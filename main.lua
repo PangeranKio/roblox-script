@@ -1,5 +1,5 @@
 -- [[ VOIDHUB SUPREME ULTRA v7.0 - CYBERPUNK LUXURY EDITION ]] --
--- Created by Kio (Added Player ESP, Removed Auto Steal & Egg Predictor, Rebuilt UI/UX with Advanced Icons, Category Announcements, & Initial Loading Screen)
+-- Fixed Loading & Menu Toggle Sequence by Kio
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -70,7 +70,7 @@ local function MakeDraggable(topbar, object)
 end
 
 -- ==========================================
--- 1. INITIAL LOADING SCREEN (Mewah & Estetik)
+-- 1. INITIAL LOADING SCREEN
 -- ==========================================
 local LoadingGui = Instance.new("Frame")
 LoadingGui.Size = UDim2.new(0, 420, 0, 240)
@@ -142,11 +142,6 @@ local BFHCorner = Instance.new("UICorner")
 BFHCorner.CornerRadius = UDim.new(1, 0)
 BFHCorner.Parent = BarFill
 
-local BarGlow = Instance.new("UIStroke")
-BarGlow.Color = Color3.fromRGB(255, 255, 255)
-BarGlow.Transparency = 0.4
-BarGlow.Parent = BarFill
-
 local PercentText = Instance.new("TextLabel")
 PercentText.Size = UDim2.new(1, 0, 0, 30)
 PercentText.Position = UDim2.new(0, 0, 0, 145)
@@ -158,7 +153,7 @@ PercentText.Font = Enum.Font.GothamBold
 PercentText.ZIndex = 51
 PercentText.Parent = LoadingGui
 
--- FLOATING OPEN BUTTON (Tombol Pill Keren)
+-- FLOATING OPEN BUTTON
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Name = "OpenButton"
 OpenBtn.Size = UDim2.new(0, 95, 0, 42)
@@ -171,6 +166,7 @@ OpenBtn.TextSize = 13
 OpenBtn.Font = Enum.Font.GothamBold
 OpenBtn.Active = true
 OpenBtn.Visible = false
+OpenBtn.ZIndex = 100
 OpenBtn.Parent = VoidHubUI
 
 local OpenCorner = Instance.new("UICorner")
@@ -186,7 +182,7 @@ OpenGlow.Parent = OpenBtn
 MakeDraggable(OpenBtn, OpenBtn)
 
 -- ==========================================
--- 2. MAIN WINDOW (Super Mewah & Apple Glass)
+-- 2. MAIN WINDOW
 -- ==========================================
 local TargetSize = UDim2.new(0, 580, 0, 380)
 
@@ -198,6 +194,7 @@ MainFrame.BackgroundTransparency = 0.05
 MainFrame.ClipsDescendants = true
 MainFrame.Active = true
 MainFrame.Visible = false
+MainFrame.ZIndex = 10
 MainFrame.Parent = VoidHubUI
 
 local MainCorner = Instance.new("UICorner")
@@ -223,6 +220,7 @@ GlassStroke.Parent = MainFrame
 local Topbar = Instance.new("Frame")
 Topbar.Size = UDim2.new(1, 0, 0, 55)
 Topbar.BackgroundTransparency = 1
+Topbar.ZIndex = 11
 Topbar.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
@@ -235,6 +233,7 @@ Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 15
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 12
 Title.Parent = Topbar
 
 MakeDraggable(Topbar, MainFrame)
@@ -248,6 +247,7 @@ CloseBtn.Text = "✕"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 200, 255)
 CloseBtn.TextSize = 13
 CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.ZIndex = 12
 CloseBtn.Parent = Topbar
 
 local CBCorner = Instance.new("UICorner")
@@ -263,26 +263,6 @@ CloseBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ANIMATE LOADING SEQUENCE
-task.spawn(function()
-    for i = 1, 100 do
-        BarFill.Size = UDim2.new(i/100, 0, 1, 0)
-        PercentText.Text = "Loading Assets: " .. i .. "%"
-        task.wait(0.012)
-    end
-    task.wait(0.2)
-    TweenService:Create(LoadingGui, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {BackgroundTransparency = 1, Size = UDim2.new(0, 0, 0, 0)}):Play()
-    for _, ch in pairs(LoadingGui:GetChildren()) do
-        if ch:IsA("GuiObject") then
-            TweenService:Create(ch, TweenInfo.new(0.3), {TextTransparency = 1, BackgroundTransparency = 1}):Play()
-        end
-    end
-    task.wait(0.4)
-    LoadingGui:Destroy()
-    MainFrame.Visible = true
-    TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
-end)
-
 -- SIDEBAR MENU
 local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Size = UDim2.new(0, 155, 1, -70)
@@ -292,6 +272,7 @@ Sidebar.BorderSizePixel = 0
 Sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
 Sidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
 Sidebar.ScrollBarThickness = 0
+Sidebar.ZIndex = 11
 Sidebar.Parent = MainFrame
 
 local SBLayout = Instance.new("UIListLayout")
@@ -305,16 +286,12 @@ ContentArea.Size = UDim2.new(1, -185, 1, -70)
 ContentArea.Position = UDim2.new(0, 175, 0, 60)
 ContentArea.BackgroundColor3 = Color3.fromRGB(12, 5, 22)
 ContentArea.BackgroundTransparency = 0.35
+ContentArea.ZIndex = 11
 ContentArea.Parent = MainFrame
 
 local CACorner = Instance.new("UICorner")
 CACorner.CornerRadius = UDim.new(0, 18)
 CACorner.Parent = ContentArea
-
-local CAStroke = Instance.new("UIStroke")
-CAStroke.Color = Color3.fromRGB(255, 255, 255)
-CAStroke.Transparency = 0.82
-CAStroke.Parent = ContentArea
 
 local PagesFolder = Instance.new("Folder")
 PagesFolder.Name = "PagesFolder"
@@ -332,6 +309,7 @@ local function CreatePage(name)
     page.ScrollBarThickness = 3
     page.ScrollBarImageColor3 = Color3.fromRGB(200, 100, 255)
     page.Visible = false
+    page.ZIndex = 12
     page.Parent = PagesFolder
     
     local layout = Instance.new("UIListLayout")
@@ -358,30 +336,24 @@ local function CreateTabButton(iconSymbol, text, pageTarget, defaultActive)
     btn.TextSize = 12
     btn.Font = Enum.Font.GothamBold
     btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.ZIndex = 12
     btn.Parent = Sidebar
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 12)
     corner.Parent = btn
 
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(220, 130, 255)
-    stroke.Transparency = defaultActive and 0.25 or 0.85
-    stroke.Parent = btn
-    
     btn.MouseButton1Click:Connect(function()
         for _, p in pairs(PagesFolder:GetChildren()) do p.Visible = false end
         for _, b in pairs(Sidebar:GetChildren()) do 
             if b:IsA("TextButton") then
                 TweenService:Create(b, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(22, 10, 36), BackgroundTransparency = 0.45}):Play()
                 b.TextColor3 = Color3.fromRGB(190, 160, 230)
-                if b:FindFirstChild("UIStroke") then b.UIStroke.Transparency = 0.85 end
             end
         end
         pageTarget.Visible = true
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(150, 60, 250), BackgroundTransparency = 0.05}):Play()
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        if btn:FindFirstChild("UIStroke") then btn.UIStroke.Transparency = 0.25 end
     end)
 end
 
@@ -396,16 +368,12 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     frame.Size = UDim2.new(1, 0, 0, 48)
     frame.BackgroundColor3 = Color3.fromRGB(22, 10, 36)
     frame.BackgroundTransparency = 0.25
+    frame.ZIndex = 13
     frame.Parent = parent
     
     local fCorner = Instance.new("UICorner")
     fCorner.CornerRadius = UDim.new(0, 14)
     fCorner.Parent = frame
-
-    local fStroke = Instance.new("UIStroke")
-    fStroke.Color = Color3.fromRGB(255, 255, 255)
-    fStroke.Transparency = 0.85
-    fStroke.Parent = frame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -70, 1, 0)
@@ -416,6 +384,7 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     label.TextSize = 12
     label.Font = Enum.Font.GothamBold
     label.TextXAlignment = Enum.TextXAlignment.Left
+    label.ZIndex = 14
     label.Parent = frame
     
     local switch = Instance.new("TextButton")
@@ -423,6 +392,7 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     switch.Position = UDim2.new(1, -56, 0.5, -13)
     switch.BackgroundColor3 = defaultState and Color3.fromRGB(160, 70, 255) or Color3.fromRGB(35, 18, 55)
     switch.Text = ""
+    switch.ZIndex = 14
     switch.Parent = frame
     
     local sCorner = Instance.new("UICorner")
@@ -433,6 +403,7 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     circle.Size = UDim2.new(0, 22, 0, 22)
     circle.Position = defaultState and UDim2.new(1, -24, 0.5, -11) or UDim2.new(0, 2, 0.5, -11)
     circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    circle.ZIndex = 15
     circle.Parent = switch
     
     local cCorner = Instance.new("UICorner")
@@ -463,38 +434,29 @@ local function CreateButton(parent, iconSymbol, titleText, callback)
     btn.TextSize = 12
     btn.Font = Enum.Font.GothamBold
     btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.ZIndex = 13
     btn.Parent = parent
     
     local bCorner = Instance.new("UICorner")
     bCorner.CornerRadius = UDim.new(0, 14)
     bCorner.Parent = btn
-
-    local bStroke = Instance.new("UIStroke")
-    bStroke.Color = Color3.fromRGB(210, 120, 255)
-    bStroke.Transparency = 0.35
-    bStroke.Parent = btn
     
     btn.MouseButton1Click:Connect(callback)
 end
 
 -- ==========================================
--- 3. KATEGORI PENGUMUMAN (Super Mewah)
+-- 3. KATEGORI PENGUMUMAN
 -- ==========================================
 local AnnounceCard = Instance.new("Frame")
 AnnounceCard.Size = UDim2.new(1, 0, 0, 230)
 AnnounceCard.BackgroundColor3 = Color3.fromRGB(22, 10, 38)
 AnnounceCard.BackgroundTransparency = 0.2
+AnnounceCard.ZIndex = 13
 AnnounceCard.Parent = AnnounceTabPage
 
 local ACCorner = Instance.new("UICorner")
 ACCorner.CornerRadius = UDim.new(0, 16)
 ACCorner.Parent = AnnounceCard
-
-local ACStroke = Instance.new("UIStroke")
-ACStroke.Color = Color3.fromRGB(230, 140, 255)
-ACStroke.Transparency = 0.3
-ACStroke.Thickness = 1.5
-ACStroke.Parent = AnnounceCard
 
 local ACTitle = Instance.new("TextLabel")
 ACTitle.Size = UDim2.new(1, -24, 0, 40)
@@ -505,6 +467,7 @@ ACTitle.TextColor3 = Color3.fromRGB(255, 210, 130)
 ACTitle.TextSize = 13
 ACTitle.Font = Enum.Font.GothamBold
 ACTitle.TextXAlignment = Enum.TextXAlignment.Left
+ACTitle.ZIndex = 14
 ACTitle.Parent = AnnounceCard
 
 local ACDesc = Instance.new("TextLabel")
@@ -518,11 +481,11 @@ ACDesc.Font = Enum.Font.GothamMedium
 ACDesc.TextWrapped = true
 ACDesc.TextXAlignment = Enum.TextXAlignment.Left
 ACDesc.TextYAlignment = Enum.TextYAlignment.Top
+ACDesc.ZIndex = 14
 ACDesc.Parent = AnnounceCard
 
-
 -- ==========================================
--- 4. VISUAL & ESP TAB (Egg ESP + Player ESP)
+-- 4. VISUAL & ESP TAB
 -- ==========================================
 local function IsValidEgg(name)
     local l = name:lower()
@@ -594,7 +557,6 @@ CreateToggle(MainTabPage, "👤 Player ESP (Box & Highlight)", SavedConfig.Playe
     end)
 end)
 
-
 -- ==========================================
 -- 5. WALK TAB
 -- ==========================================
@@ -616,7 +578,6 @@ CreateToggle(WalkTabPage, "⚡ Custom WalkSpeed (24)", SavedConfig.WalkSpeedActi
     end)
 end)
 
-
 -- ==========================================
 -- 6. MISC TAB
 -- ==========================================
@@ -636,7 +597,7 @@ CreateToggle(MiscTabPage, "🛡️ Anti-AFK Safe Mode", true, function(state)
                     end
                 end)
             end
-            task.run(RunService.RenderStepped)
+            task.wait(1)
         end
     end)
 end)
@@ -660,7 +621,6 @@ CreateButton(MiscTabPage, "🌐", "Server Hop (Cari Server Sepi)", function()
     end)
 end)
 
-
 -- ==========================================
 -- 7. CONFIG TAB
 -- ==========================================
@@ -672,45 +632,34 @@ CreateButton(ConfigTabPage, "📂", "Load Config Settings", function()
     LoadSettings()
 end)
 
-
--- RESIZE HANDLE
-local ResizeHandle = Instance.new("TextButton")
-ResizeHandle.Size = UDim2.new(0, 18, 0, 18)
-ResizeHandle.Position = UDim2.new(1, -18, 1, -18)
-ResizeHandle.BackgroundTransparency = 1
-ResizeHandle.Text = "⤡"
-ResizeHandle.TextColor3 = Color3.fromRGB(180, 140, 220)
-ResizeHandle.TextSize = 10
-ResizeHandle.Font = Enum.Font.GothamBold
-ResizeHandle.Parent = MainFrame
-
-local Resizing, StartSize, StartInputPos = false, nil, nil
-ResizeHandle.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        Resizing = true
-        StartSize = MainFrame.Size
-        StartInputPos = input.Position
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if Resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local Delta = input.Position - StartInputPos
-        local NewX = math.max(500, StartSize.X.Offset + Delta.X)
-        local NewY = math.max(300, StartSize.Y.Offset + Delta.Y)
-        MainFrame.Size = UDim2.new(0, NewX, 0, NewY)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        Resizing = false
-    end
-end)
-
+-- OPEN BUTTON CALLBACK
 OpenBtn.MouseButton1Click:Connect(function()
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.Visible = true
     OpenBtn.Visible = false
     TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
+end)
+
+-- ANIMATE LOADING SEQUENCE (ANIMASI DIBERSIHKAN DAN DIPERBAIKI)
+task.spawn(function()
+    for i = 1, 100 do
+        BarFill.Size = UDim2.new(i/100, 0, 1, 0)
+        PercentText.Text = "Loading Assets: " .. i .. "%"
+        task.wait(0.01)
+    end
+    task.wait(0.2)
+    
+    -- Fade out Loading Screen
+    local fadeTween = TweenService:Create(LoadingGui, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {BackgroundTransparency = 1})
+    fadeTween:Play()
+    
+    task.wait(0.4)
+    LoadingGui:Destroy()
+    
+    -- Munculkan Main Window & Open Button
+    MainFrame.Visible = true
+    OpenBtn.Visible = false
+    
+    local openTween = TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = TargetSize})
+    openTween:Play()
 end)
