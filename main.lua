@@ -1,4 +1,4 @@
--- [[ VOIDHUB CUSTOM UI - iOS GLASS EDITION ]] --
+-- [[ VOIDHUB CUSTOM UI - iOS GLASS EDITION v2 ]] --
 -- Created by Kio
 
 local CoreGui = game:GetService("CoreGui")
@@ -19,20 +19,53 @@ VoidHubUI.Parent = CoreGui
 VoidHubUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- ==========================================
+-- FUNCTION: CUSTOM DRAGGABLE (ANTI-CHEAT SAFE)
+-- ==========================================
+local function MakeDraggable(topbar, object)
+    local dragging, dragInput, dragStart, startPos
+    
+    topbar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = object.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    topbar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            object.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- ==========================================
 -- 1. FLOATING LOGO "VH" (MINIMIZE BUTTON)
 -- ==========================================
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Name = "OpenButton"
-OpenBtn.Size = UDim2.new(0, 45, 0, 45)
+OpenBtn.Size = UDim2.new(0, 46, 0, 46)
 OpenBtn.Position = UDim2.new(0.08, 0, 0.25, 0)
-OpenBtn.BackgroundColor3 = Color3.fromRGB(32, 20, 46)
-OpenBtn.BackgroundTransparency = 0.2
+OpenBtn.BackgroundColor3 = Color3.fromRGB(30, 18, 42)
+OpenBtn.BackgroundTransparency = 0.25
 OpenBtn.Text = "VH"
-OpenBtn.TextColor3 = Color3.fromRGB(230, 200, 255)
+OpenBtn.TextColor3 = Color3.fromRGB(235, 210, 255)
 OpenBtn.TextSize = 16
 OpenBtn.Font = Enum.Font.SourceSansBold
 OpenBtn.Active = true
-OpenBtn.Draggable = true
 OpenBtn.Visible = false
 OpenBtn.Parent = VoidHubUI
 
@@ -41,10 +74,12 @@ OpenCorner.CornerRadius = UDim.new(1, 0)
 OpenCorner.Parent = OpenBtn
 
 local OpenStroke = Instance.new("UIStroke")
-OpenStroke.Color = Color3.fromRGB(150, 90, 230)
-OpenStroke.Transparency = 0.4
-OpenStroke.Thickness = 1.5
+OpenStroke.Color = Color3.fromRGB(255, 255, 255)
+OpenStroke.Transparency = 0.75
+OpenStroke.Thickness = 1.2
 OpenStroke.Parent = OpenBtn
+
+MakeDraggable(OpenBtn, OpenBtn)
 
 -- ==========================================
 -- 2. LOADING SCREEN (iOS STYLE)
@@ -82,7 +117,7 @@ local LoadStatus = Instance.new("TextLabel")
 LoadStatus.Size = UDim2.new(1, 0, 0, 25)
 LoadStatus.Position = UDim2.new(0, 0, 0, 50)
 LoadStatus.BackgroundTransparency = 1
-LoadStatus.Text = "Loading Interface..."
+LoadStatus.Text = "Initializing iOS Interface..."
 LoadStatus.TextColor3 = Color3.fromRGB(170, 145, 205)
 LoadStatus.TextSize = 13
 LoadStatus.Font = Enum.Font.SourceSans
@@ -91,25 +126,24 @@ LoadStatus.Parent = LoadingFrame
 -- ==========================================
 -- 3. MAIN FRAME (WINDOW UTAMA GLASS)
 -- ==========================================
-local TargetSize = UDim2.new(0, 340, 0, 230)
+local TargetSize = UDim2.new(0, 340, 0, 220)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(0.5, -170, 0.5, -115)
+MainFrame.Position = UDim2.new(0.5, -170, 0.5, -110)
 MainFrame.BackgroundColor3 = Color3.fromRGB(24, 15, 34)
 MainFrame.BackgroundTransparency = 0.25
 MainFrame.ClipsDescendants = true
 MainFrame.Active = true
-MainFrame.Draggable = true
 MainFrame.Visible = false
 MainFrame.Parent = VoidHubUI
 
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 16)
+MainCorner.CornerRadius = UDim.new(0, 18)
 MainCorner.Parent = MainFrame
 
--- Gradient Kaca (Glassmorphism)
+-- Gradient Kaca Ungu-Hitam
 local GlassGradient = Instance.new("UIGradient")
 GlassGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(55, 30, 80)),
@@ -119,17 +153,24 @@ GlassGradient.Color = ColorSequence.new{
 GlassGradient.Rotation = 45
 GlassGradient.Parent = MainFrame
 
--- Border Kaca Halus
+-- Border Kaca Transparan iOS
 local GlassStroke = Instance.new("UIStroke")
 GlassStroke.Color = Color3.fromRGB(255, 255, 255)
 GlassStroke.Transparency = 0.82
 GlassStroke.Thickness = 1.2
 GlassStroke.Parent = MainFrame
 
--- TOPBAR TITLE
+-- TOPBAR TITLE & DRAG AREA
+local Topbar = Instance.new("Frame")
+Topbar.Name = "Topbar"
+Topbar.Size = UDim2.new(1, -40, 0, 40)
+Topbar.Position = UDim2.new(0, 0, 0, 0)
+Topbar.BackgroundTransparency = 1
+Topbar.Parent = MainFrame
+
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -40, 0, 35)
-Title.Position = UDim2.new(0, 15, 0, 5)
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.Position = UDim2.new(0, 16, 0, 2)
 Title.BackgroundTransparency = 1
 Title.Text = "VoidHub <font color=\"#B480FF\">by Kio</font>"
 Title.RichText = true
@@ -137,65 +178,117 @@ Title.TextColor3 = Color3.fromRGB(245, 240, 255)
 Title.TextSize = 16
 Title.Font = Enum.Font.SourceSansBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = MainFrame
+Title.Parent = Topbar
+
+MakeDraggable(Topbar, MainFrame)
 
 -- CLOSE BUTTON
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 25, 0, 25)
-CloseBtn.Position = UDim2.new(1, -32, 0, 8)
+CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+CloseBtn.Position = UDim2.new(1, -34, 0, 6)
 CloseBtn.BackgroundTransparency = 1
-CloseBtn.Text = "✕"
+CloseBtn.Text = "×"
 CloseBtn.TextColor3 = Color3.fromRGB(190, 160, 220)
-CloseBtn.TextSize = 14
-CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.TextSize = 18
+CloseBtn.Font = Enum.Font.SourceSans
 CloseBtn.Parent = MainFrame
 
--- CONTENT AREA (CONTAINER ISI FITUR)
+-- CONTENT AREA (CONTAINER FITUR)
 local ContentContainer = Instance.new("Frame")
 ContentContainer.Name = "ContentContainer"
-ContentContainer.Size = UDim2.new(1, -24, 1, -55)
+ContentContainer.Size = UDim2.new(1, -24, 1, -52)
 ContentContainer.Position = UDim2.new(0, 12, 0, 42)
 ContentContainer.BackgroundTransparency = 1
 ContentContainer.Parent = MainFrame
 
--- LABEL STATUS ANTI-AFK
-local AFKCard = Instance.new("Frame")
-AFKCard.Size = UDim2.new(1, 0, 0, 45)
-AFKCard.Position = UDim2.new(0, 0, 0, 0)
-AFKCard.BackgroundColor3 = Color3.fromRGB(36, 22, 52)
-AFKCard.BackgroundTransparency = 0.4
-AFKCard.Parent = ContentContainer
+-- ==========================================
+-- 4. FITUR ANTI-AFK TOGGLE (iOS SWITCH STYLE)
+-- ==========================================
+local AFKToggleFrame = Instance.new("Frame")
+AFKToggleFrame.Size = UDim2.new(1, 0, 0, 48)
+AFKToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 18, 42)
+AFKToggleFrame.BackgroundTransparency = 0.35
+AFKToggleFrame.Parent = ContentContainer
 
-local CardCorner = Instance.new("UICorner")
-CardCorner.CornerRadius = UDim.new(0, 10)
-CardCorner.Parent = AFKCard
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 12)
+ToggleCorner.Parent = AFKToggleFrame
 
-local CardStroke = Instance.new("UIStroke")
-CardStroke.Color = Color3.fromRGB(120, 70, 190)
-CardStroke.Transparency = 0.7
-CardStroke.Parent = AFKCard
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(255, 255, 255)
+ToggleStroke.Transparency = 0.9
+ToggleStroke.Parent = AFKToggleFrame
 
-local AFKText = Instance.new("TextLabel")
-AFKText.Size = UDim2.new(1, -20, 1, 0)
-AFKText.Position = UDim2.new(0, 10, 0, 0)
-AFKText.BackgroundTransparency = 1
-AFKText.Text = "🛡️ Anti-AFK System: <font color=\"#55FF88\">ACTIVE</font>"
-AFKText.RichText = true
-AFKText.TextColor3 = Color3.fromRGB(235, 225, 250)
-AFKText.TextSize = 13
-AFKText.Font = Enum.Font.SourceSansBold
-AFKText.TextXAlignment = Enum.TextXAlignment.Left
-AFKText.Parent = AFKCard
+local AFKLabel = Instance.new("TextLabel")
+AFKLabel.Size = UDim2.new(1, -70, 1, 0)
+AFKLabel.Position = UDim2.new(0, 14, 0, 0)
+AFKLabel.BackgroundTransparency = 1
+AFKLabel.Text = "Anti-AFK System"
+AFKLabel.TextColor3 = Color3.fromRGB(240, 235, 255)
+AFKLabel.TextSize = 14
+AFKLabel.Font = Enum.Font.SourceSansBold
+AFKLabel.TextXAlignment = Enum.TextXAlignment.Left
+AFKLabel.Parent = AFKToggleFrame
+
+-- Switch Sakelar iOS
+local SwitchBtn = Instance.new("TextButton")
+SwitchBtn.Size = UDim2.new(0, 44, 0, 24)
+SwitchBtn.Position = UDim2.new(1, -54, 0.5, -12)
+SwitchBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 65)
+SwitchBtn.Text = ""
+SwitchBtn.Parent = AFKToggleFrame
+
+local SwitchCorner = Instance.new("UICorner")
+SwitchCorner.CornerRadius = UDim.new(1, 0)
+SwitchCorner.Parent = SwitchBtn
+
+local SwitchCircle = Instance.new("Frame")
+SwitchCircle.Size = UDim2.new(0, 20, 0, 20)
+SwitchCircle.Position = UDim2.new(0, 2, 0.5, -10)
+SwitchCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SwitchCircle.Parent = SwitchBtn
+
+local CircleCorner = Instance.new("UICorner")
+CircleCorner.CornerRadius = UDim.new(1, 0)
+CircleCorner.Parent = SwitchCircle
+
+-- LOGIKA ON / OFF ANTI-AFK
+local AntiAFKActive = false
+local AFKConnection = nil
+
+SwitchBtn.MouseButton1Click:Connect(function()
+    AntiAFKActive = not AntiAFKActive
+    
+    if AntiAFKActive then
+        -- Animasi Sakelar ON (Warna Ungu iOS)
+        TweenService:Create(SwitchBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(140, 80, 220)}):Play()
+        TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -22, 0.5, -10)}):Play()
+        
+        AFKConnection = Players.LocalPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+        end)
+    else
+        -- Animasi Sakelar OFF
+        TweenService:Create(SwitchBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 35, 65)}):Play()
+        TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -10)}):Play()
+        
+        if AFKConnection then
+            AFKConnection:Disconnect()
+            AFKConnection = nil
+        end
+    end
+end)
 
 -- ==========================================
--- 4. RESIZE HANDLE (GEDEIN / KECILIN UI)
+-- 5. RESIZE HANDLE (GEDEIN / KECILIN UI)
 -- ==========================================
 local ResizeHandle = Instance.new("TextButton")
 ResizeHandle.Name = "ResizeHandle"
 ResizeHandle.Size = UDim2.new(0, 18, 0, 18)
 ResizeHandle.Position = UDim2.new(1, -18, 1, -18)
 ResizeHandle.BackgroundTransparency = 1
-ResizeHandle.Text = "◢"
+ResizeHandle.Text = "⤡"
 ResizeHandle.TextColor3 = Color3.fromRGB(160, 130, 190)
 ResizeHandle.TextSize = 12
 ResizeHandle.Font = Enum.Font.SourceSansBold
@@ -228,7 +321,7 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 -- ==========================================
--- 5. ANIMASI SMOOTH OPEN / CLOSE TWEEN
+-- 6. ANIMASI SMOOTH OPEN / CLOSE TWEEN
 -- ==========================================
 local TweenBack = TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local TweenIn = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
@@ -253,25 +346,16 @@ CloseBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- 6. SYSTEM ANTI-AFK
--- ==========================================
-Players.LocalPlayer.Idled:Connect(function()
-    VirtualUser:CaptureController()
-    VirtualUser:ClickButton2(Vector2.new())
-    print("[VoidHub] Anti-AFK Triggered!")
-end)
-
--- ==========================================
--- 7. EXECUTION SIMULATION (LOADING PROCESS)
+-- 7. EXECUTION PROCESS (LOADING)
 -- ==========================================
 task.spawn(function()
     task.wait(0.7)
-    LoadStatus.Text = "Loading Features..."
+    LoadStatus.Text = "Loading Anti-AFK Module..."
     task.wait(0.7)
-    LoadStatus.Text = "Enabling Anti-AFK..."
+    LoadStatus.Text = "Applying Security Protections..."
     task.wait(0.6)
     
-    -- Destroy Loading & Animate Open Main UI
+    -- Destroy Loading & Open Main UI
     LoadingFrame:Destroy()
     MainFrame.Visible = true
     TweenService:Create(MainFrame, TweenBack, {Size = TargetSize}):Play()
