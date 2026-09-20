@@ -3,74 +3,81 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- Bikin Window Utama
 local Window = Rayfield:CreateWindow({
-   Name = "VoidHub",
+   Name = "NXT Control Hub",
    LoadingTitle = "Loading Script...",
-   LoadingSubtitle = "by Kio",
+   LoadingSubtitle = "by VOIDLES",
    ConfigurationSaving = {
-      Enabled = false
+      Enabled = true,
+      FolderName = "NxtHubConfig",
+      FileName = "BigHub"
    },
    Discord = {
       Enabled = false
    },
-   KeySystem = false
+   KeySystem = false -- Set true kalau mau pakai sistem key
 })
 
--- Tambah Tab Utama (Gunakan icon string 'home' agar aman di Mobile)
-local MainTab = Window:CreateTab("Main Features", "home")
+-- Tambah Tab Utama
+local MainTab = Window:CreateTab("Main Features", 4483362458) -- ID Icon Roblox
 
--- Section: Anti-AFK System
-MainTab:CreateSection("Anti-AFK System")
+-- Section: Player Movement
+MainTab:CreateSection("Player Settings")
 
-local AntiAFKConnection = nil
-local VirtualUser = game:GetService("VirtualUser")
-
--- Toggle Anti-AFK
-local AntiAFKToggle = MainTab:CreateToggle({
-   Name = "Enable Anti-AFK",
+-- 1. Toggle (Sakelar On/Off)
+local SpeedToggle = MainTab:CreateToggle({
+   Name = "Enable WalkSpeed",
    CurrentValue = false,
-   Flag = "AntiAFKFlag",
+   Flag = "SpeedToggle",
    Callback = function(Value)
       if Value then
-         AntiAFKConnection = game:GetService("Players").LocalPlayer.Idled:Connect(function()
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new())
-            Rayfield:Notify({
-               Title = "VoidHub Anti-AFK",
-               Content = "Berhasil mencegah idle disconnect!",
-               Duration = 2,
-               Image = "shield"
-            })
-         end)
-         
-         Rayfield:Notify({
-            Title = "Anti-AFK Status",
-            Content = "Anti-AFK Berhasil Diaktifkan",
-            Duration = 3,
-            Image = "shield"
-         })
+         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 32
       else
-         if AntiAFKConnection then
-            AntiAFKConnection:Disconnect()
-            AntiAFKConnection = nil
-         end
-         
-         Rayfield:Notify({
-            Title = "Anti-AFK Status",
-            Content = "Anti-AFK Dimatikan",
-            Duration = 3,
-            Image = "shield"
-         })
+         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
       end
    end,
 })
 
--- Label Keterangan
-MainTab:CreateLabel("Mencegah terkena kick 20 menit saat AFK.")
+-- 2. Slider (Mengatur Nilai Angka)
+local JumpSlider = MainTab:CreateSlider({
+   Name = "Jump Power",
+   Range = {50, 200},
+   Increment = 5,
+   Suffix = "Power",
+   CurrentValue = 50,
+   Flag = "JumpSlider",
+   Callback = function(Value)
+      game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+   end,
+})
+
+-- Section: Action Buttons
+MainTab:CreateSection("Actions")
+
+-- 3. Button (Tombol Sekali Klik)
+local TeleportBtn = MainTab:CreateButton({
+   Name = "Reset Character",
+   Callback = function()
+      game.Players.LocalPlayer.Character.Humanoid.Health = 0
+   end,
+})
+
+-- 4. Textbox (Input Teks/Nilai)
+local CustomSpeedInput = MainTab:CreateInput({
+   Name = "Custom WalkSpeed",
+   PlaceholderText = "Masukkan angka (misal: 50)",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      local num = tonumber(Text)
+      if num then
+         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = num
+      end
+   end,
+})
 
 -- Notifikasi saat script berhasil di-load
 Rayfield:Notify({
-   Title = "VoidHub Loaded!",
+   Title = "Script Loaded!",
    Content = "GUI berhasil dimuat dan siap digunakan.",
    Duration = 5,
-   Image = "shield"
+   Image = 4483362458,
 })
