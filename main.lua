@@ -1,5 +1,5 @@
--- [[ VOIDHUB CUSTOM UI - iOS ULTRA EDITION v3 ]] --
--- Created by Kio
+-- [[ VOIDHUB CUSTOM UI - iOS ULTRA EDITION v3.1 ]] --
+-- Created by Kio (Fixed Execution Bug for Mobile Executors)
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -8,7 +8,7 @@ local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
+local GuiService = game:GetService("GuiService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -65,7 +65,7 @@ OpenBtn.Name = "OpenButton"
 OpenBtn.Size = UDim2.new(0, 48, 0, 48)
 OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(22, 10, 32)
-OpenBtn.BackgroundTransparency = 0 -- 0% Transparency
+OpenBtn.BackgroundTransparency = 0
 OpenBtn.Text = "VH"
 OpenBtn.TextColor3 = Color3.fromRGB(215, 170, 255)
 OpenBtn.TextSize = 16
@@ -86,25 +86,66 @@ OpenStroke.Parent = OpenBtn
 MakeDraggable(OpenBtn, OpenBtn)
 
 -- ==========================================
--- 2. MAIN FRAME (iOS GRADIENT BLACK-PURPLE)
+-- 2. LOADING SCREEN (iOS STYLE)
+-- ==========================================
+local LoadingFrame = Instance.new("Frame")
+LoadingFrame.Name = "LoadingFrame"
+LoadingFrame.Size = UDim2.new(0, 230, 0, 95)
+LoadingFrame.Position = UDim2.new(0.5, -115, 0.5, -47)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(22, 14, 32)
+LoadingFrame.BackgroundTransparency = 0
+LoadingFrame.Parent = VoidHubUI
+
+local LoadCorner = Instance.new("UICorner")
+LoadCorner.CornerRadius = UDim.new(0, 16)
+LoadCorner.Parent = LoadingFrame
+
+local LoadStroke = Instance.new("UIStroke")
+LoadStroke.Color = Color3.fromRGB(140, 80, 220)
+LoadStroke.Thickness = 1.2
+LoadStroke.Parent = LoadingFrame
+
+local LoadTitle = Instance.new("TextLabel")
+LoadTitle.Size = UDim2.new(1, 0, 0, 30)
+LoadTitle.Position = UDim2.new(0, 0, 0, 15)
+LoadTitle.BackgroundTransparency = 1
+LoadTitle.Text = "VoidHub <font color=\"#B480FF\">by Kio</font>"
+LoadTitle.RichText = true
+LoadTitle.TextColor3 = Color3.fromRGB(245, 240, 255)
+LoadTitle.TextSize = 18
+LoadTitle.Font = Enum.Font.SourceSansBold
+LoadTitle.Parent = LoadingFrame
+
+local LoadStatus = Instance.new("TextLabel")
+LoadStatus.Size = UDim2.new(1, 0, 0, 25)
+LoadStatus.Position = UDim2.new(0, 0, 0, 50)
+LoadStatus.BackgroundTransparency = 1
+LoadStatus.Text = "Initializing Interface..."
+LoadStatus.TextColor3 = Color3.fromRGB(170, 145, 205)
+LoadStatus.TextSize = 13
+LoadStatus.Font = Enum.Font.SourceSans
+LoadStatus.Parent = LoadingFrame
+
+-- ==========================================
+-- 3. MAIN FRAME (iOS GRADIENT BLACK-PURPLE)
 -- ==========================================
 local TargetSize = UDim2.new(0, 480, 0, 300)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, TargetSize.X.Offset, 0, TargetSize.Y.Offset)
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
 MainFrame.Position = UDim2.new(0.5, -240, 0.5, -150)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 8, 22)
-MainFrame.BackgroundTransparency = 0 -- Background 0% Transparan
+MainFrame.BackgroundTransparency = 0
 MainFrame.ClipsDescendants = true
 MainFrame.Active = true
+MainFrame.Visible = false
 MainFrame.Parent = VoidHubUI
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainFrame
 
--- Gradient Black - Purple
 local MainGradient = Instance.new("UIGradient")
 MainGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(38, 16, 58)),
@@ -119,7 +160,7 @@ MainStroke.Color = Color3.fromRGB(90, 50, 140)
 MainStroke.Thickness = 1.2
 MainStroke.Parent = MainFrame
 
--- TOPBAR (HEADER)
+-- TOPBAR
 local Topbar = Instance.new("Frame")
 Topbar.Name = "Topbar"
 Topbar.Size = UDim2.new(1, 0, 0, 42)
@@ -141,7 +182,7 @@ Title.Parent = Topbar
 
 MakeDraggable(Topbar, MainFrame)
 
--- CLOSE BUTTON (iOS Style)
+-- CLOSE BUTTON
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, 26, 0, 26)
 CloseBtn.Position = UDim2.new(1, -34, 0, 8)
@@ -157,7 +198,7 @@ CloseCorner.CornerRadius = UDim.new(1, 0)
 CloseCorner.Parent = CloseBtn
 
 -- ==========================================
--- 3. SIDEBAR CATEGORIES (NAVIGASI TAP)
+-- 4. SIDEBAR & NAVIGATION SYSTEM
 -- ==========================================
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
@@ -182,7 +223,6 @@ SidePadding.PaddingLeft = UDim.new(0, 6)
 SidePadding.PaddingRight = UDim.new(0, 6)
 SidePadding.Parent = Sidebar
 
--- CONTAINER KONTEN UTAMA
 local PageContainer = Instance.new("Frame")
 PageContainer.Name = "PageContainer"
 PageContainer.Size = UDim2.new(1, -148, 1, -52)
@@ -240,17 +280,14 @@ local function CreateTab(name, symbol)
     end)
 end
 
--- Buat Tab Kategori
 CreateTab("AFK", "⚙")
 CreateTab("Server", "🌐")
 CreateTab("Misc", "✦")
 
--- Set Tab AFK Aktif Default
 Pages["AFK"].Button.BackgroundTransparency = 0
 Pages["AFK"].Button.TextColor3 = Color3.fromRGB(245, 240, 255)
 Pages["AFK"].Page.Visible = true
 
--- Helper UI Card iOS Style
 local function CreateCard(parent, titleText, height)
     local Card = Instance.new("Frame")
     Card.Size = UDim2.new(1, -6, 0, height or 50)
@@ -283,11 +320,10 @@ local function CreateCard(parent, titleText, height)
 end
 
 -- ==========================================
--- 4. KATEGORI AFK (AUTO CLICKER & MARKER)
+-- 5. KATEGORI AFK (SAFE AUTO CLICKER)
 -- ==========================================
 local AFKPage = Pages["AFK"].Page
 
--- Card 1: Toggle Anti-AFK
 local AFKCard = CreateCard(AFKPage, "Auto Clicker Anti-AFK", 52)
 
 local SwitchBtn = Instance.new("TextButton")
@@ -311,7 +347,6 @@ local CircleCorner = Instance.new("UICorner")
 CircleCorner.CornerRadius = UDim.new(1, 0)
 CircleCorner.Parent = SwitchCircle
 
--- Card 2: Interval Setting
 local IntervalCard = CreateCard(AFKPage, "Click Interval (Detik)", 52)
 
 local IntervalVal = 5
@@ -358,12 +393,13 @@ PlusBtn.MouseButton1Click:Connect(function()
 end)
 
 -- CLICK MARKER TARGET (BISA DI DRAG)
-local ClickMarker = Instance.new("Frame")
+local ClickMarker = Instance.new("TextButton")
 ClickMarker.Name = "ClickMarker"
-ClickMarker.Size = UDim2.new(0, 34, 0, 34)
-ClickMarker.Position = UDim2.new(0.5, -17, 0.5, -17)
+ClickMarker.Size = UDim2.new(0, 36, 0, 36)
+ClickMarker.Position = UDim2.new(0.5, -18, 0.5, -18)
 ClickMarker.BackgroundColor3 = Color3.fromRGB(160, 90, 240)
 ClickMarker.BackgroundTransparency = 0.4
+ClickMarker.Text = ""
 ClickMarker.Visible = false
 ClickMarker.Active = true
 ClickMarker.Parent = VoidHubUI
@@ -381,7 +417,7 @@ Instance.new("UICorner", MarkerDot).CornerRadius = UDim.new(1, 0)
 
 MakeDraggable(ClickMarker, ClickMarker)
 
--- LOGIKA AUTO CLICKER ANTI-AFK
+-- LOGIKA AUTO CLICKER (SAFE METHOD)
 local AntiAFKActive = false
 local ClickThread = nil
 
@@ -397,13 +433,17 @@ SwitchBtn.MouseButton1Click:Connect(function()
             while AntiAFKActive do
                 task.wait(IntervalVal)
                 if AntiAFKActive then
-                    -- Simulasi Klik di Posisi Marker
-                    local PosX = ClickMarker.AbsolutePosition.X + (ClickMarker.AbsoluteSize.X / 2)
-                    local PosY = ClickMarker.AbsolutePosition.Y + (ClickMarker.AbsoluteSize.Y / 2) + 36 -- Offset Topbar
-                    
-                    VirtualInputManager:SendMouseButtonEvent(PosX, PosY, 0, true, game, 1)
-                    task.wait(0.05)
-                    VirtualInputManager:SendMouseButtonEvent(PosX, PosY, 0, false, game, 1)
+                    -- Safe Click Trigger Compatible All Executors
+                    pcall(function()
+                        local guiObjects = CoreGui:GetGuiObjectsAtPosition(ClickMarker.AbsolutePosition.X + 18, ClickMarker.AbsolutePosition.Y + 18)
+                        for _, obj in pairs(guiObjects) do
+                            if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+                                if obj ~= ClickMarker then
+                                    obj.InputBegan:Fire({UserInputType = Enum.UserInputType.MouseButton1})
+                                end
+                            end
+                        end
+                    end)
                     
                     -- Visual Click Pulse Effect
                     local Pulse = Instance.new("Frame")
@@ -414,7 +454,7 @@ SwitchBtn.MouseButton1Click:Connect(function()
                     Pulse.Parent = VoidHubUI
                     Instance.new("UICorner", Pulse).CornerRadius = UDim.new(1, 0)
                     
-                    TweenService:Create(Pulse, TweenInfo.new(0.3), {Size = UDim2.new(0, 50, 0, 50), Position = UDim2.new(ClickMarker.Position.X.Scale, ClickMarker.Position.X.Offset - 8, ClickMarker.Position.Y.Scale, ClickMarker.Position.Y.Offset - 8), BackgroundTransparency = 1}):Play()
+                    TweenService:Create(Pulse, TweenInfo.new(0.3), {Size = UDim2.new(0, 52, 0, 52), Position = UDim2.new(ClickMarker.Position.X.Scale, ClickMarker.Position.X.Offset - 8, ClickMarker.Position.Y.Scale, ClickMarker.Position.Y.Offset - 8), BackgroundTransparency = 1}):Play()
                     task.delay(0.35, function() Pulse:Destroy() end)
                 end
             end
@@ -431,11 +471,10 @@ SwitchBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- 5. KATEGORI SERVER
+-- 6. KATEGORI SERVER
 -- ==========================================
 local ServerPage = Pages["Server"].Page
 
--- Card 1: Rejoin Server
 local RejoinCard = CreateCard(ServerPage, "Rejoin Server", 52)
 local RejoinBtn = Instance.new("TextButton")
 RejoinBtn.Size = UDim2.new(0, 80, 0, 26)
@@ -452,7 +491,6 @@ RejoinBtn.MouseButton1Click:Connect(function()
     TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
 end)
 
--- Card 2: Server Hop (Cari Server Sepi)
 local HopCard = CreateCard(ServerPage, "Server Hop (Server Sepi)", 52)
 local HopBtn = Instance.new("TextButton")
 HopBtn.Size = UDim2.new(0, 80, 0, 26)
@@ -466,16 +504,17 @@ HopBtn.Parent = HopCard
 Instance.new("UICorner", HopBtn).CornerRadius = UDim.new(0, 8)
 
 HopBtn.MouseButton1Click:Connect(function()
-    local Http = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/0?sortOrder=Asc&limit=100"))
-    for _, s in pairs(Http.data) do
-        if s.id ~= game.JobId and s.playing < s.maxPlayers then
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
-            break
+    pcall(function()
+        local Http = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/0?sortOrder=Asc&limit=100"))
+        for _, s in pairs(Http.data) do
+            if s.id ~= game.JobId and s.playing < s.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+                break
+            end
         end
-    end
+    end)
 end)
 
--- Card 3: Ping Server Realtime
 local PingCard = CreateCard(ServerPage, "Server Ping", 52)
 local PingLabel = Instance.new("TextLabel")
 PingLabel.Size = UDim2.new(0, 100, 1, 0)
@@ -490,17 +529,18 @@ PingLabel.Parent = PingCard
 
 task.spawn(function()
     while task.wait(1) do
-        local Ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
-        PingLabel.Text = tostring(Ping) .. " ms"
+        pcall(function()
+            local Ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+            PingLabel.Text = tostring(Ping) .. " ms"
+        end)
     end
 end)
 
 -- ==========================================
--- 6. KATEGORI MISC (FPS, WEBHOOK, DLL)
+-- 7. KATEGORI MISC
 -- ==========================================
 local MiscPage = Pages["Misc"].Page
 
--- Card 1: Boost FPS
 local FPSBoostCard = CreateCard(MiscPage, "Optimize & Boost FPS", 52)
 local BoostBtn = Instance.new("TextButton")
 BoostBtn.Size = UDim2.new(0, 80, 0, 26)
@@ -511,42 +551,4 @@ BoostBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 BoostBtn.TextSize = 12
 BoostBtn.Font = Enum.Font.SourceSansBold
 BoostBtn.Parent = FPSBoostCard
-Instance.new("UICorner", BoostBtn).CornerRadius = UDim.new(0, 8)
-
-BoostBtn.MouseButton1Click:Connect(function()
-    local Terrain = workspace:FindFirstChildOfClass("Terrain")
-    if Terrain then
-        Terrain.WaterWaveSize = 0
-        Terrain.WaterWaveSpeed = 0
-        Terrain.WaterReflectance = 0
-    end
-    game:GetService("Lighting").GlobalShadows = false
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("Part") or v:IsA("UnionOperation") or v:IsA("MeshPart") then
-            v.Material = Enum.Material.Plastic
-            v.Reflectance = 0
-        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-            v.Enabled = false
-        end
-    end
-    BoostBtn.Text = "Boosted!"
-end)
-
--- Card 2: Show FPS Counter
-local ShowFPSCard = CreateCard(MiscPage, "Show FPS Counter", 52)
-local FPSSwitch = Instance.new("TextButton")
-FPSSwitch.Size = UDim2.new(0, 44, 0, 24)
-FPSSwitch.Position = UDim2.new(1, -54, 0.5, -12)
-FPSSwitch.BackgroundColor3 = Color3.fromRGB(50, 35, 65)
-FPSSwitch.Text = ""
-FPSSwitch.Parent = ShowFPSCard
-Instance.new("UICorner", FPSSwitch).CornerRadius = UDim.new(1, 0)
-
-local FPSSwitchCircle = Instance.new("Frame")
-FPSSwitchCircle.Size = UDim2.new(0, 20, 0, 20)
-FPSSwitchCircle.Position = UDim2.new(0, 2, 0.5, -10)
-FPSSwitchCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-FPSSwitchCircle.Parent = FPSSwitch
-Instance.new("UICorner", FPSSwitchCircle).CornerRadius = UDim.new(1, 0)
-
-local FPSLabel = Instance.
+Instance.new("UICorner", BoostBtn).CornerRadius = UDim.new(0,
