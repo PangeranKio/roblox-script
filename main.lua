@@ -2,31 +2,31 @@
 -- Created by: Kio
 
 -- Anti Double-Load
-if game.CoreGui:FindFirstChild("VoidHub") then
-    game.CoreGui.VoidHub:Destroy()
+if game:GetService("CoreGui"):FindFirstChild("VoidHub") then
+    game:GetService("CoreGui").VoidHub:Destroy()
 end
-if game.Players.LocalPlayer:FindFirstChild("PlayerGui") and game.Players.LocalPlayer.PlayerGui:FindFirstChild("VoidHub") then
-    game.Players.LocalPlayer.PlayerGui.VoidHub:Destroy()
+local LocalPlayer = game:GetService("Players").LocalPlayer
+if LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("VoidHub") then
+    game:GetService("Players").LocalPlayer.PlayerGui.VoidHub:Destroy()
 end
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 
 -- Master ScreenGui
 local VoidHub = Instance.new("ScreenGui")
 VoidHub.Name = "VoidHub"
 VoidHub.ResetOnSpawn = false
 
-pcall(function()
+-- Fallback Parent Detection
+local success, _ = pcall(function()
     VoidHub.Parent = game:GetService("CoreGui")
 end)
-if not VoidHub.Parent then
+if not success or not VoidHub.Parent then
     VoidHub.Parent = LocalPlayer:WaitForChild("PlayerGui")
 end
 
--- Main Window (Ukuran Responsif Mobile)
+-- Main Window Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 420, 0, 250)
@@ -40,7 +40,7 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainFrame
 
--- Gradasi Ungu Soft - iOS Dark
+-- Gradasi Ungu iOS Dark
 local MainGradient = Instance.new("UIGradient")
 MainGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(36, 20, 52)),
@@ -57,40 +57,40 @@ MainStroke.Transparency = 0.6
 MainStroke.Thickness = 1.2
 MainStroke.Parent = MainFrame
 
--- Top Header Bar
+-- Top Bar Header
 local TopBar = Instance.new("Frame")
 TopBar.Name = "TopBar"
 TopBar.Size = UDim2.new(1, 0, 0, 36)
 TopBar.BackgroundTransparency = 1
 TopBar.Parent = MainFrame
 
--- Judul Utama
+-- Title
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Size = UDim2.new(0, 80, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
+Title.Font = Enum.Font.SourceSansBold
 Title.Text = "VoidHub"
 Title.TextColor3 = Color3.fromRGB(245, 240, 255)
-Title.TextSize = 15
+Title.TextSize = 18
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
--- Subtitle Credit Pembuat
+-- Subtitle Credit
 local SubTitle = Instance.new("TextLabel")
 SubTitle.Name = "SubTitle"
 SubTitle.Size = UDim2.new(0, 80, 1, 0)
-SubTitle.Position = UDim2.new(0, 92, 0, 1)
+SubTitle.Position = UDim2.new(0, 95, 0, 1)
 SubTitle.BackgroundTransparency = 1
-SubTitle.Font = Enum.Font.GothamMedium
+SubTitle.Font = Enum.Font.SourceSans
 SubTitle.Text = "by Kio"
 SubTitle.TextColor3 = Color3.fromRGB(190, 150, 245)
-SubTitle.TextSize = 11
+SubTitle.TextSize = 13
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
 SubTitle.Parent = TopBar
 
--- iOS Control Pill (Minimize & Close)
+-- iOS Control Pill
 local ControlPill = Instance.new("Frame")
 ControlPill.Name = "ControlPill"
 ControlPill.Size = UDim2.new(0, 56, 0, 24)
@@ -109,31 +109,31 @@ PillStroke.Transparency = 0.7
 PillStroke.Thickness = 1
 PillStroke.Parent = ControlPill
 
--- Tombol Minimize (-)
+-- Minimize (-)
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Name = "MinimizeBtn"
 MinimizeBtn.Size = UDim2.new(0.5, 0, 1, 0)
 MinimizeBtn.Position = UDim2.new(0, 0, 0, 0)
 MinimizeBtn.BackgroundTransparency = 1
-MinimizeBtn.Font = Enum.Font.GothamBold
+MinimizeBtn.Font = Enum.Font.SourceSansBold
 MinimizeBtn.Text = "-"
 MinimizeBtn.TextColor3 = Color3.fromRGB(215, 180, 255)
-MinimizeBtn.TextSize = 15
+MinimizeBtn.TextSize = 18
 MinimizeBtn.Parent = ControlPill
 
--- Tombol Close (X)
+-- Close (x)
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
 CloseBtn.Size = UDim2.new(0.5, 0, 1, 0)
 CloseBtn.Position = UDim2.new(0.5, 0, 0, 0)
 CloseBtn.BackgroundTransparency = 1
-CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Font = Enum.Font.SourceSansBold
 CloseBtn.Text = "x"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 160, 175)
-CloseBtn.TextSize = 12
+CloseBtn.TextSize = 14
 CloseBtn.Parent = ControlPill
 
--- Divider Line
+-- Divider
 local Divider = Instance.new("Frame")
 Divider.Size = UDim2.new(1, -30, 0, 1)
 Divider.Position = UDim2.new(0, 15, 0, 36)
@@ -142,17 +142,17 @@ Divider.BackgroundTransparency = 0.85
 Divider.BorderSizePixel = 0
 Divider.Parent = MainFrame
 
--- Floating Logo Widget (Muncul Saat Minimize)
+-- Floating Logo Widget (Muncul saat Minimize)
 local OpenLogoBtn = Instance.new("TextButton")
 OpenLogoBtn.Name = "OpenLogoBtn"
 OpenLogoBtn.Size = UDim2.new(0, 44, 0, 44)
 OpenLogoBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
 OpenLogoBtn.BackgroundColor3 = Color3.fromRGB(32, 18, 48)
 OpenLogoBtn.BorderSizePixel = 0
-OpenLogoBtn.Font = Enum.Font.GothamBold
+OpenLogoBtn.Font = Enum.Font.SourceSansBold
 OpenLogoBtn.Text = "VH"
 OpenLogoBtn.TextColor3 = Color3.fromRGB(215, 180, 255)
-OpenLogoBtn.TextSize = 15
+OpenLogoBtn.TextSize = 16
 OpenLogoBtn.Visible = false
 OpenLogoBtn.Parent = VoidHub
 
@@ -173,7 +173,7 @@ LogoGradient.Color = ColorSequence.new{
 LogoGradient.Rotation = 135
 LogoGradient.Parent = OpenLogoBtn
 
--- Sidebar Area
+-- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 100, 1, -48)
@@ -200,7 +200,7 @@ local ContentCorner = Instance.new("UICorner")
 ContentCorner.CornerRadius = UDim.new(0, 10)
 ContentCorner.Parent = ContentArea
 
--- Dragging Function
+-- Dragging Logic
 local function enableDrag(frame, handle)
     handle = handle or frame
     local dragging, dragInput, dragStart, startPos
@@ -232,7 +232,7 @@ end
 enableDrag(MainFrame, TopBar)
 enableDrag(OpenLogoBtn, OpenLogoBtn)
 
--- Event Handlers (Minimize & Close)
+-- Minimize & Restore Events
 MinimizeBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
     OpenLogoBtn.Visible = true
@@ -247,7 +247,7 @@ CloseBtn.MouseButton1Click:Connect(function()
     VoidHub:Destroy()
 end)
 
--- Tab Builder
+-- Tab Manager
 local tabs = {}
 
 function createTab(tabName)
@@ -256,10 +256,10 @@ function createTab(tabName)
     TabButton.Size = UDim2.new(1, 0, 0, 28)
     TabButton.BackgroundColor3 = Color3.fromRGB(42, 25, 60)
     TabButton.BackgroundTransparency = 0.6
-    TabButton.Font = Enum.Font.GothamMedium
+    TabButton.Font = Enum.Font.SourceSans
     TabButton.Text = tabName
     TabButton.TextColor3 = Color3.fromRGB(180, 155, 215)
-    TabButton.TextSize = 12
+    TabButton.TextSize = 14
     TabButton.Parent = Sidebar
 
     local TabCorner = Instance.new("UICorner")
@@ -307,7 +307,7 @@ function createTab(tabName)
     return TabPage
 end
 
--- Inisialisasi Tab Kosong
+-- Initialize Tabs
 local MainTab = createTab("Main")
 local PlayerTab = createTab("Player")
 local MiscTab = createTab("Misc")
