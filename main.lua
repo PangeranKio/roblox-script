@@ -18,6 +18,37 @@ local Window = Rayfield:CreateWindow({
    KeySystem = false -- Set true kalau mau pakai sistem key
 })
 
+-- Snippet untuk menambahkan Gradient Ungu-Hitam pada Background Rayfield
+task.spawn(function()
+    task.wait(1)
+    local coreGui = game:GetService("CoreGui")
+    local rayfieldGui = coreGui:FindFirstChild("Rayfield") or game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Rayfield")
+    
+    if rayfieldGui then
+        -- Mencari Main Frame / Window Utama
+        local mainFrame = rayfieldGui:FindFirstChild("Main", true) or rayfieldGui:FindFirstChild("MainFrame", true)
+        
+        if mainFrame then
+            -- Hapus gradient lama jika ada
+            local oldGradient = mainFrame:FindFirstChildOfClass("UIGradient")
+            if oldGradient then
+                oldGradient:Destroy()
+            end
+            
+            -- Buat UIGradient Baru (Ungu Soft ke Hitam Soft)
+            local gradient = Instance.new("UIGradient")
+            gradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(38, 20, 56)),   -- Ungu Soft (Atas)
+                ColorSequenceKeypoint.new(0.6, Color3.fromRGB(22, 12, 32)), -- Ungu Gelap (Tengah)
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 8, 18))     -- Hitam Soft (Bawah)
+            }
+            gradient.Rotation = 135 -- Sudut kemiringan gradient (diagonal)
+            gradient.Parent = mainFrame
+        end
+    end
+end)
+
+
 -- Potongan kode untuk mengubah teks tombol minimize Rayfield
 task.spawn(function()
     task.wait(1) -- Beri jeda sebentar agar UI ter-render sempurna
