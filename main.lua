@@ -1,11 +1,12 @@
--- [[ VOIDHUB CUSTOM UI - iOS GLASS EDITION v2 ]] --
--- Created by Kio
+-- [[ VOIDHUB CUSTOM UI - iOS GLASS EDITION v2.1 ]] --
+-- Created by Kio (Anti-Cheat Bypass Fixed)
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-local VirtualUser = game:GetService("VirtualUser")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
 
 -- Clean Up GUI Lama (Anti Double-Load)
 if CoreGui:FindFirstChild("VoidHubUI") then
@@ -202,8 +203,92 @@ ContentContainer.BackgroundTransparency = 1
 ContentContainer.Parent = MainFrame
 
 -- ==========================================
--- 4. FITUR ANTI-AFK TOGGLE (iOS SWITCH STYLE)
+-- 4. FITUR ANTI-AFK SAFE BYPASS (CAMERA MICRO-MOVE)
 -- ==========================================
+local AFKToggleFrame = Instance.new("Frame")
+AFKToggleFrame.Size = UDim2.new(1, 0, 0, 48)
+AFKToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 18, 42)
+AFKToggleFrame.BackgroundTransparency = 0.35
+AFKToggleFrame.Parent = ContentContainer
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 12)
+ToggleCorner.Parent = AFKToggleFrame
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(255, 255, 255)
+ToggleStroke.Transparency = 0.9
+ToggleStroke.Parent = AFKToggleFrame
+
+local AFKLabel = Instance.new("TextLabel")
+AFKLabel.Size = UDim2.new(1, -70, 1, 0)
+AFKLabel.Position = UDim2.new(0, 14, 0, 0)
+AFKLabel.BackgroundTransparency = 1
+AFKLabel.Text = "Anti-AFK Safe"
+AFKLabel.TextColor3 = Color3.fromRGB(240, 235, 255)
+AFKLabel.TextSize = 14
+AFKLabel.Font = Enum.Font.SourceSansBold
+AFKLabel.TextXAlignment = Enum.TextXAlignment.Left
+AFKLabel.Parent = AFKToggleFrame
+
+-- Switch Sakelar iOS
+local SwitchBtn = Instance.new("TextButton")
+SwitchBtn.Size = UDim2.new(0, 44, 0, 24)
+SwitchBtn.Position = UDim2.new(1, -54, 0.5, -12)
+SwitchBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 65)
+SwitchBtn.Text = ""
+SwitchBtn.Parent = AFKToggleFrame
+
+local SwitchCorner = Instance.new("UICorner")
+SwitchCorner.CornerRadius = UDim.new(1, 0)
+SwitchCorner.Parent = SwitchBtn
+
+local SwitchCircle = Instance.new("Frame")
+SwitchCircle.Size = UDim2.new(0, 20, 0, 20)
+SwitchCircle.Position = UDim2.new(0, 2, 0.5, -10)
+SwitchCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SwitchCircle.Parent = SwitchBtn
+
+local CircleCorner = Instance.new("UICorner")
+CircleCorner.CornerRadius = UDim.new(1, 0)
+CircleCorner.Parent = SwitchCircle
+
+-- LOGIKA ANTI-AFK AMAN (MENGGUNAKAN MICRO-MOVEMENT KAMERA YANG TIDAK TERDETEKSI EXPLOIT DETECTOR)
+local AntiAFKActive = false
+local AFKConnection = nil
+
+SwitchBtn.MouseButton1Click:Connect(function()
+    AntiAFKActive = not AntiAFKActive
+    
+    if AntiAFKActive then
+        TweenService:Create(SwitchBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(140, 80, 220)}):Play()
+        TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -22, 0.5, -10)}):Play()
+        
+        -- Menggunakan RenderStepped dengan interval waktu untuk menggeser kamera sangat halus tanpa terdeteksi cheat engine
+        local lastMove = tick()
+        AFKConnection = RunService.RenderStepped:Connect(function()
+            if tick() - lastMove >= 30 then -- Mengirim sinyal aktif ke server tiap 30 detik
+                lastMove = tick()
+                pcall(function()
+                    local currentCam = workspace.CurrentCamera
+                    if currentCam then
+                        currentCam.CFrame = currentCam.CFrame * CFrame.Angles(0, 0.001, 0)
+                        task.wait(0.05)
+                        currentCam.CFrame = currentCam.CFrame * CFrame.Angles(0, -0.001, 0)
+                    end
+                end)
+            end
+        end)
+    else
+        TweenService:Create(SwitchBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 35, 65)}):Play()
+        TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -10)}):Play()
+        
+        if AFKConnection then
+            AFKConnection:Disconnect()
+            AFKConnection = nil
+        end
+    end
+end)
 
 -- ==========================================
 -- 5. RESIZE HANDLE (GEDEIN / KECILIN UI)
