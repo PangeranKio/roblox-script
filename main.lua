@@ -540,4 +540,38 @@ end)
 
 -- ==========================================
 -- 6. ANIMASI SMOOTH OPEN / CLOSE TWEEN
--- =
+-- ==========================================
+local TweenBack = TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local TweenIn = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+OpenBtn.MouseButton1Click:Connect(function()
+    MainFrame.Size = UDim2.new(0, 0, 0, 0)
+    MainFrame.Visible = true
+    OpenBtn.Visible = false
+    
+    TweenService:Create(MainFrame, TweenBack, {Size = TargetSize}):Play()
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    local CloseTween = TweenService:Create(MainFrame, TweenIn, {Size = UDim2.new(0, 0, 0, 0)})
+    CloseTween:Play()
+    CloseTween.Completed:Connect(function()
+        MainFrame.Visible = false
+        OpenBtn.Visible = true
+    end)
+end)
+
+-- ==========================================
+-- 7. EXECUTION PROCESS (LOADING)
+-- ==========================================
+task.spawn(function()
+    task.wait(0.7)
+    LoadStatus.Text = "Loading Anti-AFK Module..."
+    task.wait(0.7)
+    LoadStatus.Text = "Applying Security Protections..."
+    task.wait(0.6)
+    
+    LoadingFrame:Destroy()
+    MainFrame.Visible = true
+    TweenService:Create(MainFrame, TweenBack, {Size = TargetSize}):Play()
+end)
