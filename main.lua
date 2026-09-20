@@ -1,6 +1,6 @@
--- [[ VOIDHUB SUPREME v13.0 - LUXURY EXECUTIVE EDITION ]] --
--- UI/UX: Bento Obsidian Glassmorphism with Liquid Gold Accents
--- Features: Anti Double Re-Execute Guard, Instant Rejoin, Server Hop, Solo/1-Player Server List & Freeze Boss Mechanics
+-- [[ VOIDHUB SUPREME v14.0 - CYBERPUNK EXECUTIVE EDITION ]] --
+-- UI/UX: Cyberpunk Neon Glassmorphism with Dynamic Loading Screen & Auto Return
+-- Features: Complete v13.0 Engine + Boss Disable Attack + Egg Carry Auto Return Base + Solo Server Scanner
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -12,6 +12,7 @@ local HttpService = game:GetService("HttpService")
 local StatsService = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
 local ProximityPromptService = game:GetService("ProximityPromptService")
+
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
@@ -32,28 +33,30 @@ local function RegisterConnection(conn)
     return conn
 end
 
-if CoreGui:FindFirstChild("VoidHubUI_v13") then
-    CoreGui.VoidHubUI_v13:Destroy()
+if CoreGui:FindFirstChild("VoidHubUI_v14") then
+    CoreGui.VoidHubUI_v14:Destroy()
 end
 
 local VoidHubUI = Instance.new("ScreenGui")
-VoidHubUI.Name = "VoidHubUI_v13"
+VoidHubUI.Name = "VoidHubUI_v14"
 VoidHubUI.Parent = CoreGui
 VoidHubUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 VoidHubUI.ResetOnSpawn = false
 
--- COLOR PALETTE (EXECUTIVE LUXURY)
-local C_BG = Color3.fromRGB(8, 9, 12)
-local C_PANEL = Color3.fromRGB(15, 17, 22)
-local C_ACCENT = Color3.fromRGB(235, 185, 95)
-local C_ACCENT_DARK = Color3.fromRGB(170, 125, 50)
-local C_TEXT = Color3.fromRGB(245, 247, 250)
-local C_SUBTEXT = Color3.fromRGB(135, 140, 155)
-local C_ITEM = Color3.fromRGB(22, 25, 33)
-local C_STROKE = Color3.fromRGB(40, 45, 58)
+-- COLOR PALETTE (CYBERPUNK NEON GLASSMORPHISM)
+local C_BG = Color3.fromRGB(10, 10, 18)
+local C_PANEL = Color3.fromRGB(16, 18, 28)
+local C_ITEM = Color3.fromRGB(24, 27, 42)
+local C_CYAN = Color3.fromRGB(0, 240, 255)
+local C_PINK = Color3.fromRGB(255, 0, 128)
+local C_YELLOW = Color3.fromRGB(255, 220, 0)
+local C_TEXT = Color3.fromRGB(240, 245, 255)
+local C_SUBTEXT = Color3.fromRGB(120, 130, 165)
+local C_STROKE = Color3.fromRGB(0, 180, 220)
 
 -- GLOBAL STATE MANAGER
 local State = {
+    -- Movement (v13.0)
     Flying = false, FlySpeed = 50,
     WalkSpeed = false, SpeedValue = 24,
     JumpPower = false, JumpValue = 100,
@@ -61,12 +64,18 @@ local State = {
     GravityMod = false, GravityVal = 196.2,
     Spinbot = false, SpinSpeed = 30,
     
+    -- Mechanics (v13.0 & v14.0)
     InstantPrompt = false, AutoPrompt = false, ReachMod = false,
-    FreezeBossGuard = false, -- Fitur Freeze Penjaga Telur / Boss
+    FreezeBossGuard = false,
+    BossDisableAttack = false,       -- NEW v14.0: Boss Attack Disabler
+    AutoRunToBaseWithEgg = false,    -- NEW v14.0: Auto Return Base saat Bawa Telur
+    BaseCFrame = nil,                -- NEW v14.0: Base Coordinate Storage
     
+    -- Utility & Automation (v13.0)
     AntiVoid = false, AntiAFK = true, AutoClicker = false,
     AntiRagdoll = false, AutoRejoin = false,
     
+    -- Visuals & World (v13.0)
     PlayerESP = false, HidePlayers = false,
     Fullbright = false, LowGraphics = false,
     CustomFOV = false, FOVValue = 70,
@@ -96,17 +105,17 @@ local function MakeDraggable(topbar, object)
     RegisterConnection(UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
-            TweenService:Create(object, TweenInfo.new(0.1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            TweenService:Create(object, TweenInfo.new(0.08, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
                 Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
             }):Play()
         end
     end))
 end
 
--- HELPER FUNCTIONS (REJOIN & SERVER HOP)
+-- HELPER FUNCTIONS
 local function RejoinServer()
     if #Players:GetPlayers() <= 1 then
-        LocalPlayer:Kick("\n[VOIDHUB]: Rejoining Server...")
+        LocalPlayer:Kick("\n[CYBER-VOID]: Rejoining Server...")
         task.wait(0.2)
         TeleportService:Teleport(game.PlaceId, LocalPlayer)
     else
@@ -133,38 +142,112 @@ local function ServerHop()
 end
 
 -- ==========================================
+-- 1. DYNAMIC CYBERPUNK LOADING SCREEN
+-- ==========================================
+local LoadingFrame = Instance.new("Frame")
+LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
+LoadingFrame.BackgroundColor3 = C_BG
+LoadingFrame.ZIndex = 100
+LoadingFrame.Parent = VoidHubUI
+
+local LoadingTitle = Instance.new("TextLabel")
+LoadingTitle.Size = UDim2.new(1, 0, 0, 40)
+LoadingTitle.Position = UDim2.new(0, 0, 0.4, -40)
+LoadingTitle.BackgroundTransparency = 1
+LoadingTitle.Text = "SYSTEM INITIALIZING..."
+LoadingTitle.TextColor3 = C_CYAN
+LoadingTitle.TextSize = 22
+LoadingTitle.Font = Enum.Font.GothamBold
+LoadingTitle.Parent = LoadingFrame
+
+local LoadingBarBg = Instance.new("Frame")
+LoadingBarBg.Size = UDim2.new(0.4, 0, 0, 8)
+LoadingBarBg.Position = UDim2.new(0.3, 0, 0.5, 0)
+LoadingBarBg.BackgroundColor3 = C_PANEL
+LoadingBarBg.Parent = LoadingFrame
+Instance.new("UICorner", LoadingBarBg).CornerRadius = UDim.new(1, 0)
+
+local LoadingBarFill = Instance.new("Frame")
+LoadingBarFill.Size = UDim2.new(0, 0, 1, 0)
+LoadingBarFill.BackgroundColor3 = C_PINK
+LoadingBarFill.Parent = LoadingBarBg
+Instance.new("UICorner", LoadingBarFill).CornerRadius = UDim.new(1, 0)
+
+local LoadingStatus = Instance.new("TextLabel")
+LoadingStatus.Size = UDim2.new(1, 0, 0, 30)
+LoadingStatus.Position = UDim2.new(0, 0, 0.55, 0)
+LoadingStatus.BackgroundTransparency = 1
+LoadingStatus.Text = "Loading Cyber Engine..."
+LoadingStatus.TextColor3 = C_SUBTEXT
+LoadingStatus.TextSize = 11
+LoadingStatus.Font = Enum.Font.Code
+LoadingStatus.Parent = LoadingFrame
+
+task.spawn(function()
+    local tasks = {
+        {name = "Connecting Cyber Network...", time = 0.25},
+        {name = "Loading Boss AI Overrides...", time = 0.3},
+        {name = "Bypassing Guard Hitboxes...", time = 0.25},
+        {name = "Setting Up Auto Egg Return Engine...", time = 0.3},
+        {name = "Initializing Cyberpunk Canvas...", time = 0.2}
+    }
+    
+    for i, t in ipairs(tasks) do
+        LoadingStatus.Text = t.name
+        TweenService:Create(LoadingBarFill, TweenInfo.new(t.time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(i / #tasks, 0, 1, 0)
+        }):Play()
+        task.wait(t.time)
+    end
+
+    LoadingStatus.Text = "AUTHENTICATED & READY"
+    task.wait(0.2)
+    TweenService:Create(LoadingFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 1
+    }):Play()
+    for _, v in pairs(LoadingFrame:GetChildren()) do
+        if v:IsA("TextLabel") or v:IsA("Frame") then
+            TweenService:Create(v, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+        end
+    end
+    task.wait(0.4)
+    LoadingFrame:Destroy()
+end)
+
+-- ==========================================
 -- FLOATING TOGGLE BUTTON
 -- ==========================================
 local OpenBtn = Instance.new("TextButton")
-OpenBtn.Size = UDim2.new(0, 125, 0, 36)
+OpenBtn.Size = UDim2.new(0, 140, 0, 38)
 OpenBtn.Position = UDim2.new(0.02, 0, 0.15, 0)
 OpenBtn.BackgroundColor3 = C_BG
-OpenBtn.Text = "✧ VOIDHUB"
-OpenBtn.TextColor3 = C_ACCENT
+OpenBtn.Text = "⚡ CYBER-VOID"
+OpenBtn.TextColor3 = C_CYAN
 OpenBtn.TextSize = 12
 OpenBtn.Font = Enum.Font.GothamBold
 OpenBtn.Visible = false
 OpenBtn.ZIndex = 99
 OpenBtn.Parent = VoidHubUI
-Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 8)
 local OpenStroke = Instance.new("UIStroke", OpenBtn)
-OpenStroke.Color = C_ACCENT
-OpenStroke.Thickness = 1
+OpenStroke.Color = C_CYAN
+OpenStroke.Thickness = 1.5
 MakeDraggable(OpenBtn, OpenBtn)
 
 -- ==========================================
--- MAIN EXECUTIVE WINDOW
+-- MAIN CYBERPUNK WINDOW
 -- ==========================================
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 720, 0, 470)
-MainFrame.Position = UDim2.new(0.5, -360, 0.5, -235)
+MainFrame.Size = UDim2.new(0, 740, 0, 480)
+MainFrame.Position = UDim2.new(0.5, -370, 0.5, -240)
 MainFrame.BackgroundColor3 = C_BG
 MainFrame.ClipsDescendants = true
 MainFrame.ZIndex = 10
 MainFrame.Parent = VoidHubUI
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 local MainStroke = Instance.new("UIStroke", MainFrame)
-MainStroke.Color = C_STROKE
+MainStroke.Color = C_CYAN
+MainStroke.Thickness = 1.5
 
 -- TOPBAR
 local Topbar = Instance.new("Frame")
@@ -175,10 +258,10 @@ Topbar.Parent = MainFrame
 MakeDraggable(Topbar, MainFrame)
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 300, 1, 0)
+Title.Size = UDim2.new(0, 350, 1, 0)
 Title.Position = UDim2.new(0, 18, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "VOIDHUB <font color=\"#EBB95F\">SUPREME v13.0</font>"
+Title.Text = "VOIDHUB <font color=\"#FF0080\">CYBER</font> <font color=\"#00F0FF\">v14.0</font>"
 Title.RichText = true
 Title.TextColor3 = C_TEXT
 Title.TextSize = 14
@@ -192,12 +275,12 @@ CloseBtn.Size = UDim2.new(0, 28, 0, 28)
 CloseBtn.Position = UDim2.new(1, -36, 0, 10)
 CloseBtn.BackgroundColor3 = C_ITEM
 CloseBtn.Text = "✕"
-CloseBtn.TextColor3 = C_SUBTEXT
-CloseBtn.TextSize = 11
+CloseBtn.TextColor3 = C_PINK
+CloseBtn.TextSize = 12
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.ZIndex = 12
 CloseBtn.Parent = Topbar
-Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
 
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
@@ -210,7 +293,7 @@ end)
 
 -- SIDEBAR NAV
 local Sidebar = Instance.new("Frame")
-Sidebar.Size = UDim2.new(0, 165, 1, -48)
+Sidebar.Size = UDim2.new(0, 170, 1, -48)
 Sidebar.Position = UDim2.new(0, 0, 0, 48)
 Sidebar.BackgroundColor3 = C_PANEL
 Sidebar.ZIndex = 11
@@ -227,8 +310,8 @@ NavPadding.PaddingRight = UDim.new(0, 8)
 
 -- CONTENT AREA
 local ContentArea = Instance.new("Frame")
-ContentArea.Size = UDim2.new(1, -177, 1, -58)
-ContentArea.Position = UDim2.new(0, 172, 0, 52)
+ContentArea.Size = UDim2.new(1, -182, 1, -58)
+ContentArea.Position = UDim2.new(0, 177, 0, 52)
 ContentArea.BackgroundTransparency = 1
 ContentArea.ZIndex = 11
 ContentArea.Parent = MainFrame
@@ -242,8 +325,8 @@ local function CreatePage(name)
     page.BackgroundTransparency = 1
     page.BorderSizePixel = 0
     page.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    page.ScrollBarThickness = 2
-    page.ScrollBarImageColor3 = C_ACCENT
+    page.ScrollBarThickness = 3
+    page.ScrollBarImageColor3 = C_CYAN
     page.Visible = false
     page.ZIndex = 12
     page.Parent = PagesFolder
@@ -268,7 +351,7 @@ MainTabPage.Visible = true
 local function CreateTabButton(text, pageTarget, defaultActive)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 34)
-    btn.BackgroundColor3 = defaultActive and C_ACCENT or C_ITEM
+    btn.BackgroundColor3 = defaultActive and C_CYAN or C_ITEM
     btn.Text = "  " .. text
     btn.TextColor3 = defaultActive and C_BG or C_SUBTEXT
     btn.TextSize = 11
@@ -276,7 +359,7 @@ local function CreateTabButton(text, pageTarget, defaultActive)
     btn.TextXAlignment = Enum.TextXAlignment.Left
     btn.ZIndex = 12
     btn.Parent = Sidebar
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 7)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 
     btn.MouseButton1Click:Connect(function()
         for _, p in pairs(PagesFolder:GetChildren()) do p.Visible = false end
@@ -287,14 +370,14 @@ local function CreateTabButton(text, pageTarget, defaultActive)
             end
         end
         pageTarget.Visible = true
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = C_ACCENT}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = C_CYAN}):Play()
         btn.TextColor3 = C_BG
     end)
 end
 
 CreateTabButton("Dashboard", MainTabPage, true)
 CreateTabButton("Movement", MovementTabPage, false)
-CreateTabButton("Game Mechanics", MechanicsTabPage, false)
+CreateTabButton("Boss & Egg Core", MechanicsTabPage, false)
 CreateTabButton("Utility & Auto", UtilityTabPage, false)
 CreateTabButton("Visuals & ESP", VisualTabPage, false)
 CreateTabButton("Camera & World", WorldTabPage, false)
@@ -310,7 +393,7 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     frame.BackgroundColor3 = C_ITEM
     frame.ZIndex = 13
     frame.Parent = parent
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
     local stroke = Instance.new("UIStroke", frame)
     stroke.Color = C_STROKE
     stroke.Transparency = 0.8
@@ -330,7 +413,7 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     local switch = Instance.new("TextButton")
     switch.Size = UDim2.new(0, 36, 0, 18)
     switch.Position = UDim2.new(1, -44, 0.5, -9)
-    switch.BackgroundColor3 = defaultState and C_ACCENT or Color3.fromRGB(40, 45, 55)
+    switch.BackgroundColor3 = defaultState and C_PINK or Color3.fromRGB(35, 40, 55)
     switch.Text = ""
     switch.ZIndex = 14
     switch.Parent = frame
@@ -348,10 +431,10 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     switch.MouseButton1Click:Connect(function()
         active = not active
         if active then
-            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = C_ACCENT}):Play()
+            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = C_PINK}):Play()
             TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -15, 0.5, -6), BackgroundColor3 = C_BG}):Play()
         else
-            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 45, 55)}):Play()
+            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 40, 55)}):Play()
             TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -6), BackgroundColor3 = C_TEXT}):Play()
         end
         callback(active)
@@ -364,7 +447,7 @@ local function CreateSlider(parent, titleText, minVal, maxVal, defaultVal, callb
     frame.BackgroundColor3 = C_ITEM
     frame.ZIndex = 13
     frame.Parent = parent
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
 
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -60, 0, 22)
@@ -383,7 +466,7 @@ local function CreateSlider(parent, titleText, minVal, maxVal, defaultVal, callb
     valLabel.Position = UDim2.new(1, -55, 0, 4)
     valLabel.BackgroundTransparency = 1
     valLabel.Text = tostring(defaultVal)
-    valLabel.TextColor3 = C_ACCENT
+    valLabel.TextColor3 = C_CYAN
     valLabel.TextSize = 11
     valLabel.Font = Enum.Font.GothamBold
     valLabel.TextXAlignment = Enum.TextXAlignment.Right
@@ -393,14 +476,14 @@ local function CreateSlider(parent, titleText, minVal, maxVal, defaultVal, callb
     local sliderBg = Instance.new("Frame")
     sliderBg.Size = UDim2.new(1, -24, 0, 6)
     sliderBg.Position = UDim2.new(0, 12, 0, 34)
-    sliderBg.BackgroundColor3 = Color3.fromRGB(40, 45, 55)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(35, 40, 55)
     sliderBg.ZIndex = 14
     sliderBg.Parent = frame
     Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
 
     local sliderFill = Instance.new("Frame")
     sliderFill.Size = UDim2.new((defaultVal - minVal) / (maxVal - minVal), 0, 1, 0)
-    sliderFill.BackgroundColor3 = C_ACCENT
+    sliderFill.BackgroundColor3 = C_CYAN
     sliderFill.ZIndex = 15
     sliderFill.Parent = sliderBg
     Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
@@ -442,13 +525,13 @@ local function CreateButton(parent, titleText, callback)
     btn.Font = Enum.Font.GothamMedium
     btn.ZIndex = 13
     btn.Parent = parent
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
     local stroke = Instance.new("UIStroke", btn)
     stroke.Color = C_STROKE
     stroke.Transparency = 0.8
 
     btn.MouseButton1Click:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.08), {BackgroundColor3 = C_ACCENT, TextColor3 = C_BG}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.08), {BackgroundColor3 = C_CYAN, TextColor3 = C_BG}):Play()
         task.wait(0.1)
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = C_ITEM, TextColor3 = C_TEXT}):Play()
         callback()
@@ -463,7 +546,7 @@ ProfileCard.Size = UDim2.new(1, -6, 0, 70)
 ProfileCard.BackgroundColor3 = C_ITEM
 ProfileCard.ZIndex = 13
 ProfileCard.Parent = MainTabPage
-Instance.new("UICorner", ProfileCard).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", ProfileCard).CornerRadius = UDim.new(0, 8)
 
 local AvatarImg = Instance.new("ImageLabel")
 AvatarImg.Size = UDim2.new(0, 50, 0, 50)
@@ -478,10 +561,10 @@ local WelcomeText = Instance.new("TextLabel")
 WelcomeText.Size = UDim2.new(1, -75, 0, 20)
 WelcomeText.Position = UDim2.new(0, 70, 0, 14)
 WelcomeText.BackgroundTransparency = 1
-WelcomeText.Text = "Welcome back, <font color=\"#EBB95F\">" .. LocalPlayer.DisplayName .. "</font>"
+WelcomeText.Text = "SYSTEM ONLINE // <font color=\"#00F0FF\">" .. LocalPlayer.DisplayName .. "</font>"
 WelcomeText.RichText = true
 WelcomeText.TextColor3 = C_TEXT
-WelcomeText.TextSize = 13
+WelcomeText.TextSize = 12
 WelcomeText.Font = Enum.Font.GothamBold
 WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
 WelcomeText.ZIndex = 14
@@ -491,10 +574,10 @@ local StatsText = Instance.new("TextLabel")
 StatsText.Size = UDim2.new(1, -75, 0, 18)
 StatsText.Position = UDim2.new(0, 70, 0, 36)
 StatsText.BackgroundTransparency = 1
-StatsText.Text = "Tier: Executive  |  FPS: 60  |  Ping: 0 ms"
+StatsText.Text = "FPS: 60  |  PING: 0 ms"
 StatsText.TextColor3 = C_SUBTEXT
 StatsText.TextSize = 10
-StatsText.Font = Enum.Font.Gotham
+StatsText.Font = Enum.Font.Code
 StatsText.TextXAlignment = Enum.TextXAlignment.Left
 StatsText.ZIndex = 14
 StatsText.Parent = ProfileCard
@@ -503,7 +586,7 @@ RegisterConnection(RunService.RenderStepped:Connect(function(dt)
     local fps = math.floor(1 / dt)
     local ping = 0
     pcall(function() ping = math.floor(StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()) end)
-    StatsText.Text = string.format("Tier: Executive  |  FPS: %d  |  Ping: %d ms", fps, ping)
+    StatsText.Text = string.format("FPS: %d  |  PING: %d ms", fps, ping)
 end))
 
 -- ANNOUNCEMENT BOARD
@@ -512,17 +595,17 @@ NoticeCard.Size = UDim2.new(1, -6, 0, 90)
 NoticeCard.BackgroundColor3 = C_ITEM
 NoticeCard.ZIndex = 13
 NoticeCard.Parent = MainTabPage
-Instance.new("UICorner", NoticeCard).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", NoticeCard).CornerRadius = UDim.new(0, 8)
 local NoticeStroke = Instance.new("UIStroke", NoticeCard)
-NoticeStroke.Color = C_ACCENT
+NoticeStroke.Color = C_CYAN
 NoticeStroke.Transparency = 0.7
 
 local NoticeTitle = Instance.new("TextLabel")
 NoticeTitle.Size = UDim2.new(1, -20, 0, 22)
 NoticeTitle.Position = UDim2.new(0, 12, 0, 8)
 NoticeTitle.BackgroundTransparency = 1
-NoticeTitle.Text = "📢 OFFICIAL ANNOUNCEMENT"
-NoticeTitle.TextColor3 = C_ACCENT
+NoticeTitle.Text = "📢 CYBER-VOID SYSTEM ANNOUNCEMENT"
+NoticeTitle.TextColor3 = C_CYAN
 NoticeTitle.TextSize = 11
 NoticeTitle.Font = Enum.Font.GothamBold
 NoticeTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -533,7 +616,7 @@ local NoticeBody = Instance.new("TextLabel")
 NoticeBody.Size = UDim2.new(1, -24, 0, 50)
 NoticeBody.Position = UDim2.new(0, 12, 0, 30)
 NoticeBody.BackgroundTransparency = 1
-NoticeBody.Text = "Fitur Freeze Boss Guard (Penjaga Telur Diam) & Solo Server Scanner (1-Player Server List) telah berhasil diintegrasikan!"
+NoticeBody.Text = "v14.0 UPDATE: Disabling Boss Hitboxes/Attacks & Auto-Run To Base when carrying Eggs integrated successfully!"
 NoticeBody.TextColor3 = C_TEXT
 NoticeBody.TextSize = 10
 NoticeBody.Font = Enum.Font.Gotham
@@ -543,12 +626,11 @@ NoticeBody.TextXAlignment = Enum.TextXAlignment.Left
 NoticeBody.ZIndex = 14
 NoticeBody.Parent = NoticeCard
 
--- QUICK SERVER CONTROLS ON DASHBOARD
 CreateButton(MainTabPage, "⚡ Instant Rejoin Server", function() RejoinServer() end)
 CreateButton(MainTabPage, "🌐 Random Server Hop", function() ServerHop() end)
 
 -- ==========================================
--- 2. MOVEMENT TAB
+-- 2. MOVEMENT TAB (ALL v13.0 FEATURES INCLUDED)
 -- ==========================================
 local function StartFlying()
     local char = LocalPlayer.Character
@@ -576,7 +658,7 @@ local function StartFlying()
     end)
 end
 
-CreateToggle(MovementTabPage, "Kinetic Flight Mode", State.Flying, function(a)
+CreateToggle(MovementTabPage, "Kinetic Flight Engine", State.Flying, function(a)
     State.Flying = a
     if a then StartFlying() else if FlyVel then FlyVel:Destroy() end if FlyGyro then FlyGyro:Destroy() end end
 end)
@@ -632,9 +714,138 @@ CreateToggle(MovementTabPage, "Ghost Noclip", State.Noclip, function(a)
     end)
 end)
 
+CreateToggle(MovementTabPage, "Custom World Gravity", State.GravityMod, function(a)
+    State.GravityMod = a
+    if not a then workspace.Gravity = 196.2 end
+    task.spawn(function()
+        while State.GravityMod do
+            workspace.Gravity = State.GravityVal
+            task.wait(0.2)
+        end
+    end)
+end)
+CreateSlider(MovementTabPage, "Gravity Force", 0, 196, 196, function(v) State.GravityVal = v end)
+
+CreateToggle(MovementTabPage, "Spinbot Matrix Mode", State.Spinbot, function(a)
+    State.Spinbot = a
+    task.spawn(function()
+        while State.Spinbot do
+            pcall(function()
+                local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(State.SpinSpeed), 0)
+                end
+            end)
+            task.wait()
+        end
+    end)
+end)
+CreateSlider(MovementTabPage, "Spinbot Speed", 10, 100, 30, function(v) State.SpinSpeed = v end)
+
 -- ==========================================
--- 3. GAME MECHANICS TAB
+-- 3. GAME MECHANICS TAB (v13.0 + NEW v14.0)
 -- ==========================================
+CreateButton(MechanicsTabPage, "📍 Set Current Position as Base", function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        State.BaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+    end
+end)
+
+-- NEW v14.0 FEATURE: BOSS DISABLE ATTACK
+CreateToggle(MechanicsTabPage, "Disable Boss Attacks / Hitboxes", State.BossDisableAttack, function(a)
+    State.BossDisableAttack = a
+    task.spawn(function()
+        while State.BossDisableAttack do
+            pcall(function()
+                for _, model in pairs(workspace:GetDescendants()) do
+                    if model:IsA("Model") and not Players:GetPlayerFromCharacter(model) then
+                        local hum = model:FindFirstChildOfClass("Humanoid")
+                        if hum then
+                            for _, part in pairs(model:GetDescendants()) do
+                                if part:IsA("TouchTransmitter") or part.Name:lower():find("hitbox") or part.Name:lower():find("attack") then
+                                    part:Destroy()
+                                elseif part:IsA("BasePart") then
+                                    part.CanTouch = false
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+            task.wait(0.5)
+        end
+    end)
+end)
+
+-- NEW v14.0 FEATURE: AUTO-RUN TO BASE ON EGG CARRY
+CreateToggle(MechanicsTabPage, "Auto-Run To Base When Holding Egg", State.AutoRunToBaseWithEgg, function(a)
+    State.AutoRunToBaseWithEgg = a
+    task.spawn(function()
+        while State.AutoRunToBaseWithEgg do
+            pcall(function()
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local holdingEgg = false
+                    for _, child in pairs(char:GetChildren()) do
+                        if child:IsA("Tool") and (child.Name:lower():find("egg") or child.Name:lower():find("telur")) then
+                            holdingEgg = true
+                        end
+                    end
+                    
+                    if holdingEgg then
+                        if State.BaseCFrame then
+                            char.HumanoidRootPart.CFrame = State.BaseCFrame
+                        else
+                            local spawnLoc = workspace:FindFirstChildOfClass("SpawnLocation")
+                            if spawnLoc then
+                                char.HumanoidRootPart.CFrame = spawnLoc.CFrame + Vector3.new(0, 3, 0)
+                            end
+                        end
+                    end
+                end
+            end)
+            task.wait(0.3)
+        end
+    end)
+end)
+
+-- v13.0 FEATURE: FREEZE BOSS GUARD
+CreateToggle(MechanicsTabPage, "Freeze Boss / Egg Guard (Diam Di Tempat)", State.FreezeBossGuard, function(a)
+    State.FreezeBossGuard = a
+    task.spawn(function()
+        while State.FreezeBossGuard do
+            pcall(function()
+                for _, model in pairs(workspace:GetDescendants()) do
+                    if model:IsA("Model") and not Players:GetPlayerFromCharacter(model) then
+                        local hum = model:FindFirstChildOfClass("Humanoid")
+                        local hrp = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart")
+                        if hum and hrp then
+                            hum.WalkSpeed = 0
+                            hrp.Velocity = Vector3.zero
+                            hrp.RotVelocity = Vector3.zero
+                            if not hrp.Anchored then hrp.Anchored = true end
+                        end
+                    end
+                end
+            end)
+            task.wait(0.2)
+        end
+
+        pcall(function()
+            for _, model in pairs(workspace:GetDescendants()) do
+                if model:IsA("Model") and not Players:GetPlayerFromCharacter(model) then
+                    local hum = model:FindFirstChildOfClass("Humanoid")
+                    local hrp = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart")
+                    if hum and hrp then
+                        hum.WalkSpeed = 16
+                        hrp.Anchored = false
+                    end
+                end
+            end
+        end)
+    end)
+end)
+
 CreateToggle(MechanicsTabPage, "Instant Proximity Prompt (No Hold)", State.InstantPrompt, function(a) State.InstantPrompt = a end)
 RegisterConnection(ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt)
     if State.InstantPrompt then fireproximityprompt(prompt) end
@@ -649,48 +860,6 @@ CreateToggle(MechanicsTabPage, "Auto Click Proximity Prompts", State.AutoPrompt,
             end
             task.wait(0.5)
         end
-    end)
-end)
-
--- FITUR BARU: Freeze Boss Guard / Penjaga Telur Diam di Tempat
-CreateToggle(MechanicsTabPage, "Freeze Boss / Egg Guard (Diam Di Tempat)", State.FreezeBossGuard, function(a)
-    State.FreezeBossGuard = a
-    task.spawn(function()
-        while State.FreezeBossGuard do
-            pcall(function()
-                -- Memindai NPC/Boss/Penjaga di workspace
-                for _, model in pairs(workspace:GetDescendants()) do
-                    if model:IsA("Model") and not Players:GetPlayerFromCharacter(model) then
-                        local hum = model:FindFirstChildOfClass("Humanoid")
-                        local hrp = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart")
-                        if hum and hrp then
-                            -- Menahan pergerakan Boss/Penjaga
-                            hum.WalkSpeed = 0
-                            hrp.Velocity = Vector3.zero
-                            hrp.RotVelocity = Vector3.zero
-                            if not hrp.Anchored then
-                                hrp.Anchored = true
-                            end
-                        end
-                    end
-                end
-            end)
-            task.wait(0.2)
-        end
-
-        -- Pengembalian status (un-anchor) saat disatukan/dimatikan
-        pcall(function()
-            for _, model in pairs(workspace:GetDescendants()) do
-                if model:IsA("Model") and not Players:GetPlayerFromCharacter(model) then
-                    local hum = model:FindFirstChildOfClass("Humanoid")
-                    local hrp = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart")
-                    if hum and hrp then
-                        hum.WalkSpeed = 16
-                        hrp.Anchored = false
-                    end
-                end
-            end
-        end)
     end)
 end)
 
@@ -730,6 +899,18 @@ CreateToggle(UtilityTabPage, "Anti-AFK Disconnect Guard", State.AntiAFK, functio
     end)
 end)
 
+CreateToggle(UtilityTabPage, "Auto Clicker Engine", State.AutoClicker, function(a)
+    State.AutoClicker = a
+    task.spawn(function()
+        while State.AutoClicker do
+            pcall(function()
+                mouse1click()
+            end)
+            task.wait(0.1)
+        end
+    end)
+end)
+
 -- ==========================================
 -- 5. VISUALS & ESP TAB
 -- ==========================================
@@ -738,7 +919,7 @@ local function ApplyESP(p)
     if not p.Character:FindFirstChild("VoidHL") then
         local hl = Instance.new("Highlight")
         hl.Name = "VoidHL"
-        hl.FillColor = C_ACCENT
+        hl.FillColor = C_CYAN
         hl.OutlineColor = Color3.fromRGB(255, 255, 255)
         hl.FillTransparency = 0.5
         hl.Parent = p.Character
@@ -775,6 +956,18 @@ CreateToggle(WorldTabPage, "Fullbright Vision Ambient", State.Fullbright, functi
     end
 end)
 
+CreateToggle(WorldTabPage, "Custom Field Of View", State.CustomFOV, function(a)
+    State.CustomFOV = a
+    if not a then workspace.CurrentCamera.FieldOfView = 70 end
+    task.spawn(function()
+        while State.CustomFOV do
+            workspace.CurrentCamera.FieldOfView = State.FOVValue
+            task.wait(0.2)
+        end
+    end)
+end)
+CreateSlider(WorldTabPage, "FOV Range", 50, 120, 70, function(v) State.FOVValue = v end)
+
 -- ==========================================
 -- 7. SERVER FINDER TAB
 -- ==========================================
@@ -784,8 +977,8 @@ CreateButton(ServerTabPage, "🌐 Random Server Hop", function() ServerHop() end
 local ServerListFrame = Instance.new("ScrollingFrame")
 ServerListFrame.Size = UDim2.new(1, -6, 1, -125)
 ServerListFrame.BackgroundTransparency = 1
-ServerListFrame.ScrollBarThickness = 2
-ServerListFrame.ScrollBarImageColor3 = C_ACCENT
+ServerListFrame.ScrollBarThickness = 3
+ServerListFrame.ScrollBarImageColor3 = C_CYAN
 ServerListFrame.ZIndex = 13
 ServerListFrame.Parent = ServerTabPage
 
@@ -793,7 +986,6 @@ local ServerListLayout = Instance.new("UIListLayout", ServerListFrame)
 ServerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ServerListLayout.Padding = UDim.new(0, 6)
 
--- PEMBARUAN: Pindai Server dengan Tepat 1 Player + Tombol Join
 local function ScanSoloServers()
     for _, child in pairs(ServerListFrame:GetChildren()) do
         if child:IsA("Frame") or child:IsA("TextLabel") then child:Destroy() end
@@ -823,7 +1015,7 @@ local function ScanSoloServers()
                     card.BackgroundColor3 = C_ITEM
                     card.ZIndex = 14
                     card.Parent = ServerListFrame
-                    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 7)
+                    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 6)
 
                     local info = Instance.new("TextLabel")
                     info.Size = UDim2.new(1, -110, 1, 0)
@@ -840,7 +1032,7 @@ local function ScanSoloServers()
                     local joinBtn = Instance.new("TextButton")
                     joinBtn.Size = UDim2.new(0, 85, 0, 26)
                     joinBtn.Position = UDim2.new(1, -92, 0.5, -13)
-                    joinBtn.BackgroundColor3 = C_ACCENT
+                    joinBtn.BackgroundColor3 = C_CYAN
                     joinBtn.Text = "JOIN SERVER"
                     joinBtn.TextColor3 = C_BG
                     joinBtn.TextSize = 9
@@ -877,8 +1069,8 @@ CreateButton(ServerTabPage, "🔍 Scan 1-Player Servers Only", function() ScanSo
 local PlayerListFrame = Instance.new("ScrollingFrame")
 PlayerListFrame.Size = UDim2.new(1, -6, 1, -45)
 PlayerListFrame.BackgroundTransparency = 1
-PlayerListFrame.ScrollBarThickness = 2
-PlayerListFrame.ScrollBarImageColor3 = C_ACCENT
+PlayerListFrame.ScrollBarThickness = 3
+PlayerListFrame.ScrollBarImageColor3 = C_CYAN
 PlayerListFrame.ZIndex = 13
 PlayerListFrame.Parent = PlayersTabPage
 
@@ -895,7 +1087,7 @@ local function RenderPlayerList()
             card.BackgroundColor3 = C_ITEM
             card.ZIndex = 14
             card.Parent = PlayerListFrame
-            Instance.new("UICorner", card).CornerRadius = UDim.new(0, 7)
+            Instance.new("UICorner", card).CornerRadius = UDim.new(0, 6)
 
             local img = Instance.new("ImageLabel")
             img.Size = UDim2.new(0, 32, 0, 32)
@@ -921,7 +1113,7 @@ local function RenderPlayerList()
             local tpBtn = Instance.new("TextButton")
             tpBtn.Size = UDim2.new(0, 85, 0, 24)
             tpBtn.Position = UDim2.new(1, -92, 0.5, -12)
-            tpBtn.BackgroundColor3 = C_ACCENT
+            tpBtn.BackgroundColor3 = C_CYAN
             tpBtn.Text = "TP TO PLAYER"
             tpBtn.TextColor3 = C_BG
             tpBtn.TextSize = 9
@@ -951,3 +1143,5 @@ end))
 RegisterConnection(Players.PlayerAdded:Connect(RenderPlayerList))
 RegisterConnection(Players.PlayerRemoving:Connect(RenderPlayerList))
 RenderPlayerList()
+
+print("[CYBER-VOID v14.0] FULL EXECUTION COMPLETE!")
