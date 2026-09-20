@@ -1,5 +1,5 @@
--- [[ VOIDHUB CUSTOM UI - ULTRA SUPREME EDITION v6.0 ]] --
--- Created by Kio (Fixed ESP, Dropdown Target, Accurate Pathfinding Auto Steal, Fixed Treadmill, Egg Predictor, & Announcement Board)
+-- [[ VOIDHUB SUPREME ULTRA v7.0 - CYBERPUNK LUXURY EDITION ]] --
+-- Created by Kio (Added Player ESP, Removed Auto Steal & Egg Predictor, Rebuilt UI/UX with Advanced Icons, Category Announcements, & Initial Loading Screen)
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -7,7 +7,6 @@ local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TeleportService = game:GetService("TeleportService")
-local PathfindingService = game:GetService("PathfindingService")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
@@ -21,13 +20,12 @@ VoidHubUI.Parent = CoreGui
 VoidHubUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- CONFIG SYSTEM
-local ConfigFileName = "VoidHub_Config_Kio_v6.json"
+local ConfigFileName = "VoidHub_Config_Kio_v7.json"
 local SavedConfig = {
-    AutoStealActive = false,
-    SelectedEggTarget = "All Eggs",
-    AutoTreadmill = true,
-    PlayerESP = false,
-    EggESPUI = false
+    PlayerESPActive = false,
+    EggESPActive = false,
+    AutoTreadmill = false,
+    WalkSpeedActive = false
 }
 
 local function SaveSettings()
@@ -71,15 +69,104 @@ local function MakeDraggable(topbar, object)
     end)
 end
 
--- FLOATING BUTTON "Void"
+-- ==========================================
+-- 1. INITIAL LOADING SCREEN (Mewah & Estetik)
+-- ==========================================
+local LoadingGui = Instance.new("Frame")
+LoadingGui.Size = UDim2.new(0, 420, 0, 240)
+LoadingGui.Position = UDim2.new(0.5, -210, 0.5, -120)
+LoadingGui.BackgroundColor3 = Color3.fromRGB(10, 4, 18)
+LoadingGui.BackgroundTransparency = 0.05
+LoadingGui.ZIndex = 50
+LoadingGui.Parent = VoidHubUI
+
+local LGCorner = Instance.new("UICorner")
+LGCorner.CornerRadius = UDim.new(0, 24)
+LGCorner.Parent = LoadingGui
+
+local LGStroke = Instance.new("UIStroke")
+LGStroke.Color = Color3.fromRGB(220, 100, 255)
+LGStroke.Transparency = 0.2
+LGStroke.Thickness = 2.5
+LGStroke.Parent = LoadingGui
+
+local LGLoadingGradient = Instance.new("UIGradient")
+LGLoadingGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 25, 150)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(15, 6, 28)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 2, 10))
+}
+LGLoadingGradient.Rotation = 45
+LGLoadingGradient.Parent = LoadingGui
+
+local LTitle = Instance.new("TextLabel")
+LTitle.Size = UDim2.new(1, 0, 0, 45)
+LTitle.Position = UDim2.new(0, 0, 0, 25)
+LTitle.BackgroundTransparency = 1
+LTitle.Text = "⚡ VOIDHUB SUPREME ⚡"
+LTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+LTitle.TextSize = 18
+LTitle.Font = Enum.Font.GothamBold
+LTitle.ZIndex = 51
+LTitle.Parent = LoadingGui
+
+local LSub = Instance.new("TextLabel")
+LSub.Size = UDim2.new(1, 0, 0, 25)
+LSub.Position = UDim2.new(0, 0, 0, 65)
+LSub.BackgroundTransparency = 1
+LSub.Text = "Initializing Secure Core System [KIO]..."
+LSub.TextColor3 = Color3.fromRGB(200, 150, 255)
+LSub.TextSize = 11
+LSub.Font = Enum.Font.GothamMedium
+LSub.ZIndex = 51
+LSub.Parent = LoadingGui
+
+local BarBg = Instance.new("Frame")
+BarBg.Size = UDim2.new(0, 340, 0, 10)
+BarBg.Position = UDim2.new(0.5, -170, 0, 120)
+BarBg.BackgroundColor3 = Color3.fromRGB(25, 10, 45)
+BarBg.ZIndex = 51
+BarBg.Parent = LoadingGui
+
+local BBHCorner = Instance.new("UICorner")
+BBHCorner.CornerRadius = UDim.new(1, 0)
+BBHCorner.Parent = BarBg
+
+local BarFill = Instance.new("Frame")
+BarFill.Size = UDim2.new(0, 0, 1, 0)
+BarFill.BackgroundColor3 = Color3.fromRGB(210, 80, 255)
+BarFill.ZIndex = 52
+BarFill.Parent = BarBg
+
+local BFHCorner = Instance.new("UICorner")
+BFHCorner.CornerRadius = UDim.new(1, 0)
+BFHCorner.Parent = BarFill
+
+local BarGlow = Instance.new("UIStroke")
+BarGlow.Color = Color3.fromRGB(255, 255, 255)
+BarGlow.Transparency = 0.4
+BarGlow.Parent = BarFill
+
+local PercentText = Instance.new("TextLabel")
+PercentText.Size = UDim2.new(1, 0, 0, 30)
+PercentText.Position = UDim2.new(0, 0, 0, 145)
+PercentText.BackgroundTransparency = 1
+PercentText.Text = "Loading Assets: 0%"
+PercentText.TextColor3 = Color3.fromRGB(240, 210, 255)
+PercentText.TextSize = 11
+PercentText.Font = Enum.Font.GothamBold
+PercentText.ZIndex = 51
+PercentText.Parent = LoadingGui
+
+-- FLOATING OPEN BUTTON (Tombol Pill Keren)
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Name = "OpenButton"
-OpenBtn.Size = UDim2.new(0, 75, 0, 40)
-OpenBtn.Position = UDim2.new(0.08, 0, 0.22, 0)
-OpenBtn.BackgroundColor3 = Color3.fromRGB(12, 5, 22)
-OpenBtn.BackgroundTransparency = 0.1
-OpenBtn.Text = "VOID v6"
-OpenBtn.TextColor3 = Color3.fromRGB(245, 190, 255)
+OpenBtn.Size = UDim2.new(0, 95, 0, 42)
+OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 6, 26)
+OpenBtn.BackgroundTransparency = 0.15
+OpenBtn.Text = "💎 VOID v7"
+OpenBtn.TextColor3 = Color3.fromRGB(245, 180, 255)
 OpenBtn.TextSize = 13
 OpenBtn.Font = Enum.Font.GothamBold
 OpenBtn.Active = true
@@ -87,121 +174,62 @@ OpenBtn.Visible = false
 OpenBtn.Parent = VoidHubUI
 
 local OpenCorner = Instance.new("UICorner")
-OpenCorner.CornerRadius = UDim.new(0, 12)
+OpenCorner.CornerRadius = UDim.new(1, 0)
 OpenCorner.Parent = OpenBtn
 
 local OpenGlow = Instance.new("UIStroke")
-OpenGlow.Color = Color3.fromRGB(210, 120, 255)
+OpenGlow.Color = Color3.fromRGB(220, 110, 255)
 OpenGlow.Transparency = 0.2
-OpenGlow.Thickness = 2
+OpenGlow.Thickness = 2.5
 OpenGlow.Parent = OpenBtn
 
 MakeDraggable(OpenBtn, OpenBtn)
 
--- ANNOUNCEMENT BOARD POPUP (Papan Pengumuman)
-local AnnounceFrame = Instance.new("Frame")
-AnnounceFrame.Size = UDim2.new(0, 320, 0, 180)
-AnnounceFrame.Position = UDim2.new(0.5, -160, 0.5, -90)
-AnnounceFrame.BackgroundColor3 = Color3.fromRGB(12, 5, 22)
-AnnounceFrame.BackgroundTransparency = 0.05
-AnnounceFrame.ZIndex = 10
-AnnounceFrame.Parent = VoidHubUI
-
-local AnnounceCorner = Instance.new("UICorner")
-AnnounceCorner.CornerRadius = UDim.new(0, 16)
-AnnounceCorner.Parent = AnnounceFrame
-
-local AnnounceStroke = Instance.new("UIStroke")
-AnnounceStroke.Color = Color3.fromRGB(230, 140, 255)
-AnnounceStroke.Thickness = 2
-AnnounceStroke.Parent = AnnounceFrame
-
-local AnnounceTitle = Instance.new("TextLabel")
-AnnounceTitle.Size = UDim2.new(1, 0, 0, 40)
-AnnounceTitle.BackgroundTransparency = 1
-AnnounceTitle.Text = "📢 PENGUMUMAN RESMI [KIO]"
-AnnounceTitle.TextColor3 = Color3.fromRGB(255, 220, 140)
-AnnounceTitle.TextSize = 13
-AnnounceTitle.Font = Enum.Font.GothamBold
-AnnounceTitle.ZIndex = 11
-AnnounceTitle.Parent = AnnounceFrame
-
-local AnnounceDesc = Instance.new("TextLabel")
-AnnounceDesc.Size = UDim2.new(1, -30, 0, 80)
-AnnounceDesc.Position = UDim2.new(0, 15, 0, 40)
-AnnounceDesc.BackgroundTransparency = 1
-AnnounceDesc.Text = "Selamat datang di VoidHub Supreme v6.0!\nSemua bug ESP, Auto Steal (sampai titik ujung map), dan Treadmill telah diperbaiki total secara presisi. Nikmati performa maksimal!"
-AnnounceDesc.TextColor3 = Color3.fromRGB(210, 190, 240)
-AnnounceDesc.TextSize = 11
-AnnounceDesc.Font = Enum.Font.GothamMedium
-AnnounceDesc.TextWrapped = true
-AnnounceDesc.ZIndex = 11
-AnnounceDesc.Parent = AnnounceFrame
-
-local AnnounceBtn = Instance.new("TextButton")
-AnnounceBtn.Size = UDim2.new(0, 120, 0, 32)
-AnnounceBtn.Position = UDim2.new(0.5, -60, 1, -42)
-AnnounceBtn.BackgroundColor3 = Color3.fromRGB(140, 60, 240)
-AnnounceBtn.Text = "MENGGERTI"
-AnnounceBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AnnounceBtn.TextSize = 11
-AnnounceBtn.Font = Enum.Font.GothamBold
-AnnounceBtn.ZIndex = 11
-AnnounceBtn.Parent = AnnounceFrame
-
-local ABPCorner = Instance.new("UICorner")
-ABPCorner.CornerRadius = UDim.new(0, 10)
-ABPCorner.Parent = AnnounceBtn
-
--- MAIN WINDOW
-local TargetSize = UDim2.new(0, 560, 0, 360)
+-- ==========================================
+-- 2. MAIN WINDOW (Super Mewah & Apple Glass)
+-- ==========================================
+local TargetSize = UDim2.new(0, 580, 0, 380)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(0.5, -280, 0.5, -180)
-MainFrame.BackgroundColor3 = Color3.fromRGB(8, 3, 14)
-MainFrame.BackgroundTransparency = 0.04
+MainFrame.Position = UDim2.new(0.5, -290, 0.5, -190)
+MainFrame.BackgroundColor3 = Color3.fromRGB(8, 2, 14)
+MainFrame.BackgroundTransparency = 0.05
 MainFrame.ClipsDescendants = true
 MainFrame.Active = true
 MainFrame.Visible = false
 MainFrame.Parent = VoidHubUI
 
-AnnounceBtn.MouseButton1Click:Connect(function()
-    AnnounceFrame:Destroy()
-    MainFrame.Visible = true
-    TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
-end)
-
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 20)
+MainCorner.CornerRadius = UDim.new(0, 24)
 MainCorner.Parent = MainFrame
 
 local GlassGradient = Instance.new("UIGradient")
 GlassGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(65, 20, 110)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(12, 4, 22)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 2, 10))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(75, 15, 125)),
+    ColorSequenceKeypoint.new(0.4, Color3.fromRGB(14, 4, 25)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(4, 1, 8))
 }
-GlassGradient.Rotation = 135
+GlassGradient.Rotation = 140
 GlassGradient.Parent = MainFrame
 
 local GlassStroke = Instance.new("UIStroke")
-GlassStroke.Color = Color3.fromRGB(210, 130, 255)
-GlassStroke.Transparency = 0.25
-GlassStroke.Thickness = 2
+GlassStroke.Color = Color3.fromRGB(230, 120, 255)
+GlassStroke.Transparency = 0.2
+GlassStroke.Thickness = 2.2
 GlassStroke.Parent = MainFrame
 
 -- TOPBAR
 local Topbar = Instance.new("Frame")
-Topbar.Size = UDim2.new(1, 0, 0, 50)
+Topbar.Size = UDim2.new(1, 0, 0, 55)
 Topbar.BackgroundTransparency = 1
 Topbar.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 320, 1, 0)
-Title.Position = UDim2.new(0, 20, 0, 0)
+Title.Size = UDim2.new(0, 360, 1, 0)
+Title.Position = UDim2.new(0, 22, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "VoidHub <font color=\"#C080FF\">Supreme v6.0 [KIO]</font>"
+Title.Text = "💎 VoidHub <font color=\"#D880FF\">Supreme v7.0 [KIO]</font>"
 Title.RichText = true
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 15
@@ -212,12 +240,12 @@ Title.Parent = Topbar
 MakeDraggable(Topbar, MainFrame)
 
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -42, 0, 10)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 15, 65)
-CloseBtn.BackgroundTransparency = 0.25
+CloseBtn.Size = UDim2.new(0, 32, 0, 32)
+CloseBtn.Position = UDim2.new(1, -45, 0, 12)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(45, 12, 75)
+CloseBtn.BackgroundTransparency = 0.2
 CloseBtn.Text = "✕"
-CloseBtn.TextColor3 = Color3.fromRGB(240, 200, 255)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 200, 255)
 CloseBtn.TextSize = 13
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Parent = Topbar
@@ -235,10 +263,30 @@ CloseBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- SIDEBAR
+-- ANIMATE LOADING SEQUENCE
+task.spawn(function()
+    for i = 1, 100 do
+        BarFill.Size = UDim2.new(i/100, 0, 1, 0)
+        PercentText.Text = "Loading Assets: " .. i .. "%"
+        task.wait(0.012)
+    end
+    task.wait(0.2)
+    TweenService:Create(LoadingGui, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {BackgroundTransparency = 1, Size = UDim2.new(0, 0, 0, 0)}):Play()
+    for _, ch in pairs(LoadingGui:GetChildren()) do
+        if ch:IsA("GuiObject") then
+            TweenService:Create(ch, TweenInfo.new(0.3), {TextTransparency = 1, BackgroundTransparency = 1}):Play()
+        end
+    end
+    task.wait(0.4)
+    LoadingGui:Destroy()
+    MainFrame.Visible = true
+    TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
+end)
+
+-- SIDEBAR MENU
 local Sidebar = Instance.new("ScrollingFrame")
-Sidebar.Size = UDim2.new(0, 145, 1, -62)
-Sidebar.Position = UDim2.new(0, 12, 0, 52)
+Sidebar.Size = UDim2.new(0, 155, 1, -70)
+Sidebar.Position = UDim2.new(0, 14, 0, 60)
 Sidebar.BackgroundTransparency = 1
 Sidebar.BorderSizePixel = 0
 Sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -253,14 +301,14 @@ SBLayout.Parent = Sidebar
 
 -- CONTENT AREA
 local ContentArea = Instance.new("Frame")
-ContentArea.Size = UDim2.new(1, -173, 1, -62)
-ContentArea.Position = UDim2.new(0, 163, 0, 52)
-ContentArea.BackgroundColor3 = Color3.fromRGB(12, 6, 22)
-ContentArea.BackgroundTransparency = 0.4
+ContentArea.Size = UDim2.new(1, -185, 1, -70)
+ContentArea.Position = UDim2.new(0, 175, 0, 60)
+ContentArea.BackgroundColor3 = Color3.fromRGB(12, 5, 22)
+ContentArea.BackgroundTransparency = 0.35
 ContentArea.Parent = MainFrame
 
 local CACorner = Instance.new("UICorner")
-CACorner.CornerRadius = UDim.new(0, 16)
+CACorner.CornerRadius = UDim.new(0, 18)
 CACorner.Parent = ContentArea
 
 local CAStroke = Instance.new("UIStroke")
@@ -282,7 +330,7 @@ local function CreatePage(name)
     page.CanvasSize = UDim2.new(0, 0, 0, 0)
     page.AutomaticCanvasSize = Enum.AutomaticSize.Y
     page.ScrollBarThickness = 3
-    page.ScrollBarImageColor3 = Color3.fromRGB(190, 100, 255)
+    page.ScrollBarImageColor3 = Color3.fromRGB(200, 100, 255)
     page.Visible = false
     page.Parent = PagesFolder
     
@@ -293,20 +341,20 @@ local function CreatePage(name)
     return page
 end
 
+local AnnounceTabPage = CreatePage("Announce")
 local MainTabPage = CreatePage("Main")
-local AutoTabPage = CreatePage("AutoSteal")
 local WalkTabPage = CreatePage("Walk")
 local MiscTabPage = CreatePage("Misc")
 local ConfigTabPage = CreatePage("Config")
-MainTabPage.Visible = true
+AnnounceTabPage.Visible = true
 
-local function CreateTabButton(text, pageTarget, defaultActive)
+local function CreateTabButton(iconSymbol, text, pageTarget, defaultActive)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 38)
-    btn.BackgroundColor3 = defaultActive and Color3.fromRGB(140, 55, 240) or Color3.fromRGB(20, 10, 32)
+    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.BackgroundColor3 = defaultActive and Color3.fromRGB(150, 60, 250) or Color3.fromRGB(22, 10, 36)
     btn.BackgroundTransparency = defaultActive and 0.05 or 0.45
-    btn.Text = "   " .. text
-    btn.TextColor3 = defaultActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 150, 220)
+    btn.Text = "   " .. iconSymbol .. "  " .. text
+    btn.TextColor3 = defaultActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 160, 230)
     btn.TextSize = 12
     btn.Font = Enum.Font.GothamBold
     btn.TextXAlignment = Enum.TextXAlignment.Left
@@ -317,63 +365,63 @@ local function CreateTabButton(text, pageTarget, defaultActive)
     corner.Parent = btn
 
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(210, 140, 255)
-    stroke.Transparency = defaultActive and 0.3 or 0.85
+    stroke.Color = Color3.fromRGB(220, 130, 255)
+    stroke.Transparency = defaultActive and 0.25 or 0.85
     stroke.Parent = btn
     
     btn.MouseButton1Click:Connect(function()
         for _, p in pairs(PagesFolder:GetChildren()) do p.Visible = false end
         for _, b in pairs(Sidebar:GetChildren()) do 
             if b:IsA("TextButton") then
-                TweenService:Create(b, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(20, 10, 32), BackgroundTransparency = 0.45}):Play()
-                b.TextColor3 = Color3.fromRGB(180, 150, 220)
+                TweenService:Create(b, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(22, 10, 36), BackgroundTransparency = 0.45}):Play()
+                b.TextColor3 = Color3.fromRGB(190, 160, 230)
                 if b:FindFirstChild("UIStroke") then b.UIStroke.Transparency = 0.85 end
             end
         end
         pageTarget.Visible = true
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(140, 55, 240), BackgroundTransparency = 0.05}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(150, 60, 250), BackgroundTransparency = 0.05}):Play()
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        if btn:FindFirstChild("UIStroke") then btn.UIStroke.Transparency = 0.3 end
+        if btn:FindFirstChild("UIStroke") then btn.UIStroke.Transparency = 0.25 end
     end)
 end
 
-CreateTabButton("Steal an Egg", MainTabPage, true)
-CreateTabButton("Auto Steal", AutoTabPage, false)
-CreateTabButton("Walk", WalkTabPage, false)
-CreateTabButton("Misc", MiscTabPage, false)
-CreateTabButton("Config", ConfigTabPage, false)
+CreateTabButton("📢", "Announcement", AnnounceTabPage, true)
+CreateTabButton("🥚", "Visual & ESP", MainTabPage, false)
+CreateTabButton("⚡", "Walk & Speed", WalkTabPage, false)
+CreateTabButton("⚙️", "Misc Tools", MiscTabPage, false)
+CreateTabButton("💾", "Settings", ConfigTabPage, false)
 
 local function CreateToggle(parent, titleText, defaultState, callback)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 46)
+    frame.Size = UDim2.new(1, 0, 0, 48)
     frame.BackgroundColor3 = Color3.fromRGB(22, 10, 36)
-    frame.BackgroundTransparency = 0.3
+    frame.BackgroundTransparency = 0.25
     frame.Parent = parent
     
     local fCorner = Instance.new("UICorner")
-    fCorner.CornerRadius = UDim.new(0, 12)
+    fCorner.CornerRadius = UDim.new(0, 14)
     fCorner.Parent = frame
 
     local fStroke = Instance.new("UIStroke")
     fStroke.Color = Color3.fromRGB(255, 255, 255)
-    fStroke.Transparency = 0.88
+    fStroke.Transparency = 0.85
     fStroke.Parent = frame
     
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -65, 1, 0)
-    label.Position = UDim2.new(0, 14, 0, 0)
+    label.Size = UDim2.new(1, -70, 1, 0)
+    label.Position = UDim2.new(0, 16, 0, 0)
     label.BackgroundTransparency = 1
     label.Text = titleText
-    label.TextColor3 = Color3.fromRGB(245, 235, 255)
+    label.TextColor3 = Color3.fromRGB(250, 240, 255)
     label.TextSize = 12
     label.Font = Enum.Font.GothamBold
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
     
     local switch = Instance.new("TextButton")
-    switch.Size = UDim2.new(0, 44, 0, 24)
-    switch.Position = UDim2.new(1, -52, 0.5, -12)
-    switch.BackgroundColor3 = defaultState and Color3.fromRGB(150, 70, 250) or Color3.fromRGB(35, 18, 55)
+    switch.Size = UDim2.new(0, 48, 0, 26)
+    switch.Position = UDim2.new(1, -56, 0.5, -13)
+    switch.BackgroundColor3 = defaultState and Color3.fromRGB(160, 70, 255) or Color3.fromRGB(35, 18, 55)
     switch.Text = ""
     switch.Parent = frame
     
@@ -382,8 +430,8 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     sCorner.Parent = switch
     
     local circle = Instance.new("Frame")
-    circle.Size = UDim2.new(0, 20, 0, 20)
-    circle.Position = defaultState and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+    circle.Size = UDim2.new(0, 22, 0, 22)
+    circle.Position = defaultState and UDim2.new(1, -24, 0.5, -11) or UDim2.new(0, 2, 0.5, -11)
     circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     circle.Parent = switch
     
@@ -395,297 +443,164 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     switch.MouseButton1Click:Connect(function()
         active = not active
         if active then
-            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(150, 70, 250)}):Play()
-            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -22, 0.5, -10)}):Play()
+            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(160, 70, 255)}):Play()
+            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -24, 0.5, -11)}):Play()
         else
             TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 18, 55)}):Play()
-            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -10)}):Play()
+            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -11)}):Play()
         end
         callback(active)
     end)
 end
 
-local function CreateButton(parent, titleText, callback)
+local function CreateButton(parent, iconSymbol, titleText, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 42)
+    btn.Size = UDim2.new(1, 0, 0, 44)
     btn.BackgroundColor3 = Color3.fromRGB(35, 15, 60)
     btn.BackgroundTransparency = 0.2
-    btn.Text = titleText
-    btn.TextColor3 = Color3.fromRGB(250, 235, 255)
+    btn.Text = "   " .. iconSymbol .. "  " .. titleText
+    btn.TextColor3 = Color3.fromRGB(255, 240, 255)
     btn.TextSize = 12
     btn.Font = Enum.Font.GothamBold
+    btn.TextXAlignment = Enum.TextXAlignment.Left
     btn.Parent = parent
     
     local bCorner = Instance.new("UICorner")
-    bCorner.CornerRadius = UDim.new(0, 12)
+    bCorner.CornerRadius = UDim.new(0, 14)
     bCorner.Parent = btn
 
     local bStroke = Instance.new("UIStroke")
-    bStroke.Color = Color3.fromRGB(200, 120, 255)
-    bStroke.Transparency = 0.4
+    bStroke.Color = Color3.fromRGB(210, 120, 255)
+    bStroke.Transparency = 0.35
     bStroke.Parent = btn
     
     btn.MouseButton1Click:Connect(callback)
 end
 
 -- ==========================================
--- TAB 1: EGG TRACKER & ESP (FIXED FILTER)
+-- 3. KATEGORI PENGUMUMAN (Super Mewah)
 -- ==========================================
-local EggTrackerContainer = Instance.new("ScrollingFrame")
-EggTrackerContainer.Size = UDim2.new(1, 0, 0, 200)
-EggTrackerContainer.BackgroundColor3 = Color3.fromRGB(18, 8, 30)
-EggTrackerContainer.BackgroundTransparency = 0.45
-EggTrackerContainer.BorderSizePixel = 0
-EggTrackerContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-EggTrackerContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
-EggTrackerContainer.ScrollBarThickness = 3
-EggTrackerContainer.Parent = MainTabPage
+local AnnounceCard = Instance.new("Frame")
+AnnounceCard.Size = UDim2.new(1, 0, 0, 230)
+AnnounceCard.BackgroundColor3 = Color3.fromRGB(22, 10, 38)
+AnnounceCard.BackgroundTransparency = 0.2
+AnnounceCard.Parent = AnnounceTabPage
 
-local ETCCorner = Instance.new("UICorner")
-ETCCorner.CornerRadius = UDim.new(0, 12)
-ETCCorner.Parent = EggTrackerContainer
+local ACCorner = Instance.new("UICorner")
+ACCorner.CornerRadius = UDim.new(0, 16)
+ACCorner.Parent = AnnounceCard
 
-local ETCLayout = Instance.new("UIListLayout")
-ETCLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ETCLayout.Padding = UDim.new(0, 5)
-ETCLayout.Parent = EggTrackerContainer
+local ACStroke = Instance.new("UIStroke")
+ACStroke.Color = Color3.fromRGB(230, 140, 255)
+ACStroke.Transparency = 0.3
+ACStroke.Thickness = 1.5
+ACStroke.Parent = AnnounceCard
 
-local function IsValidEgg(name, obj)
+local ACTitle = Instance.new("TextLabel")
+ACTitle.Size = UDim2.new(1, -24, 0, 40)
+ACTitle.Position = UDim2.new(0, 12, 0, 8)
+ACTitle.BackgroundTransparency = 1
+ACTitle.Text = "🛡️ PENGUMUMAN RESMI [KIO]"
+ACTitle.TextColor3 = Color3.fromRGB(255, 210, 130)
+ACTitle.TextSize = 13
+ACTitle.Font = Enum.Font.GothamBold
+ACTitle.TextXAlignment = Enum.TextXAlignment.Left
+ACTitle.Parent = AnnounceCard
+
+local ACDesc = Instance.new("TextLabel")
+ACDesc.Size = UDim2.new(1, -24, 0, 130)
+ACDesc.Position = UDim2.new(0, 12, 0, 48)
+ACDesc.BackgroundTransparency = 1
+ACDesc.Text = "Selamat datang di VoidHub Supreme v7.0!\n\n• Fitur Auto Steal & Prediksi Telur telah dihapus total.\n• Penambahan fitur Player ESP baru untuk memindai pemain lain.\n• UI dirombak total menjadi super mewah bergaya Apple Glassmorphic dengan simbol ikonik.\n• Seluruh tombol kini menggunakan desain melengkung elegan."
+ACDesc.TextColor3 = Color3.fromRGB(220, 200, 245)
+ACDesc.TextSize = 11
+ACDesc.Font = Enum.Font.GothamMedium
+ACDesc.TextWrapped = true
+ACDesc.TextXAlignment = Enum.TextXAlignment.Left
+ACDesc.TextYAlignment = Enum.TextYAlignment.Top
+ACDesc.Parent = AnnounceCard
+
+
+-- ==========================================
+-- 4. VISUAL & ESP TAB (Egg ESP + Player ESP)
+-- ==========================================
+local function IsValidEgg(name)
     local l = name:lower()
-    -- Filter ketat mutlak untuk mencegah salah deteksi mesin fusi atau item lain
-    if l:find("fusion") or l:find("machine") or l:find("shop") or l:find("treadmill") or l:find("gym") or l:find("leaderboard") then
-        return false
-    end
+    if l:find("fusion") or l:find("machine") or l:find("shop") or l:find("treadmill") or l:find("gym") then return false end
     return l:find("egg") or l:find("telur")
 end
 
-local function RefreshEggTracker()
-    for _, child in pairs(EggTrackerContainer:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
-    end
-    
-    local eggList = {}
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if IsValidEgg(obj.Name, obj) and not obj.Name:lower():find("player") then
-            local targetPart = obj:IsA("BasePart") and obj or (obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")))
-            if targetPart then
-                table.insert(eggList, {Object = obj, Part = targetPart, Name = obj.Name})
-            end
-        end
-    end
-    
-    for _, item in ipairs(eggList) do
-        if _G.EggESPUIActive then
-            if not item.Part:FindFirstChild("VoidEggHighlight") then
-                local hl = Instance.new("Highlight")
-                hl.Name = "VoidEggHighlight"
-                hl.FillColor = Color3.fromRGB(180, 80, 255)
-                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                hl.FillTransparency = 0.3
-                hl.Parent = item.Part
-            end
-        else
-            if item.Part:FindFirstChild("VoidEggHighlight") then
-                item.Part.VoidEggHighlight:Destroy()
-            end
-        end
-        
-        local row = Instance.new("Frame")
-        row.Size = UDim2.new(1, -6, 0, 34)
-        row.BackgroundColor3 = Color3.fromRGB(32, 14, 52)
-        row.BackgroundTransparency = 0.25
-        row.Parent = EggTrackerContainer
-        
-        local rCorner = Instance.new("UICorner")
-        rCorner.CornerRadius = UDim.new(0, 8)
-        rCorner.Parent = row
-        
-        local rLabel = Instance.new("TextLabel")
-        rLabel.Size = UDim2.new(1, -10, 1, 0)
-        rLabel.Position = UDim2.new(0, 10, 0, 0)
-        rLabel.BackgroundTransparency = 1
-        rLabel.TextColor3 = Color3.fromRGB(255, 220, 130)
-        rLabel.TextSize = 11
-        rLabel.Font = Enum.Font.GothamBold
-        rLabel.TextXAlignment = Enum.TextXAlignment.Left
-        rLabel.Text = "🥚 " .. item.Name
-        rLabel.Parent = row
-    end
-end
-
-CreateToggle(MainTabPage, "Egg ESP & Sorted UI Tracker", SavedConfig.EggESPUI, function(state)
-    _G.EggESPUIActive = state
-    SavedConfig.EggESPUI = state
+CreateToggle(MainTabPage, "🥚 Egg ESP & Sorted Tracker", SavedConfig.EggESPActive, function(state)
+    _G.EggESPActive = state
+    SavedConfig.EggESPActive = state
     task.spawn(function()
-        while _G.EggESPUIActive do
-            pcall(RefreshEggTracker)
-            task.wait(1.5)
-        end
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and obj:FindFirstChild("VoidEggHighlight") then
-                obj.VoidEggHighlight:Destroy()
-            end
-        end
-    end)
-end)
-
-CreateButton(MainTabPage, "🔄 Refresh Egg List Now", function()
-    pcall(RefreshEggTracker)
-end)
-
-
--- ==========================================
--- TAB 2: AUTO STEAL & DROPDOWN MENU & WORKING TREADMILL
--- ==========================================
-
-local DropdownLabel = Instance.new("TextLabel")
-DropdownLabel.Size = UDim2.new(1, 0, 0, 22)
-DropdownLabel.BackgroundTransparency = 1
-DropdownLabel.Text = "Select Target Egg Category:"
-DropdownLabel.TextColor3 = Color3.fromRGB(220, 180, 255)
-DropdownLabel.TextSize = 12
-DropdownLabel.Font = Enum.Font.GothamBold
-DropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
-DropdownLabel.Parent = AutoTabPage
-
--- Dropdown Frame Container
-local DropdownContainer = Instance.new("Frame")
-DropdownContainer.Size = UDim2.new(1, 0, 0, 40)
-DropdownContainer.BackgroundColor3 = Color3.fromRGB(25, 12, 42)
-DropdownContainer.BackgroundTransparency = 0.2
-DropdownContainer.Parent = AutoTabPage
-
-local DCModelCorner = Instance.new("UICorner")
-DCModelCorner.CornerRadius = UDim.new(0, 10)
-DCModelCorner.Parent = DropdownContainer
-
-local DropdownButton = Instance.new("TextButton")
-DropdownButton.Size = UDim2.new(1, 0, 1, 0)
-DropdownButton.BackgroundTransparency = 1
-DropdownButton.Text = "  [ " .. SavedConfig.SelectedEggTarget .. " ]  ▼"
-DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-DropdownButton.TextSize = 12
-DropdownButton.Font = Enum.Font.GothamBold
-DropdownButton.TextXAlignment = Enum.TextXAlignment.Left
-DropdownButton.Parent = DropdownContainer
-
-local DropdownList = Instance.new("ScrollingFrame")
-DropdownList.Size = UDim2.new(1, 0, 0, 110)
-DropdownList.Position = UDim2.new(0, 0, 1, 4)
-DropdownList.BackgroundColor3 = Color3.fromRGB(16, 7, 28)
-DropdownList.BackgroundTransparency = 0.05
-DropdownList.BorderSizePixel = 0
-DropdownList.Visible = false
-DropdownList.ZIndex = 5
-DropdownList.CanvasSize = UDim2.new(0, 0, 0, 140)
-DropdownList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-DropdownList.Parent = DropdownContainer
-
-local DLCorner = Instance.new("UICorner")
-DLCorner.CornerRadius = UDim.new(0, 10)
-DLCorner.Parent = DropdownList
-
-local DLLayout = Instance.new("UIListLayout")
-DLLayout.SortOrder = Enum.SortOrder.LayoutOrder
-DLLayout.Padding = UDim.new(0, 2)
-DLLayout.Parent = DropdownList
-
-local options = {"All Eggs", "Rare / Epic", "Legendary / Mythic", "Divine"}
-for _, opt in ipairs(options) do
-    local optBtn = Instance.new("TextButton")
-    optBtn.Size = UDim2.new(1, 0, 0, 32)
-    optBtn.BackgroundColor3 = Color3.fromRGB(30, 12, 50)
-    optBtn.BackgroundTransparency = 0.3
-    optBtn.Text = "   " .. opt
-    optBtn.TextColor3 = Color3.fromRGB(230, 200, 255)
-    optBtn.TextSize = 11
-    optBtn.Font = Enum.Font.GothamMedium
-    optBtn.TextXAlignment = Enum.TextXAlignment.Left
-    optBtn.ZIndex = 6
-    optBtn.Parent = DropdownList
-    
-    optBtn.MouseButton1Click:Connect(function()
-        SavedConfig.SelectedEggTarget = opt
-        DropdownButton.Text = "  [ " .. opt .. " ]  ▼"
-        DropdownList.Visible = false
-    end)
-end
-
-DropdownButton.MouseButton1Click:Connect(function()
-    DropdownList.Visible = not DropdownList.Visible
-end)
-
-CreateToggle(AutoTabPage, "Auto Steal (Pathfinding to Edge/End)", SavedConfig.AutoStealActive, function(state)
-    _G.AutoStealActive = state
-    SavedConfig.AutoStealActive = state
-    
-    task.spawn(function()
-        while _G.AutoStealActive do
+        while _G.EggESPActive do
             pcall(function()
-                local targetFound = false
-                local targetPart = nil
-                
                 for _, obj in pairs(workspace:GetDescendants()) do
-                    if IsValidEgg(obj.Name, obj) then
+                    if IsValidEgg(obj.Name) then
                         local part = obj:IsA("BasePart") and obj or (obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")))
-                        if part then
-                            targetPart = part
-                            targetFound = true
-                            break
-                        end
-                    end
-                end
-                
-                local char = LocalPlayer.Character
-                local hum = char and char:FindFirstChildOfClass("Humanoid")
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                
-                if targetFound and targetPart and hum and hrp then
-                    -- Menggunakan Pathfinding agar lari sampai titik paling ujung map secara mulus
-                    local path = PathfindingService:CreatePath({
-                        AgentRadius = 2,
-                        AgentHeight = 5,
-                        AgentCanJump = true
-                    })
-                    path:ComputeAsync(hrp.Position, targetPart.Position)
-                    local waypoints = path:GetWaypoints()
-                    if #waypoints > 0 then
-                        for _, wp in ipairs(waypoints) do
-                            if not _G.AutoStealActive then break end
-                            hum:MoveTo(wp.Position)
-                            if wp.Action == Enum.PathWaypointAction.Jump then
-                                hum.Jump = true
-                            end
-                            hum.MoveToFinished:Wait(0.8)
-                        end
-                    else
-                        hum:MoveTo(targetPart.Position)
-                    end
-                elseif SavedConfig.AutoTreadmill and hum and hrp then
-                    local treadmill = workspace:FindFirstChild("Treadmill", true) or workspace:FindFirstChild("Gym", true) or workspace:FindFirstChild("Treadmil", true)
-                    if treadmill then
-                        local tPart = treadmill:IsA("BasePart") and treadmill or treadmill:FindFirstChildWhichIsA("BasePart")
-                        if tPart then
-                            hum:MoveTo(tPart.Position)
+                        if part and not part:FindFirstChild("VoidEggHL") then
+                            local hl = Instance.new("Highlight")
+                            hl.Name = "VoidEggHL"
+                            hl.FillColor = Color3.fromRGB(180, 80, 255)
+                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            hl.FillTransparency = 0.3
+                            hl.Parent = part
                         end
                     end
                 end
             end)
-            task.wait(0.3)
+            task.wait(2)
+        end
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj:FindFirstChild("VoidEggHL") then
+                obj.VoidEggHL:Destroy()
+            end
         end
     end)
 end)
 
-CreateToggle(AutoTabPage, "Auto Treadmill (If No Egg Found)", SavedConfig.AutoTreadmill, function(state)
-    SavedConfig.AutoTreadmill = state
+CreateToggle(MainTabPage, "👤 Player ESP (Box & Highlight)", SavedConfig.PlayerESPActive, function(state)
+    _G.PlayerESPActive = state
+    SavedConfig.PlayerESPActive = state
+    task.spawn(function()
+        while _G.PlayerESPActive do
+            pcall(function()
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character then
+                        local char = p.Character
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        if root and not root:FindFirstChild("VoidPlayerHL") then
+                            local hl = Instance.new("Highlight")
+                            hl.Name = "VoidPlayerHL"
+                            hl.FillColor = Color3.fromRGB(80, 200, 255)
+                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            hl.FillTransparency = 0.4
+                            hl.Parent = char
+                        end
+                    end
+                end
+            end)
+            task.wait(1.5)
+        end
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character then
+                local root = p.Character:FindFirstChild("HumanoidRootPart")
+                if root and root:FindFirstChild("VoidPlayerHL") then
+                    root.VoidPlayerHL:Destroy()
+                end
+            end
+        end
+    end)
 end)
 
 
 -- ==========================================
--- TAB 3: WALK TAB
+-- 5. WALK TAB
 -- ==========================================
-CreateToggle(WalkTabPage, "Custom WalkSpeed (24)", false, function(state)
+CreateToggle(WalkTabPage, "⚡ Custom WalkSpeed (24)", SavedConfig.WalkSpeedActive, function(state)
     _G.SpeedActive = state
+    SavedConfig.WalkSpeedActive = state
     task.spawn(function()
         while _G.SpeedActive do
             pcall(function()
@@ -703,35 +618,9 @@ end)
 
 
 -- ==========================================
--- TAB 4: MISC TAB (WITH EGG RESPAWN PREDICTOR)
+-- 6. MISC TAB
 -- ==========================================
-local PredictorLabel = Instance.new("TextLabel")
-PredictorLabel.Size = UDim2.new(1, 0, 0, 38)
-PredictorLabel.BackgroundColor3 = Color3.fromRGB(22, 10, 38)
-PredictorLabel.BackgroundTransparency = 0.25
-PredictorLabel.Text = "⏳ Prediksi Telur Selanjutnya: Menghitung..."
-PredictorLabel.TextColor3 = Color3.fromRGB(255, 210, 140)
-PredictorLabel.TextSize = 11
-PredictorLabel.Font = Enum.Font.GothamBold
-PredictorLabel.Parent = MiscTabPage
-
-local PLCorner = Instance.new("UICorner")
-PLCorner.CornerRadius = UDim.new(0, 10)
-PLCorner.Parent = PredictorLabel
-
-task.spawn(function()
-    local countdown = 45
-    while true do
-        pcall(function()
-            countdown = countdown - 1
-            if countdown < 0 then countdown = 45 end
-            PredictorLabel.Text = "⏳ Prediksi Respawn Telur: ~ " .. countdown .. " Detik Lagi"
-        end)
-        task.wait(1)
-    end
-end)
-
-CreateToggle(MiscTabPage, "Anti-AFK Safe", true, function(state)
+CreateToggle(MiscTabPage, "🛡️ Anti-AFK Safe Mode", true, function(state)
     _G.AntiAFKActive = state
     task.spawn(function()
         local lastMove = tick()
@@ -752,11 +641,11 @@ CreateToggle(MiscTabPage, "Anti-AFK Safe", true, function(state)
     end)
 end)
 
-CreateButton(MiscTabPage, "🔄 Rejoin Server", function()
+CreateButton(MiscTabPage, "🔄", "Rejoin Server", function()
     pcall(function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
 end)
 
-CreateButton(MiscTabPage, "🌐 Server Hop (Cari Server Sepi)", function()
+CreateButton(MiscTabPage, "🌐", "Server Hop (Cari Server Sepi)", function()
     pcall(function()
         local servers = {}
         local req = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
@@ -773,13 +662,13 @@ end)
 
 
 -- ==========================================
--- TAB 5: CONFIG TAB
+-- 7. CONFIG TAB
 -- ==========================================
-CreateButton(ConfigTabPage, "💾 Save Current Settings", function()
+CreateButton(ConfigTabPage, "💾", "Save Current Settings", function()
     SaveSettings()
 end)
 
-CreateButton(ConfigTabPage, "📂 Load Config Settings", function()
+CreateButton(ConfigTabPage, "📂", "Load Config Settings", function()
     LoadSettings()
 end)
 
@@ -807,8 +696,8 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if Resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local Delta = input.Position - StartInputPos
-        local NewX = math.max(480, StartSize.X.Offset + Delta.X)
-        local NewY = math.max(280, StartSize.Y.Offset + Delta.Y)
+        local NewX = math.max(500, StartSize.X.Offset + Delta.X)
+        local NewY = math.max(300, StartSize.Y.Offset + Delta.Y)
         MainFrame.Size = UDim2.new(0, NewX, 0, NewY)
     end
 end)
