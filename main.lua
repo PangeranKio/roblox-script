@@ -1,6 +1,6 @@
 -- [[ VOIDHUB SUPREME v13.0 - LUXURY EXECUTIVE EDITION ]] --
 -- UI/UX: Bento Obsidian Glassmorphism with Liquid Gold Accents
--- Features: Anti Double Re-Execute Guard, Instant Rejoin, Server Hop, Solo Server Scanner & Mechanics
+-- Features: Anti Double Re-Execute Guard, Instant Rejoin, Server Hop, Solo/1-Player Server List & Freeze Boss Mechanics
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -62,6 +62,7 @@ local State = {
     Spinbot = false, SpinSpeed = 30,
     
     InstantPrompt = false, AutoPrompt = false, ReachMod = false,
+    FreezeBossGuard = false, -- Fitur Freeze Penjaga Telur / Boss
     
     AntiVoid = false, AntiAFK = true, AutoClicker = false,
     AntiRagdoll = false, AutoRejoin = false,
@@ -532,7 +533,7 @@ local NoticeBody = Instance.new("TextLabel")
 NoticeBody.Size = UDim2.new(1, -24, 0, 50)
 NoticeBody.Position = UDim2.new(0, 12, 0, 30)
 NoticeBody.BackgroundTransparency = 1
-NoticeBody.Text = "Sistem Anti Double-Execution aktif! Fitur Server Hop & Rejoin telah ditambahkan ke menu utama Dashboard dan Server Finder."
+NoticeBody.Text = "Fitur Freeze Boss Guard (Penjaga Telur Diam) & Solo Server Scanner (1-Player Server List) telah berhasil diintegrasikan!"
 NoticeBody.TextColor3 = C_TEXT
 NoticeBody.TextSize = 10
 NoticeBody.Font = Enum.Font.Gotham
@@ -651,6 +652,48 @@ CreateToggle(MechanicsTabPage, "Auto Click Proximity Prompts", State.AutoPrompt,
     end)
 end)
 
+-- FITUR BARU: Freeze Boss Guard / Penjaga Telur Diam di Tempat
+CreateToggle(MechanicsTabPage, "Freeze Boss / Egg Guard (Diam Di Tempat)", State.FreezeBossGuard, function(a)
+    State.FreezeBossGuard = a
+    task.spawn(function()
+        while State.FreezeBossGuard do
+            pcall(function()
+                -- Memindai NPC/Boss/Penjaga di workspace
+                for _, model in pairs(workspace:GetDescendants()) do
+                    if model:IsA("Model") and not Players:GetPlayerFromCharacter(model) then
+                        local hum = model:FindFirstChildOfClass("Humanoid")
+                        local hrp = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart")
+                        if hum and hrp then
+                            -- Menahan pergerakan Boss/Penjaga
+                            hum.WalkSpeed = 0
+                            hrp.Velocity = Vector3.zero
+                            hrp.RotVelocity = Vector3.zero
+                            if not hrp.Anchored then
+                                hrp.Anchored = true
+                            end
+                        end
+                    end
+                end
+            end)
+            task.wait(0.2)
+        end
+
+        -- Pengembalian status (un-anchor) saat disatukan/dimatikan
+        pcall(function()
+            for _, model in pairs(workspace:GetDescendants()) do
+                if model:IsA("Model") and not Players:GetPlayerFromCharacter(model) then
+                    local hum = model:FindFirstChildOfClass("Humanoid")
+                    local hrp = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("PrimaryPart")
+                    if hum and hrp then
+                        hum.WalkSpeed = 16
+                        hrp.Anchored = false
+                    end
+                end
+            end
+        end)
+    end)
+end)
+
 -- ==========================================
 -- 4. UTILITY & AUTOMATION TAB
 -- ==========================================
@@ -739,7 +782,7 @@ CreateButton(ServerTabPage, "⚡ Rejoin Current Server", function() RejoinServer
 CreateButton(ServerTabPage, "🌐 Random Server Hop", function() ServerHop() end)
 
 local ServerListFrame = Instance.new("ScrollingFrame")
-ServerListFrame.Size = UDim2.new(1, -6, 1, -90)
+ServerListFrame.Size = UDim2.new(1, -6, 1, -125)
 ServerListFrame.BackgroundTransparency = 1
 ServerListFrame.ScrollBarThickness = 2
 ServerListFrame.ScrollBarImageColor3 = C_ACCENT
@@ -750,15 +793,16 @@ local ServerListLayout = Instance.new("UIListLayout", ServerListFrame)
 ServerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ServerListLayout.Padding = UDim.new(0, 6)
 
+-- PEMBARUAN: Pindai Server dengan Tepat 1 Player + Tombol Join
 local function ScanSoloServers()
     for _, child in pairs(ServerListFrame:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
+        if child:IsA("Frame") or child:IsA("TextLabel") then child:Destroy() end
     end
 
     local status = Instance.new("TextLabel")
     status.Size = UDim2.new(1, 0, 0, 25)
     status.BackgroundTransparency = 1
-    status.Text = "Scanning active 1-player servers..."
+    status.Text = "Scanning public servers with exactly 1 player..."
     status.TextColor3 = C_SUBTEXT
     status.TextSize = 11
     status.Font = Enum.Font.Gotham
@@ -770,20 +814,22 @@ local function ScanSoloServers()
             local data = HttpService:JSONDecode(raw)
             status:Destroy()
 
+            local count = 0
             for _, s in pairs(data.data) do
                 if s.playing == 1 and s.id ~= game.JobId then
+                    count = count + 1
                     local card = Instance.new("Frame")
-                    card.Size = UDim2.new(1, 0, 0, 40)
+                    card.Size = UDim2.new(1, 0, 0, 42)
                     card.BackgroundColor3 = C_ITEM
                     card.ZIndex = 14
                     card.Parent = ServerListFrame
                     Instance.new("UICorner", card).CornerRadius = UDim.new(0, 7)
 
                     local info = Instance.new("TextLabel")
-                    info.Size = UDim2.new(1, -100, 1, 0)
+                    info.Size = UDim2.new(1, -110, 1, 0)
                     info.Position = UDim2.new(0, 10, 0, 0)
                     info.BackgroundTransparency = 1
-                    info.Text = "Server ID: " .. string.sub(s.id, 1, 14) .. "... [1 Player]"
+                    info.Text = "Server: " .. string.sub(s.id, 1, 12) .. "... [" .. s.playing .. "/" .. s.maxPlayers .. " Player]"
                     info.TextColor3 = C_TEXT
                     info.TextSize = 11
                     info.Font = Enum.Font.GothamMedium
@@ -791,28 +837,39 @@ local function ScanSoloServers()
                     info.ZIndex = 15
                     info.Parent = card
 
-                    local tp = Instance.new("TextButton")
-                    tp.Size = UDim2.new(0, 75, 0, 24)
-                    tp.Position = UDim2.new(1, -82, 0.5, -12)
-                    tp.BackgroundColor3 = C_ACCENT
-                    tp.Text = "TP SOLO"
-                    tp.TextColor3 = C_BG
-                    tp.TextSize = 10
-                    tp.Font = Enum.Font.GothamBold
-                    tp.ZIndex = 15
-                    tp.Parent = card
-                    Instance.new("UICorner", tp).CornerRadius = UDim.new(0, 5)
+                    local joinBtn = Instance.new("TextButton")
+                    joinBtn.Size = UDim2.new(0, 85, 0, 26)
+                    joinBtn.Position = UDim2.new(1, -92, 0.5, -13)
+                    joinBtn.BackgroundColor3 = C_ACCENT
+                    joinBtn.Text = "JOIN SERVER"
+                    joinBtn.TextColor3 = C_BG
+                    joinBtn.TextSize = 9
+                    joinBtn.Font = Enum.Font.GothamBold
+                    joinBtn.ZIndex = 15
+                    joinBtn.Parent = card
+                    Instance.new("UICorner", joinBtn).CornerRadius = UDim.new(0, 5)
 
-                    tp.MouseButton1Click:Connect(function()
+                    joinBtn.MouseButton1Click:Connect(function()
                         TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
                     end)
                 end
+            end
+
+            if count == 0 then
+                local noServer = Instance.new("TextLabel")
+                noServer.Size = UDim2.new(1, 0, 0, 25)
+                noServer.BackgroundTransparency = 1
+                noServer.Text = "Tidak ditemukan server publik dengan 1 player. Coba lagi!"
+                noServer.TextColor3 = C_SUBTEXT
+                noServer.TextSize = 11
+                noServer.Font = Enum.Font.Gotham
+                noServer.Parent = ServerListFrame
             end
         end)
     end)
 end
 
-CreateButton(ServerTabPage, "🔍 Scan 1-Player Solo Servers", function() ScanSoloServers() end)
+CreateButton(ServerTabPage, "🔍 Scan 1-Player Servers Only", function() ScanSoloServers() end)
 
 -- ==========================================
 -- 8. PLAYER LIST TAB
