@@ -26,7 +26,7 @@ if not VoidHub.Parent then
     VoidHub.Parent = LocalPlayer:WaitForChild("PlayerGui")
 end
 
--- Main Window (Diatur agar Pas & Responsif di Layar HP)
+-- Main Window (Ukuran Responsif Mobile)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 420, 0, 250)
@@ -64,7 +64,7 @@ TopBar.Size = UDim2.new(1, 0, 0, 36)
 TopBar.BackgroundTransparency = 1
 TopBar.Parent = MainFrame
 
--- Judul (Tanpa Tag RichText Bug, Dipisah Jadi 2 Label)
+-- Judul Utama
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Size = UDim2.new(0, 80, 1, 0)
@@ -77,6 +77,7 @@ Title.TextSize = 15
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
+-- Subtitle Credit Pembuat
 local SubTitle = Instance.new("TextLabel")
 SubTitle.Name = "SubTitle"
 SubTitle.Size = UDim2.new(0, 80, 1, 0)
@@ -108,7 +109,7 @@ PillStroke.Transparency = 0.7
 PillStroke.Thickness = 1
 PillStroke.Parent = ControlPill
 
--- Minimize (-)
+-- Tombol Minimize (-)
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Name = "MinimizeBtn"
 MinimizeBtn.Size = UDim2.new(0.5, 0, 1, 0)
@@ -120,7 +121,7 @@ MinimizeBtn.TextColor3 = Color3.fromRGB(215, 180, 255)
 MinimizeBtn.TextSize = 15
 MinimizeBtn.Parent = ControlPill
 
--- Close (X)
+-- Tombol Close (X)
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
 CloseBtn.Size = UDim2.new(0.5, 0, 1, 0)
@@ -132,7 +133,7 @@ CloseBtn.TextColor3 = Color3.fromRGB(255, 160, 175)
 CloseBtn.TextSize = 12
 CloseBtn.Parent = ControlPill
 
--- Divider
+-- Divider Line
 local Divider = Instance.new("Frame")
 Divider.Size = UDim2.new(1, -30, 0, 1)
 Divider.Position = UDim2.new(0, 15, 0, 36)
@@ -141,7 +142,7 @@ Divider.BackgroundTransparency = 0.85
 Divider.BorderSizePixel = 0
 Divider.Parent = MainFrame
 
--- Floating Logo Widget saat di-Minimize
+-- Floating Logo Widget (Muncul Saat Minimize)
 local OpenLogoBtn = Instance.new("TextButton")
 OpenLogoBtn.Name = "OpenLogoBtn"
 OpenLogoBtn.Size = UDim2.new(0, 44, 0, 44)
@@ -172,7 +173,7 @@ LogoGradient.Color = ColorSequence.new{
 LogoGradient.Rotation = 135
 LogoGradient.Parent = OpenLogoBtn
 
--- Sidebar & Content Layout (Diatur Pas untuk Layar HP)
+-- Sidebar Area
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 100, 1, -48)
@@ -185,11 +186,12 @@ UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 5)
 UIListLayout.Parent = Sidebar
 
+-- Content Area
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
 ContentArea.Size = UDim2.new(1, -132, 1, -48)
 ContentArea.Position = UDim2.new(0, 120, 0, 42)
-ContentArea.BackgroundColor3 = Color3.fromRGB(16长, 10, 25)
+ContentArea.BackgroundColor3 = Color3.fromRGB(16, 10, 25)
 ContentArea.BackgroundTransparency = 0.4
 ContentArea.BorderSizePixel = 0
 ContentArea.Parent = MainFrame
@@ -230,7 +232,7 @@ end
 enableDrag(MainFrame, TopBar)
 enableDrag(OpenLogoBtn, OpenLogoBtn)
 
--- Event Minimize & Close
+-- Event Handlers (Minimize & Close)
 MinimizeBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
     OpenLogoBtn.Visible = true
@@ -245,7 +247,7 @@ CloseBtn.MouseButton1Click:Connect(function()
     VoidHub:Destroy()
 end)
 
--- System Tab
+-- Tab Builder
 local tabs = {}
 
 function createTab(tabName)
@@ -305,7 +307,7 @@ function createTab(tabName)
     return TabPage
 end
 
--- Tab Kosong Siap Pakai
+-- Inisialisasi Tab Kosong
 local MainTab = createTab("Main")
 local PlayerTab = createTab("Player")
 local MiscTab = createTab("Misc")
