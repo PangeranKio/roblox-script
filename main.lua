@@ -1,174 +1,109 @@
--- Load Rayfield UI Library
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- [[ VOIDHUB CUSTOM UI - PURE LUA ]] --
+-- Created by Kio
 
--- Bikin Window Utama VoidHub
-local Window = Rayfield:CreateWindow({
-   Name = "VoidHub",
-   LoadingTitle = "Loading Script...",
-   LoadingSubtitle = "by Kio",
-   ConfigurationSaving = {
-      Enabled = true,
-      FolderName = "VoidHubConfig",
-      FileName = "Config"
-   },
-   Discord = {
-      Enabled = false
-   },
-   KeySystem = false
-})
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
--- ==========================================
--- SNIPPET KUSTOMISASI UI (Gradient & Minimize)
--- ==========================================
-task.spawn(function()
-    task.wait(2) -- Jeda agar UI ter-render sempurna di CoreGui
-    
-    local coreGui = game:GetService("CoreGui")
-    local localPlayer = game:GetService("Players").LocalPlayer
-    local rayfieldGui = coreGui:FindFirstChild("Rayfield") or (localPlayer and localPlayer:FindFirstChild("PlayerGui") and localPlayer.PlayerGui:FindFirstChild("Rayfield"))
-    
-    if rayfieldGui then
-        -- 1. UBAH TEKS TOMBOL MINIMIZE MENJADI "VoidHub"
-        for _, desc in pairs(rayfieldGui:GetDescendants()) do
-            if desc:IsA("TextButton") then
-                if desc.Text:find("Rayfield") or desc.Name == "Open" or desc.Name == "Close" or desc.Name == "Toggle" then
-                    desc.Text = "VoidHub"
-                    desc:GetPropertyChangedSignal("Text"):Connect(function()
-                        if desc.Text ~= "VoidHub" then
-                            desc.Text = "VoidHub"
-                        end
-                    end)
-                end
-            end
-        end
+-- Clean Up GUI Lama (Anti Double-Load)
+if CoreGui:FindFirstChild("VoidHubUI") then
+    CoreGui.VoidHubUI:Destroy()
+end
 
-        -- 2. PASANG EFEK GRADIENT UNGU-HITAM
-        for _, desc in pairs(rayfieldGui:GetDescendants()) do
-            if desc:IsA("Frame") and (desc.Name == "Main" or desc.Name == "Background" or desc.Name == "MainFrame") then
-                local oldGrad = desc:FindFirstChildOfClass("UIGradient")
-                if oldGrad then oldGrad:Destroy() end
-                
-                local gradient = Instance.new("UIGradient")
-                gradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0, Color3.fromRGB(42, 22, 62)),   -- Ungu Soft
-                    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(22, 12, 32)), -- Ungu Gelap
-                    ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 8, 18))     -- Hitam Soft
-                }
-                gradient.Rotation = 135
-                gradient.Parent = desc
-            end
-        end
-    end
+-- ScreenGui Utama
+local VoidHubUI = Instance.new("ScreenGui")
+VoidHubUI.Name = "VoidHubUI"
+VoidHubUI.Parent = CoreGui
+VoidHubUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- 1. TOMBOL MINIMIZE / FLOATING LOGO "VH"
+local OpenBtn = Instance.new("TextButton")
+OpenBtn.Name = "OpenButton"
+OpenBtn.Size = UDim2.new(0, 45, 0, 45)
+OpenBtn.Position = UDim2.new(0.1, 0, 0.2, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(35, 20, 50)
+OpenBtn.Text = "VH"
+OpenBtn.TextColor3 = Color3.fromRGB(220, 180, 255)
+OpenBtn.TextSize = 18
+OpenBtn.Font = Enum.Font.SourceSansBold
+OpenBtn.Active = true
+OpenBtn.Draggable = true -- Bisa digeser di layar mobile
+OpenBtn.Parent = VoidHubUI
+
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(1, 0) -- Bentuk Bulat / Pill
+OpenCorner.Parent = OpenBtn
+
+local OpenStroke = Instance.new("UIStroke")
+OpenStroke.Color = Color3.fromRGB(140, 80, 220)
+OpenStroke.Thickness = 1,5
+OpenStroke.Parent = OpenBtn
+
+-- 2. FRAME UTAMA (WINDOW)
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 320, 0, 220)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -110)
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.ClipsDescendants = true
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = VoidHubUI
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+-- Gradient Ungu - Hitam Soft
+local MainGradient = Instance.new("UIGradient")
+MainGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(42, 22, 62)),   -- Ungu Soft (Atas)
+    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(22, 12, 32)), -- Ungu Gelap (Tengah)
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 8, 18))     -- Hitam Soft (Bawah)
+}
+MainGradient.Rotation = 135
+MainGradient.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(90, 50, 140)
+MainStroke.Thickness = 1
+MainStroke.Parent = MainFrame
+
+-- TOPBAR (TITLE & CLOSE)
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -40, 0, 35)
+Title.Position = UDim2.new(0, 12, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "VoidHub <font color=\"#B480FF\">by Kio</font>"
+Title.RichText = true
+Title.TextColor3 = Color3.fromRGB(240, 235, 255)
+Title.TextSize = 16
+Title.Font = Enum.Font.SourceSansBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = MainFrame
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 25, 0, 25)
+CloseBtn.Position = UDim2.new(1, -30, 0, 5)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(180, 150, 210)
+CloseBtn.TextSize = 14
+CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.Parent = MainFrame
+
+-- LOGIK TOGGLE SHOW / HIDE
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    OpenBtn.Visible = true
 end)
 
--- ==========================================
--- TAB NAVIGATION & FITUR
--- ==========================================
+OpenBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    OpenBtn.Visible = false
+end)
 
--- Tab Utama
-local MainTab = Window:CreateTab("Main Features", "home")
+-- Default: Hide OpenBtn pas window terbuka
+OpenBtn.Visible = false
 
--- Section: Anti-AFK System
-MainTab:CreateSection("Anti-AFK System")
-
-local AntiAFKConnection = nil
-local VirtualUser = game:GetService("VirtualUser")
-
-MainTab:CreateToggle({
-   Name = "Enable Anti-AFK",
-   CurrentValue = false,
-   Flag = "AntiAFKFlag",
-   Callback = function(Value)
-      if Value then
-         AntiAFKConnection = game:GetService("Players").LocalPlayer.Idled:Connect(function()
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new())
-            Rayfield:Notify({
-               Title = "VoidHub Anti-AFK",
-               Content = "Berhasil mencegah idle disconnect!",
-               Duration = 2,
-               Image = "shield"
-            })
-         end)
-         
-         Rayfield:Notify({
-            Title = "Anti-AFK Status",
-            Content = "Anti-AFK Berhasil Diaktifkan",
-            Duration = 3,
-            Image = "shield"
-         })
-      else
-         if AntiAFKConnection then
-            AntiAFKConnection:Disconnect()
-            AntiAFKConnection = nil
-         end
-         
-         Rayfield:Notify({
-            Title = "Anti-AFK Status",
-            Content = "Anti-AFK Dimatikan",
-            Duration = 3,
-            Image = "shield"
-         })
-      end
-   end,
-})
-
-MainTab:CreateLabel("Mencegah terkena kick 20 menit saat AFK.")
-
--- Section: Player Movement
-MainTab:CreateSection("Player Settings")
-
-MainTab:CreateToggle({
-   Name = "Enable WalkSpeed",
-   CurrentValue = false,
-   Flag = "SpeedToggle",
-   Callback = function(Value)
-      if Value then
-         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 32
-      else
-         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-      end
-   end,
-})
-
-MainTab:CreateSlider({
-   Name = "Jump Power",
-   Range = {50, 200},
-   Increment = 5,
-   Suffix = "Power",
-   CurrentValue = 50,
-   Flag = "JumpSlider",
-   Callback = function(Value)
-      game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
-   end,
-})
-
-MainTab:CreateInput({
-   Name = "Custom WalkSpeed",
-   PlaceholderText = "Masukkan angka (misal: 50)",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      local num = tonumber(Text)
-      if num then
-         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = num
-      end
-   end,
-})
-
--- Section: Action Buttons
-MainTab:CreateSection("Actions")
-
-MainTab:CreateButton({
-   Name = "Reset Character",
-   Callback = function()
-      game.Players.LocalPlayer.Character.Humanoid.Health = 0
-   end,
-})
-
--- Notifikasi saat script berhasil di-load
-Rayfield:Notify({
-   Title = "VoidHub Loaded!",
-   Content = "GUI berhasil dimuat dan siap digunakan.",
-   Duration = 5,
-   Image = "shield",
-})
+print("[VoidHub] Custom UI Loaded!")
