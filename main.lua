@@ -1,5 +1,5 @@
--- [[ VOIDHUB CUSTOM UI - ULTRA PREMIUM iOS EDITION v2.2 ]] --
--- Created by Kio (Clean & Modern Sidebar UI)
+-- [[ VOIDHUB CUSTOM UI - ULTRA PREMIUM iOS EDITION v2.3 ]] --
+-- Created by Kio (Clean Sidebar UI + ESP Integrated)
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -7,6 +7,7 @@ local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
 
 -- Clean Up GUI Lama (Anti Double-Load)
 if CoreGui:FindFirstChild("VoidHubUI") then
@@ -83,7 +84,7 @@ OpenStroke.Parent = OpenBtn
 MakeDraggable(OpenBtn, OpenBtn)
 
 -- ==========================================
--- 2. LOADING SCREEN (PREMIUM MODERNIZE)
+-- 2. LOADING SCREEN
 -- ==========================================
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Name = "LoadingFrame"
@@ -152,7 +153,6 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainFrame
 
--- Gradient Premium Deep Purple & Black Glass
 local GlassGradient = Instance.new("UIGradient")
 GlassGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 15, 55)),
@@ -176,7 +176,7 @@ Topbar.BackgroundTransparency = 1
 Topbar.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Size = UDim2.new(0, 250, 1, 0)
 Title.Position = UDim2.new(0, 16, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "VOIDHUB <font color=\"#B480FF\">// STEAL AN EGG</font>"
@@ -189,7 +189,7 @@ Title.Parent = Topbar
 
 MakeDraggable(Topbar, MainFrame)
 
--- CLOSE BUTTON (MODERN X)
+-- CLOSE BUTTON
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, 26, 0, 26)
 CloseBtn.Position = UDim2.new(1, -35, 0, 8)
@@ -232,7 +232,7 @@ SBLayout.Padding = UDim.new(0, 6)
 SBLayout.Parent = Sidebar
 
 -- ==========================================
--- CONTAINER KONTEN KANAN (HALAMAN MENU)
+-- CONTAINER KONTEN KANAN
 -- ==========================================
 local ContentArea = Instance.new("Frame")
 ContentArea.Size = UDim2.new(1, -155, 1, -52)
@@ -278,9 +278,8 @@ end
 
 local MainTabPage = CreatePage("Main")
 local MiscTabPage = CreatePage("Misc")
-MainTabPage.Visible = true -- Default Tab
+MainTabPage.Visible = true
 
--- Tab Builder dengan Desain Sidebar Mewah
 local function CreateTabButton(text, pageTarget, defaultActive)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 34)
@@ -315,7 +314,7 @@ CreateTabButton("Steal an Egg", MainTabPage, true)
 CreateTabButton("Misc & Walk", MiscTabPage, false)
 
 -- ==========================================
--- FITUR TOGGLE BUILDER (REUSABLE & CLEAN)
+-- TOGGLE BUILDER FUNCTION
 -- ==========================================
 local function CreateToggle(parent, titleText, callback)
     local frame = Instance.new("Frame")
@@ -375,10 +374,10 @@ local function CreateToggle(parent, titleText, callback)
 end
 
 -- ==========================================
--- MASUKKAN FITUR KE DALAM KATEGORI
+-- FITUR DI TAB: STEAL AN EGG (MAIN TAB)
 -- ==========================================
 
--- 1. Tab Steal an Egg (Auto AFK Safe saja, Auto Collect dihapus)
+-- 1. Anti-AFK Safe
 CreateToggle(MainTabPage, "Anti-AFK Safe", function(state)
     if state then
         _G.AntiAFKActive = true
@@ -404,14 +403,88 @@ CreateToggle(MainTabPage, "Anti-AFK Safe", function(state)
     end
 end)
 
--- 2. Tab Misc & Walk (Custom WalkSpeed)
+-- 2. Player ESP (Melacak Player Lain)
+local function CreatePlayerESP(plr)
+    if plr == LocalPlayer then return end
+    local function addBox(char)
+        if char:FindFirstChild("HumanoidRootPart") and not char:FindFirstChild("VoidESP_Box") then
+            local bill = Instance.new("BillboardGui")
+            bill.Name = "VoidESP_Box"
+            bill.Size = UDim2.new(0, 50, 0, 50)
+            bill.AlwaysOnTop = true
+            bill.StudsOffset = Vector3.new(0, 2.5, 0)
+            bill.Parent = char.Head
+            
+            local text = Instance.new("TextLabel")
+            text.Size = UDim2.new(1, 0, 1, 0)
+            text.BackgroundTransparency = 1
+            text.Text = plr.Name
+            text.TextColor3 = Color3.fromRGB(200, 130, 255)
+            text.TextSize = 11
+            text.Font = Enum.Font.GothamBold
+            text.TextStrokeTransparency = 0.4
+            text.Parent = bill
+        end
+    end
+    plr.CharacterAdded:Connect(addBox)
+    if plr.Character then addBox(plr.Character) end
+end
+
+CreateToggle(MainTabPage, "Player ESP", function(state)
+    _G.PlayerESPActive = state
+    if state then
+        for _, p in pairs(Players:GetPlayers()) do CreatePlayerESP(p) end
+        Players.PlayerAdded:Connect(CreatePlayerESP)
+    else
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("Head") then
+                local esp = p.Character.Head:FindFirstChild("VoidESP_Box")
+                if esp then esp:Destroy() end
+            end
+        end
+    end
+end)
+
+-- 3. Egg & Item ESP (Melacak Telur/Item di Map)
+CreateToggle(MainTabPage, "Egg & Item ESP", function(state)
+    _G.EggESPActive = state
+    task.spawn(function()
+        while _G.EggESPActive do
+            pcall(function()
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and (obj.Name:lower():find("egg") or obj.Name:lower():find("item")) then
+                        if not obj:FindFirstChild("EggHighlight") then
+                            local hl = Instance.new("Highlight")
+                            hl.Name = "EggHighlight"
+                            hl.FillColor = Color3.fromRGB(150, 50, 255)
+                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            hl.FillTransparency = 0.4
+                            hl.Parent = obj
+                        end
+                    end
+                end
+            end)
+            task.wait(2)
+        end
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj:FindFirstChild("EggHighlight") then
+                obj.EggHighlight:Destroy()
+            end
+        end
+    end)
+end)
+
+
+-- ==========================================
+-- FITUR DI TAB: MISC & WALK (MISC TAB)
+-- ==========================================
 CreateToggle(MiscTabPage, "Custom WalkSpeed (24)", function(state)
     if state then
         _G.SpeedActive = true
         task.spawn(function()
             while _G.SpeedActive do
                 pcall(function()
-                    local hum = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
                     if hum then hum.WalkSpeed = 24 end
                 end)
                 task.wait(0.2)
@@ -420,14 +493,14 @@ CreateToggle(MiscTabPage, "Custom WalkSpeed (24)", function(state)
     else
         _G.SpeedActive = false
         pcall(function()
-            local hum = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
             if hum then hum.WalkSpeed = 16 end
         end)
     end
 end)
 
 -- ==========================================
--- 5. RESIZE HANDLE (POJOK KANAN BAWAH)
+-- 5. RESIZE HANDLE
 -- ==========================================
 local ResizeHandle = Instance.new("TextButton")
 ResizeHandle.Size = UDim2.new(0, 16, 0, 16)
@@ -464,7 +537,7 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 -- ==========================================
--- 6. ANIMASI PEMBUKAAN WINDOW (TWEEN)
+-- 6. ANIMASI PEMBUKAAN WINDOW
 -- ==========================================
 local TweenBack = TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
