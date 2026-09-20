@@ -5,6 +5,7 @@ local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
 
 -- Clean Up GUI Lama (Anti Double-Load)
 if CoreGui:FindFirstChild("VoidHubUI") then
@@ -201,34 +202,8 @@ ContentContainer.BackgroundTransparency = 1
 ContentContainer.Parent = MainFrame
 
 -- ==========================================
--- 4. FITUR AUTO CLICKER (UPDATED SAFE METHOD)
+-- 4. FITUR ANTI-AFK TOGGLE (iOS SWITCH STYLE)
 -- ==========================================
--- CLICK MARKER TARGET (BISA DI-DRAG KE MANA SAJA)
-local ClickMarker = Instance.new("TextButton")
-ClickMarker.Name = "ClickMarker"
-ClickMarker.Size = UDim2.new(0, 36, 0, 36)
-ClickMarker.Position = UDim2.new(0.5, -18, 0.5, -18)
-ClickMarker.BackgroundColor3 = Color3.fromRGB(160, 90, 240)
-ClickMarker.BackgroundTransparency = 0.4
-ClickMarker.Text = ""
-ClickMarker.Visible = false
-ClickMarker.Active = true
-ClickMarker.Parent = VoidHubUI
-
-local MarkerCorner = Instance.new("UICorner")
-MarkerCorner.CornerRadius = UDim.new(1, 0)
-MarkerCorner.Parent = ClickMarker
-
-local MarkerDot = Instance.new("Frame")
-MarkerDot.Size = UDim2.new(0, 8, 0, 8)
-MarkerDot.Position = UDim2.new(0.5, -4, 0.5, -4)
-MarkerDot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-MarkerDot.Parent = ClickMarker
-Instance.new("UICorner", MarkerDot).CornerRadius = UDim.new(1, 0)
-
-MakeDraggable(ClickMarker, ClickMarker)
-
--- UI CARD AUTO CLICKER
 local AFKToggleFrame = Instance.new("Frame")
 AFKToggleFrame.Size = UDim2.new(1, 0, 0, 48)
 AFKToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 18, 42)
@@ -248,7 +223,7 @@ local AFKLabel = Instance.new("TextLabel")
 AFKLabel.Size = UDim2.new(1, -70, 1, 0)
 AFKLabel.Position = UDim2.new(0, 14, 0, 0)
 AFKLabel.BackgroundTransparency = 1
-AFKLabel.Text = "Auto Clicker"
+AFKLabel.Text = "Anti-AFK System"
 AFKLabel.TextColor3 = Color3.fromRGB(240, 235, 255)
 AFKLabel.TextSize = 14
 AFKLabel.Font = Enum.Font.SourceSansBold
@@ -277,60 +252,30 @@ local CircleCorner = Instance.new("UICorner")
 CircleCorner.CornerRadius = UDim.new(1, 0)
 CircleCorner.Parent = SwitchCircle
 
--- LOGIKA AUTO CLICKER (SAFE & ALL EXECUTOR COMPATIBLE)
+-- LOGIKA ON / OFF ANTI-AFK
 local AntiAFKActive = false
-local ClickThread = nil
+local AFKConnection = nil
 
 SwitchBtn.MouseButton1Click:Connect(function()
     AntiAFKActive = not AntiAFKActive
     
     if AntiAFKActive then
-        -- Animasi ON
+        -- Animasi Sakelar ON (Warna Ungu iOS)
         TweenService:Create(SwitchBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(140, 80, 220)}):Play()
         TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -22, 0.5, -10)}):Play()
-        ClickMarker.Visible = true
         
-        ClickThread = task.spawn(function()
-            while AntiAFKActive do
-                task.wait(3) -- Interval klik 3 detik
-                if AntiAFKActive then
-                    pcall(function()
-                        local guiObjects = CoreGui:GetGuiObjectsAtPosition(ClickMarker.AbsolutePosition.X + 18, ClickMarker.AbsolutePosition.Y + 18)
-                        for _, obj in pairs(guiObjects) do
-                            if (obj:IsA("TextButton") or obj:IsA("ImageButton")) and obj ~= ClickMarker then
-                                obj.InputBegan:Fire({UserInputType = Enum.UserInputType.MouseButton1})
-                            end
-                        end
-                    end)
-                    
-                    -- Efek Pulse Visual Saat Klik
-                    local Pulse = Instance.new("Frame")
-                    Pulse.Size = ClickMarker.Size
-                    Pulse.Position = ClickMarker.Position
-                    Pulse.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                    Pulse.BackgroundTransparency = 0.5
-                    Pulse.Parent = VoidHubUI
-                    Instance.new("UICorner", Pulse).CornerRadius = UDim.new(1, 0)
-                    
-                    TweenService:Create(Pulse, TweenInfo.new(0.3), {
-                        Size = UDim2.new(0, 52, 0, 52), 
-                        Position = UDim2.new(ClickMarker.Position.X.Scale, ClickMarker.Position.X.Offset - 8, ClickMarker.Position.Y.Scale, ClickMarker.Position.Y.Offset - 8), 
-                        BackgroundTransparency = 1
-                    }):Play()
-                    
-                    task.delay(0.35, function() Pulse:Destroy() end)
-                end
-            end
+        AFKConnection = Players.LocalPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
         end)
     else
-        -- Animasi OFF
+        -- Animasi Sakelar OFF
         TweenService:Create(SwitchBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 35, 65)}):Play()
         TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -10)}):Play()
-        ClickMarker.Visible = false
         
-        if ClickThread then
-            task.cancel(ClickThread)
-            ClickThread = nil
+        if AFKConnection then
+            AFKConnection:Disconnect()
+            AFKConnection = nil
         end
     end
 end)
@@ -405,7 +350,7 @@ end)
 -- ==========================================
 task.spawn(function()
     task.wait(0.7)
-    LoadStatus.Text = "Loading Auto Clicker Module..."
+    LoadStatus.Text = "Loading Anti-AFK Module..."
     task.wait(0.7)
     LoadStatus.Text = "Applying Security Protections..."
     task.wait(0.6)
