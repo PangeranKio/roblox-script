@@ -1,52 +1,52 @@
--- [[ VOIDHUB - Rayfield Custom Edition ]] --
+-- [[ VOIDHUB - iOS Style Edition ]] --
 -- Created by: Kio
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Registrasi Tema Custom: Ungu - Hitam Soft (Gradient Style)
-Rayfield:RegisterTheme("VoidHubDarkPurple", {
-    TextColor = Color3.fromRGB(240, 235, 255),
-    Background = Color3.fromRGB(20, 14, 28),             -- Hitam Soft Keunguan
-    Topbar = Color3.fromRGB(34, 20, 48),                 -- Ungu Gelap
-    Shadow = Color3.fromRGB(10, 6, 16),
-    NotificationBackground = Color3.fromRGB(28, 18, 40),
-    NotificationActionsBackground = Color3.fromRGB(45, 28, 65),
+-- Registrasi Tema iOS Dark Purple (Sleek, Soft, Non-Neon)
+Rayfield:RegisterTheme("iOSDarkPurple", {
+    TextColor = Color3.fromRGB(245, 240, 255),
+    Background = Color3.fromRGB(18, 14, 26),             -- iOS Dark Surface
+    Topbar = Color3.fromRGB(28, 20, 42),                 -- iOS Header
+    Shadow = Color3.fromRGB(8, 5, 12),
+    NotificationBackground = Color3.fromRGB(32, 22, 48),
+    NotificationActionsBackground = Color3.fromRGB(48, 30, 70),
     
-    TabBackground = Color3.fromRGB(30, 20, 42),
-    TabStroke = Color3.fromRGB(120, 75, 180),            -- Ungu Muted
-    TabBackgroundSelected = Color3.fromRGB(95, 50, 150),
+    TabBackground = Color3.fromRGB(26, 18, 38),
+    TabStroke = Color3.fromRGB(90, 55, 140),            -- Soft Accent Border
+    TabBackgroundSelected = Color3.fromRGB(110, 60, 180),
     TabTextColor = Color3.fromRGB(180, 155, 220),
     SelectedTabTextColor = Color3.fromRGB(255, 255, 255),
     
-    ElementBackground = Color3.fromRGB(28, 18, 40),
-    ElementBackgroundHover = Color3.fromRGB(42, 26, 60),
-    ElementStroke = Color3.fromRGB(100, 60, 150),
-    SecondaryElementBackground = Color3.fromRGB(22, 14, 32),
-    SecondaryElementBackgroundHover = Color3.fromRGB(32, 20, 46),
-    SecondaryElementStroke = Color3.fromRGB(80, 48, 120),
+    ElementBackground = Color3.fromRGB(26, 18, 38),
+    ElementBackgroundHover = Color3.fromRGB(38, 26, 56),
+    ElementStroke = Color3.fromRGB(75, 45, 115),
+    SecondaryElementBackground = Color3.fromRGB(20, 14, 30),
+    SecondaryElementBackgroundHover = Color3.fromRGB(30, 20, 44),
+    SecondaryElementStroke = Color3.fromRGB(65, 40, 100),
     
-    SliderBackground = Color3.fromRGB(40, 25, 58),
-    SliderProgress = Color3.fromRGB(140, 85, 210),
-    SliderStroke = Color3.fromRGB(160, 100, 230),
+    SliderBackground = Color3.fromRGB(34, 22, 50),
+    SliderProgress = Color3.fromRGB(130, 75, 200),
+    SliderStroke = Color3.fromRGB(150, 85, 220),
     
-    ToggleBackground = Color3.fromRGB(40, 25, 58),
-    ToggleEnabled = Color3.fromRGB(140, 85, 210),
-    ToggleDisabled = Color3.fromRGB(25, 15, 38),
-    ToggleStroke = Color3.fromRGB(150, 90, 220),
+    ToggleBackground = Color3.fromRGB(34, 22, 50),
+    ToggleEnabled = Color3.fromRGB(130, 75, 200),
+    ToggleDisabled = Color3.fromRGB(22, 14, 32),
+    ToggleStroke = Color3.fromRGB(140, 80, 210),
     
-    DropdownBackground = Color3.fromRGB(28, 18, 40),
-    DropdownText = Color3.fromRGB(240, 235, 255),
-    DropdownStroke = Color3.fromRGB(100, 60, 150),
+    DropdownBackground = Color3.fromRGB(26, 18, 38),
+    DropdownText = Color3.fromRGB(245, 240, 255),
+    DropdownStroke = Color3.fromRGB(75, 45, 115),
     
-    InputBackground = Color3.fromRGB(22, 14, 32),
-    InputStroke = Color3.fromRGB(100, 60, 150),
-    PlaceholderColor = Color3.fromRGB(130, 105, 165)
+    InputBackground = Color3.fromRGB(20, 14, 30),
+    InputStroke = Color3.fromRGB(75, 45, 115),
+    PlaceholderColor = Color3.fromRGB(120, 95, 155)
 })
 
--- Inisialisasi Window Utama
+-- Inisialisasi Window Utama VoidHub
 local Window = Rayfield:CreateWindow({
     Name = "VoidHub",
-    LoadingTitle = "VoidHub Executing...",
+    LoadingTitle = "VoidHub iOS",
     LoadingSubtitle = "by Kio",
     ConfigurationSaving = {
         Enabled = true,
@@ -57,26 +57,31 @@ local Window = Rayfield:CreateWindow({
         Enabled = false
     },
     KeySystem = false,
-    Theme = "VoidHubDarkPurple"
+    Theme = "iOSDarkPurple"
 })
 
--- Kustomisasi Minimizer (Ubah Tombol Minimize Jadi Logo / Icon Floating)
+-- Safe Customization untuk Minimizer Logo "VH" (iOS Pill Badge Style)
 task.spawn(function()
+    task.wait(1)
     local coreGui = game:GetService("CoreGui")
-    local rayfieldGui = coreGui:WaitForChild("Rayfield", 5)
+    local rayfieldGui = coreGui:FindFirstChild("Rayfield") or game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("Rayfield")
+    
     if rayfieldGui then
-        -- Mencari tombol minimize bawaan untuk diubah menjadi gaya Logo VoidHub
         for _, desc in pairs(rayfieldGui:GetDescendants()) do
-            if desc:IsA("TextButton") and (desc.Name == "Open" or desc.Name == "Close") then
-                desc.Text = "VH" -- Logo Singkatan VoidHub
+            if desc:IsA("TextButton") and (desc.Name == "Open" or desc.Name == "Close" or desc.Name == "Minimize") then
+                desc.Text = "VH"
                 desc.Font = Enum.Font.SourceSansBold
-                desc.TextSize = 16
-                desc.TextColor3 = Color3.fromRGB(220, 190, 255)
-                desc.BackgroundColor3 = Color3.fromRGB(34, 20, 48)
+                desc.TextSize = 14
+                desc.TextColor3 = Color3.fromRGB(235, 215, 255)
+                desc.BackgroundColor3 = Color3.fromRGB(38, 24, 58)
                 
-                -- Menambahkan sudut membulat untuk logo
+                local stroke = desc:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke")
+                stroke.Color = Color3.fromRGB(130, 75, 200)
+                stroke.Thickness = 1
+                stroke.Parent = desc
+                
                 local corner = desc:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(0, 10)
+                corner.CornerRadius = UDim.new(1, 0) -- Membuat pill membulat khas iOS
                 corner.Parent = desc
             end
         end
@@ -84,16 +89,72 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- TAB KOSONG (SIAP DIISI FITUR)
+-- TAB MENU (iOS STYLED)
 -- ==========================================
 
 local MainTab = Window:CreateTab("Main", "home")
 local PlayerTab = Window:CreateTab("Player", "user")
-local MiscTab = Window:CreateTab("Misc", "sliders")
-local SettingsTab = Window:CreateTab("Settings", "settings")
+local MiscTab = Window:CreateTab("Misc", "shield")
+local SettingsTab = Window:CreateTab("Settings", "cog")
 
--- Contoh Label Kosong di Tab Main
-MainTab:CreateSection("Fitur Utama")
-MainTab:CreateLabel("Belum ada fitur diset. Siap ditambahkan!")
+-- ==========================================
+-- FITUR ANTI-AFK
+-- ==========================================
 
-print("[VoidHub] Loaded successfully with Custom Dark Purple Theme!")
+MainTab:CreateSection("Sistem Anti-AFK")
+
+local AntiAFKConnections = nil
+local AntiAFKEnabled = false
+
+local AntiAFKToggle = MainTab:CreateToggle({
+    Name = "Anti-AFK System",
+    CurrentValue = false,
+    Flag = "AntiAFKFlag",
+    Callback = function(Value)
+        AntiAFKEnabled = Value
+        if AntiAFKEnabled then
+            -- Mencegah Kick 20 Menit Roblox
+            local VirtualUser = game:GetService("VirtualUser")
+            AntiAFKConnections = game:GetService("Players").LocalPlayer.Idled:Connect(function()
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+                Rayfield:Notify({
+                    Title = "VoidHub Anti-AFK",
+                    Content = "Deteksi AFK dicegah otomatis!",
+                    Duration = 3,
+                    Image = "shield"
+                })
+            end)
+            
+            Rayfield:Notify({
+                Title = "VoidHub Anti-AFK",
+                Content = "Anti-AFK berhasil Diaktifkan",
+                Duration = 3,
+                Image = "check"
+            })
+        else
+            if AntiAFKConnections then
+                AntiAFKConnections:Disconnect()
+                AntiAFKConnections = nil
+            end
+            Rayfield:Notify({
+                Title = "VoidHub Anti-AFK",
+                Content = "Anti-AFK Dimatikan",
+                Duration = 3,
+                Image = "x"
+            })
+        end
+    end,
+})
+
+MainTab:CreateLabel("Status Anti-AFK aktif menjaga koneksi game.")
+
+-- Notifikasi Berhasil Execute
+Rayfield:Notify({
+    Title = "VoidHub Loaded",
+    Content = "Selamat datang! Script by Kio siap digunakan.",
+    Duration = 4,
+    Image = "sparkles"
+})
+
+print("[VoidHub] iOS Edition successfully loaded!")
