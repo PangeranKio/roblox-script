@@ -3,12 +3,12 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- Bikin Window Utama
 local Window = Rayfield:CreateWindow({
-   Name = "NXT Control Hub",
+   Name = "VoidHub",
    LoadingTitle = "Loading Script...",
-   LoadingSubtitle = "by VOIDLES",
+   LoadingSubtitle = "by Akio",
    ConfigurationSaving = {
       Enabled = true,
-      FolderName = "NxtHubConfig",
+      FolderName = "VoidHubConfig",
       FileName = "BigHub"
    },
    Discord = {
@@ -16,6 +16,23 @@ local Window = Rayfield:CreateWindow({
    },
    KeySystem = false -- Set true kalau mau pakai sistem key
 })
+
+-- Potongan kode untuk mengubah teks tombol minimize Rayfield
+task.spawn(function()
+    task.wait(1) -- Beri jeda sebentar agar UI ter-render sempurna
+    local coreGui = game:GetService("CoreGui")
+    local rayfieldGui = coreGui:FindFirstChild("Rayfield") or game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Rayfield")
+    
+    if rayfieldGui then
+        for _, desc in pairs(rayfieldGui:GetDescendants()) do
+            -- Mencari tombol toggle open/close
+            if desc:IsA("TextButton") and (desc.Text == "Show Rayfield" or desc.Name == "Open" or desc.Name == "Close") then
+                desc.Text = "VoidHub" -- Ganti sesuai keinginan (misal: "VH" atau "VoidHub")
+            end
+        end
+    end
+end)
+
 
 -- Tambah Tab Utama
 local MainTab = Window:CreateTab("Main Features", 4483362458) -- ID Icon Roblox
