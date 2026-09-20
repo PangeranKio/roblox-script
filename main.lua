@@ -1,5 +1,5 @@
--- [[ VOIDHUB CUSTOM UI - ULTRA PREMIUM iOS EDITION v2.3 ]] --
--- Created by Kio (Clean Sidebar UI + ESP Integrated)
+-- [[ VOIDHUB CUSTOM UI - ULTRA PREMIUM iOS EDITION v2.4 ]] --
+-- Created by Kio (Split Categories & Refresh Egg ESP)
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -134,7 +134,7 @@ LoadStatus.Font = Enum.Font.Gotham
 LoadStatus.Parent = LoadingFrame
 
 -- ==========================================
--- 3. MAIN FRAME (SIDEBAR MODERN UI DESIGN)
+-- 3. MAIN FRAME
 -- ==========================================
 local TargetSize = UDim2.new(0, 460, 0, 280)
 
@@ -168,7 +168,7 @@ GlassStroke.Transparency = 0.4
 GlassStroke.Thickness = 1.5
 GlassStroke.Parent = MainFrame
 
--- TOPBAR / HEADER KECIL
+-- TOPBAR / HEADER (Tanpa teks Steal an Egg)
 local Topbar = Instance.new("Frame")
 Topbar.Name = "Topbar"
 Topbar.Size = UDim2.new(1, 0, 0, 42)
@@ -179,7 +179,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0, 250, 1, 0)
 Title.Position = UDim2.new(0, 16, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "VOIDHUB <font color=\"#B480FF\">// STEAL AN EGG</font>"
+Title.Text = "VOIDHUB"
 Title.RichText = true
 Title.TextColor3 = Color3.fromRGB(245, 240, 255)
 Title.TextSize = 13
@@ -214,7 +214,7 @@ CloseBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- SIDEBAR NAVIGATION (TAB MENU KIRI)
+-- SIDEBAR NAVIGATION (3 KATEGORI: MAIN, WALK, MISC)
 -- ==========================================
 local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Size = UDim2.new(0, 130, 1, -52)
@@ -277,6 +277,7 @@ local function CreatePage(name)
 end
 
 local MainTabPage = CreatePage("Main")
+local WalkTabPage = CreatePage("Walk")
 local MiscTabPage = CreatePage("Misc")
 MainTabPage.Visible = true
 
@@ -311,7 +312,8 @@ local function CreateTabButton(text, pageTarget, defaultActive)
 end
 
 CreateTabButton("Steal an Egg", MainTabPage, true)
-CreateTabButton("Misc & Walk", MiscTabPage, false)
+CreateTabButton("Walk", WalkTabPage, false)
+CreateTabButton("Misc", MiscTabPage, false)
 
 -- ==========================================
 -- TOGGLE BUILDER FUNCTION
@@ -374,36 +376,31 @@ local function CreateToggle(parent, titleText, callback)
 end
 
 -- ==========================================
+-- BUTTON BUILDER FUNCTION (UNTUK REFRESH)
+-- ==========================================
+local function CreateButton(parent, titleText, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 38)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 20, 65)
+    btn.BackgroundTransparency = 0.3
+    btn.Text = titleText
+    btn.TextColor3 = Color3.fromRGB(240, 225, 255)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = parent
+    
+    local bCorner = Instance.new("UICorner")
+    bCorner.CornerRadius = UDim.new(0, 8)
+    bCorner.Parent = btn
+    
+    btn.MouseButton1Click:Connect(callback)
+end
+
+-- ==========================================
 -- FITUR DI TAB: STEAL AN EGG (MAIN TAB)
 -- ==========================================
 
--- 1. Anti-AFK Safe
-CreateToggle(MainTabPage, "Anti-AFK Safe", function(state)
-    if state then
-        _G.AntiAFKActive = true
-        task.spawn(function()
-            local lastMove = tick()
-            while _G.AntiAFKActive do
-                if tick() - lastMove >= 30 then
-                    lastMove = tick()
-                    pcall(function()
-                        local currentCam = workspace.CurrentCamera
-                        if currentCam then
-                            currentCam.CFrame = currentCam.CFrame * CFrame.Angles(0, 0.001, 0)
-                            task.wait(0.05)
-                            currentCam.CFrame = currentCam.CFrame * CFrame.Angles(0, -0.001, 0)
-                        end
-                    end)
-                end
-                task.run(RunService.RenderStepped)
-            end
-        end)
-    else
-        _G.AntiAFKActive = false
-    end
-end)
-
--- 2. Player ESP (Melacak Player Lain)
+-- 1. Player ESP
 local function CreatePlayerESP(plr)
     if plr == LocalPlayer then return end
     local function addBox(char)
@@ -445,27 +442,31 @@ CreateToggle(MainTabPage, "Player ESP", function(state)
     end
 end)
 
--- 3. Egg & Item ESP (Melacak Telur/Item di Map)
-CreateToggle(MainTabPage, "Egg & Item ESP", function(state)
+-- 2. Fungsi Refresh & Auto Detect Egg ESP (Telur yang belum diambil / reset otomatis)
+local function RefreshEggs()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and (obj.Name:lower():find("egg") or obj.Name:lower():find("item")) then
+            -- Pastikan objek aktif (tidak transparan total atau baru spawn)
+            if obj.Transparency < 0.9 and not obj:FindFirstChild("EggHighlight") then
+                local hl = Instance.new("Highlight")
+                hl.Name = "EggHighlight"
+                hl.FillColor = Color3.fromRGB(150, 50, 255)
+                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                hl.FillTransparency = 0.4
+                hl.Parent = obj
+            end
+        end
+    end
+end
+
+CreateToggle(MainTabPage, "Egg & Item ESP (Auto Scan)", function(state)
     _G.EggESPActive = state
     task.spawn(function()
         while _G.EggESPActive do
-            pcall(function()
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("BasePart") and (obj.Name:lower():find("egg") or obj.Name:lower():find("item")) then
-                        if not obj:FindFirstChild("EggHighlight") then
-                            local hl = Instance.new("Highlight")
-                            hl.Name = "EggHighlight"
-                            hl.FillColor = Color3.fromRGB(150, 50, 255)
-                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                            hl.FillTransparency = 0.4
-                            hl.Parent = obj
-                        end
-                    end
-                end
-            end)
-            task.wait(2)
+            pcall(RefreshEggs)
+            task.wait(1.5) -- Auto-refresh setiap 1.5 detik untuk mendeteksi telur baru / reset
         end
+        -- Bersihkan jika dimatikan
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("BasePart") and obj:FindFirstChild("EggHighlight") then
                 obj.EggHighlight:Destroy()
@@ -474,11 +475,15 @@ CreateToggle(MainTabPage, "Egg & Item ESP", function(state)
     end)
 end)
 
+CreateButton(MainTabPage, "🔄 Refresh Egg ESP Now", function()
+    pcall(RefreshEggs)
+end)
+
 
 -- ==========================================
--- FITUR DI TAB: MISC & WALK (MISC TAB)
+-- FITUR DI TAB: WALK (WALK TAB)
 -- ==========================================
-CreateToggle(MiscTabPage, "Custom WalkSpeed (24)", function(state)
+CreateToggle(WalkTabPage, "Custom WalkSpeed (24)", function(state)
     if state then
         _G.SpeedActive = true
         task.spawn(function()
@@ -496,6 +501,35 @@ CreateToggle(MiscTabPage, "Custom WalkSpeed (24)", function(state)
             local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
             if hum then hum.WalkSpeed = 16 end
         end)
+    end
+end)
+
+
+-- ==========================================
+-- FITUR DI TAB: MISC (MISC TAB)
+-- ==========================================
+CreateToggle(MiscTabPage, "Anti-AFK Safe", function(state)
+    if state then
+        _G.AntiAFKActive = true
+        task.spawn(function()
+            local lastMove = tick()
+            while _G.AntiAFKActive do
+                if tick() - lastMove >= 30 then
+                    lastMove = tick()
+                    pcall(function()
+                        local currentCam = workspace.CurrentCamera
+                        if currentCam then
+                            currentCam.CFrame = currentCam.CFrame * CFrame.Angles(0, 0.001, 0)
+                            task.wait(0.05)
+                            currentCam.CFrame = currentCam.CFrame * CFrame.Angles(0, -0.001, 0)
+                        end
+                    end)
+                end
+                task.run(RunService.RenderStepped)
+            end
+        end)
+    else
+        _G.AntiAFKActive = false
     end
 end)
 
