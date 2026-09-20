@@ -1,4 +1,4 @@
--- [[ VOIDHUB SUPREME ULTRA v8.0 - CYBERPUNK LUXURY EDITION ]] --
+-- [[ VOIDHUB SUPREME ULTRA v9.0 - LUXURY ADMIN PANEL EDITION ]] --
 -- Rebuilt & Redesigned by Kio
 
 local CoreGui = game:GetService("CoreGui")
@@ -11,47 +11,33 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
 -- Cleanup Previous Instances
-if CoreGui:FindFirstChild("VoidHubUI_v8") then
-    CoreGui.VoidHubUI_v8:Destroy()
+if CoreGui:FindFirstChild("VoidHubUI_v9") then
+    CoreGui.VoidHubUI_v9:Destroy()
 end
 
 local VoidHubUI = Instance.new("ScreenGui")
-VoidHubUI.Name = "VoidHubUI_v8"
+VoidHubUI.Name = "VoidHubUI_v9"
 VoidHubUI.Parent = CoreGui
 VoidHubUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- SYSTEM STATE & CONFIG
-local ConfigFileName = "VoidHub_v8_Config.json"
+local ConfigFileName = "VoidHub_v9_Config.json"
 local State = {
     PlayerESP = false,
     WalkSpeed = false,
     JumpPower = false,
     InfJump = false,
     Noclip = false,
-    AutoClicker = false,
-    FPSBooster = false,
-    AntiAFK = true,
+    Flying = false,
+    FlySpeed = 50,
     SpeedValue = 24,
-    JumpValue = 100
+    JumpValue = 100,
+    GodMode = false,
+    AntiAFK = true
 }
 
 local ESPConnections = {}
-
-local function SaveSettings()
-    pcall(function()
-        if writefile then writefile(ConfigFileName, HttpService:JSONEncode(State)) end
-    end)
-end
-
-local function LoadSettings()
-    pcall(function()
-        if readfile and isfile and isfile(ConfigFileName) then
-            local decoded = HttpService:JSONDecode(readfile(ConfigFileName))
-            for k, v in pairs(decoded) do State[k] = v end
-        end
-    end)
-end
-LoadSettings()
+local FlyBodyVel, FlyBodyGyro
 
 -- SMOOTH DRAG SYSTEM
 local function MakeDraggable(topbar, object)
@@ -74,7 +60,7 @@ local function MakeDraggable(topbar, object)
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
-            TweenService:Create(object, TweenInfo.new(0.12, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            TweenService:Create(object, TweenInfo.new(0.1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
                 Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
             }):Play()
         end
@@ -82,12 +68,55 @@ local function MakeDraggable(topbar, object)
 end
 
 -- ==========================================
--- 1. INTRO / LOADING SCREEN (ULTRA SMOOTH)
+-- FLY SYSTEM
+-- ==========================================
+local function StartFlying()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+
+    FlyBodyVel = Instance.new("BodyVelocity")
+    FlyBodyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    FlyBodyVel.Velocity = Vector3.zero
+    FlyBodyVel.Parent = root
+
+    FlyBodyGyro = Instance.new("BodyGyro")
+    FlyBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+    FlyBodyGyro.CFrame = root.CFrame
+    FlyBodyGyro.Parent = root
+
+    task.spawn(function()
+        while State.Flying and char and root and root:FindFirstChild("BodyVelocity") do
+            local cam = workspace.CurrentCamera
+            local moveDir = Vector3.zero
+            
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+
+            FlyBodyVel.Velocity = moveDir * State.FlySpeed
+            FlyBodyGyro.CFrame = cam.CFrame
+            task.wait()
+        end
+    end)
+end
+
+local function StopFlying()
+    if FlyBodyVel then FlyBodyVel:Destroy() FlyBodyVel = nil end
+    if FlyBodyGyro then FlyBodyGyro:Destroy() FlyBodyGyro = nil end
+end
+
+-- ==========================================
+-- 1. INTRO / LOADING SCREEN
 -- ==========================================
 local LoadingGui = Instance.new("Frame")
 LoadingGui.Size = UDim2.new(0, 440, 0, 250)
 LoadingGui.Position = UDim2.new(0.5, -220, 0.5, -125)
-LoadingGui.BackgroundColor3 = Color3.fromRGB(12, 6, 20)
+LoadingGui.BackgroundColor3 = Color3.fromRGB(10, 4, 18)
 LoadingGui.BackgroundTransparency = 0.05
 LoadingGui.ZIndex = 100
 LoadingGui.Parent = VoidHubUI
@@ -97,16 +126,16 @@ LGCorner.CornerRadius = UDim.new(0, 28)
 LGCorner.Parent = LoadingGui
 
 local LGStroke = Instance.new("UIStroke")
-LGStroke.Color = Color3.fromRGB(200, 90, 255)
+LGStroke.Color = Color3.fromRGB(220, 100, 255)
 LGStroke.Transparency = 0.15
 LGStroke.Thickness = 2.5
 LGStroke.Parent = LoadingGui
 
 local LGLoadingGradient = Instance.new("UIGradient")
 LGLoadingGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 20, 140)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(18, 8, 30)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 3, 14))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 25, 150)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(18, 6, 32)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 2, 14))
 }
 LGLoadingGradient.Rotation = 45
 LGLoadingGradient.Parent = LoadingGui
@@ -126,8 +155,8 @@ local LSub = Instance.new("TextLabel")
 LSub.Size = UDim2.new(1, 0, 0, 25)
 LSub.Position = UDim2.new(0, 0, 0, 70)
 LSub.BackgroundTransparency = 1
-LSub.Text = "Cyberpunk Luxury Engine v8.0 [KIO]"
-LSub.TextColor3 = Color3.fromRGB(190, 140, 255)
+LSub.Text = "Loading Luxury Admin Engine v9.0..."
+LSub.TextColor3 = Color3.fromRGB(200, 150, 255)
 LSub.TextSize = 11
 LSub.Font = Enum.Font.GothamMedium
 LSub.ZIndex = 101
@@ -158,7 +187,7 @@ local PercentText = Instance.new("TextLabel")
 PercentText.Size = UDim2.new(1, 0, 0, 30)
 PercentText.Position = UDim2.new(0, 0, 0, 155)
 PercentText.BackgroundTransparency = 1
-PercentText.Text = "Initializing Modules... 0%"
+PercentText.Text = "Initializing Core System... 0%"
 PercentText.TextColor3 = Color3.fromRGB(230, 200, 255)
 PercentText.TextSize = 11
 PercentText.Font = Enum.Font.GothamBold
@@ -168,13 +197,13 @@ PercentText.Parent = LoadingGui
 -- FLOATING TOGGLE BUTTON (PILL SHAPE)
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Name = "OpenButton"
-OpenBtn.Size = UDim2.new(0, 110, 0, 44)
+OpenBtn.Size = UDim2.new(0, 115, 0, 44)
 OpenBtn.Position = UDim2.new(0.03, 0, 0.2, 0)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(18, 8, 30)
 OpenBtn.BackgroundTransparency = 0.15
-OpenBtn.Text = "◈ VOID v8"
+OpenBtn.Text = "◈ ADMIN v9"
 OpenBtn.TextColor3 = Color3.fromRGB(245, 180, 255)
-OpenBtn.TextSize = 13
+OpenBtn.TextSize = 12
 OpenBtn.Font = Enum.Font.GothamBold
 OpenBtn.Active = true
 OpenBtn.Visible = false
@@ -186,7 +215,7 @@ OpenCorner.CornerRadius = UDim.new(1, 0)
 OpenCorner.Parent = OpenBtn
 
 local OpenGlow = Instance.new("UIStroke")
-OpenGlow.Color = Color3.fromRGB(210, 100, 255)
+OpenGlow.Color = Color3.fromRGB(220, 100, 255)
 OpenGlow.Transparency = 0.2
 OpenGlow.Thickness = 2.5
 OpenGlow.Parent = OpenBtn
@@ -196,11 +225,11 @@ MakeDraggable(OpenBtn, OpenBtn)
 -- ==========================================
 -- 2. MAIN WINDOW FRAME
 -- ==========================================
-local TargetSize = UDim2.new(0, 620, 0, 400)
+local TargetSize = UDim2.new(0, 640, 0, 410)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(0.5, -310, 0.5, -200)
+MainFrame.Position = UDim2.new(0.5, -320, 0.5, -205)
 MainFrame.BackgroundColor3 = Color3.fromRGB(10, 4, 16)
 MainFrame.BackgroundTransparency = 0.05
 MainFrame.ClipsDescendants = true
@@ -215,7 +244,7 @@ MainCorner.Parent = MainFrame
 
 local GlassGradient = Instance.new("UIGradient")
 GlassGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(85, 20, 140)),
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 20, 145)),
     ColorSequenceKeypoint.new(0.35, Color3.fromRGB(16, 6, 28)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 2, 10))
 }
@@ -223,7 +252,7 @@ GlassGradient.Rotation = 135
 GlassGradient.Parent = MainFrame
 
 local GlassStroke = Instance.new("UIStroke")
-GlassStroke.Color = Color3.fromRGB(220, 110, 255)
+GlassStroke.Color = Color3.fromRGB(230, 110, 255)
 GlassStroke.Transparency = 0.25
 GlassStroke.Thickness = 2
 GlassStroke.Parent = MainFrame
@@ -239,7 +268,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0, 400, 1, 0)
 Title.Position = UDim2.new(0, 24, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "◈ VoidHub <font color=\"#E080FF\">Supreme v8.0</font>"
+Title.Text = "◈ VoidHub <font color=\"#E080FF\">Admin Panel v9.0</font>"
 Title.RichText = true
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
@@ -319,7 +348,7 @@ local function CreatePage(name)
     page.CanvasSize = UDim2.new(0, 0, 0, 0)
     page.AutomaticCanvasSize = Enum.AutomaticSize.Y
     page.ScrollBarThickness = 2
-    page.ScrollBarImageColor3 = Color3.fromRGB(210, 100, 255)
+    page.ScrollBarImageColor3 = Color3.fromRGB(220, 100, 255)
     page.Visible = false
     page.ZIndex = 12
     page.Parent = PagesFolder
@@ -331,14 +360,12 @@ local function CreatePage(name)
     return page
 end
 
-local InfoTabPage = CreatePage("Info")
-local VisualTabPage = CreatePage("Visual")
+local AdminTabPage = CreatePage("Admin")
 local MovementTabPage = CreatePage("Movement")
-local FarmTabPage = CreatePage("Farm")
-local TeleportTabPage = CreatePage("Teleport")
+local VisualTabPage = CreatePage("Visual")
 local MiscTabPage = CreatePage("Misc")
 
-InfoTabPage.Visible = true
+AdminTabPage.Visible = true
 
 local function CreateTabButton(symbol, text, pageTarget, defaultActive)
     local btn = Instance.new("TextButton")
@@ -354,7 +381,7 @@ local function CreateTabButton(symbol, text, pageTarget, defaultActive)
     btn.Parent = Sidebar
     
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0) -- FULL BULAT / PILL SHAPE
+    corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = btn
 
     btn.MouseButton1Click:Connect(function()
@@ -371,26 +398,24 @@ local function CreateTabButton(symbol, text, pageTarget, defaultActive)
     end)
 end
 
-CreateTabButton("◆", "Overview", InfoTabPage, true)
-CreateTabButton("👁", "Player ESP", VisualTabPage, false)
-CreateTabButton("⚡", "Movement", MovementTabPage, false)
-CreateTabButton("⬢", "Auto Helpers", FarmTabPage, false)
-CreateTabButton("▲", "Teleports", TeleportTabPage, false)
+CreateTabButton("⚡", "Admin Console", AdminTabPage, true)
+CreateTabButton("◈", "Movement & Fly", MovementTabPage, false)
+CreateTabButton("👁", "Visual & ESP", VisualTabPage, false)
 CreateTabButton("⚙", "System Tools", MiscTabPage, false)
 
 -- ==========================================
--- UI COMPONENT CREATORS (BULAT & PREMIUM)
+-- UI HELPER COMPONENTS
 -- ==========================================
 local function CreateToggle(parent, titleText, defaultState, callback)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 50)
+    frame.Size = UDim2.new(1, 0, 0, 48)
     frame.BackgroundColor3 = Color3.fromRGB(24, 10, 40)
     frame.BackgroundTransparency = 0.3
     frame.ZIndex = 13
     frame.Parent = parent
     
     local fCorner = Instance.new("UICorner")
-    fCorner.CornerRadius = UDim.new(1, 0) -- FULL BULAT
+    fCorner.CornerRadius = UDim.new(1, 0)
     fCorner.Parent = frame
     
     local label = Instance.new("TextLabel")
@@ -406,8 +431,8 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     label.Parent = frame
     
     local switch = Instance.new("TextButton")
-    switch.Size = UDim2.new(0, 50, 0, 26)
-    switch.Position = UDim2.new(1, -60, 0.5, -13)
+    switch.Size = UDim2.new(0, 48, 0, 26)
+    switch.Position = UDim2.new(1, -58, 0.5, -13)
     switch.BackgroundColor3 = defaultState and Color3.fromRGB(170, 70, 255) or Color3.fromRGB(38, 16, 60)
     switch.Text = ""
     switch.ZIndex = 14
@@ -432,11 +457,11 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     switch.MouseButton1Click:Connect(function()
         active = not active
         if active then
-            TweenService:Create(switch, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundColor3 = Color3.fromRGB(170, 70, 255)}):Play()
-            TweenService:Create(circle, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {Position = UDim2.new(1, -23, 0.5, -10)}):Play()
+            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(170, 70, 255)}):Play()
+            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -23, 0.5, -10)}):Play()
         else
-            TweenService:Create(switch, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundColor3 = Color3.fromRGB(38, 16, 60)}):Play()
-            TweenService:Create(circle, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {Position = UDim2.new(0, 3, 0.5, -10)}):Play()
+            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(38, 16, 60)}):Play()
+            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -10)}):Play()
         end
         callback(active)
     end)
@@ -444,7 +469,7 @@ end
 
 local function CreateButton(parent, symbol, titleText, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 46)
+    btn.Size = UDim2.new(1, 0, 0, 44)
     btn.BackgroundColor3 = Color3.fromRGB(38, 16, 62)
     btn.BackgroundTransparency = 0.25
     btn.Text = "   " .. symbol .. "  " .. titleText
@@ -456,112 +481,236 @@ local function CreateButton(parent, symbol, titleText, callback)
     btn.Parent = parent
     
     local bCorner = Instance.new("UICorner")
-    bCorner.CornerRadius = UDim.new(1, 0) -- FULL BULAT
+    bCorner.CornerRadius = UDim.new(1, 0)
     bCorner.Parent = btn
 
     btn.MouseButton1Click:Connect(function()
         local origColor = btn.BackgroundColor3
-        TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(180, 80, 255)}):Play()
-        task.wait(0.12)
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = origColor}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(180, 80, 255)}):Play()
+        task.wait(0.1)
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = origColor}):Play()
         callback()
     end)
 end
 
 -- ==========================================
--- 3. OVERVIEW TAB
+-- 3. ADMIN CONSOLE & COMMAND SYSTEM
 -- ==========================================
-local Card = Instance.new("Frame")
-Card.Size = UDim2.new(1, 0, 0, 220)
-Card.BackgroundColor3 = Color3.fromRGB(24, 10, 40)
-Card.BackgroundTransparency = 0.3
-Card.ZIndex = 13
-Card.Parent = InfoTabPage
+local ConsoleFrame = Instance.new("Frame")
+ConsoleFrame.Size = UDim2.new(1, 0, 0, 140)
+ConsoleFrame.BackgroundColor3 = Color3.fromRGB(12, 5, 20)
+ConsoleFrame.BackgroundTransparency = 0.2
+ConsoleFrame.ZIndex = 13
+ConsoleFrame.Parent = AdminTabPage
 
-local CCorner = Instance.new("UICorner")
-CCorner.CornerRadius = UDim.new(0, 20)
-CCorner.Parent = Card
+local CFCorner = Instance.new("UICorner")
+CFCorner.CornerRadius = UDim.new(0, 16)
+CFCorner.Parent = ConsoleFrame
 
-local CTitle = Instance.new("TextLabel")
-CTitle.Size = UDim2.new(1, -24, 0, 36)
-CTitle.Position = UDim2.new(0, 16, 0, 10)
-CTitle.BackgroundTransparency = 1
-CTitle.Text = "◈ SYSTEM CHANGELOG & INFORMATION"
-CTitle.TextColor3 = Color3.fromRGB(255, 210, 130)
-CTitle.TextSize = 13
-CTitle.Font = Enum.Font.GothamBold
-CTitle.TextXAlignment = Enum.TextXAlignment.Left
-CTitle.ZIndex = 14
-CTitle.Parent = Card
+local ConsoleScroll = Instance.new("ScrollingFrame")
+ConsoleScroll.Size = UDim2.new(1, -20, 1, -20)
+ConsoleScroll.Position = UDim2.new(0, 10, 0, 10)
+ConsoleScroll.BackgroundTransparency = 1
+ConsoleScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+ConsoleScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+ConsoleScroll.ScrollBarThickness = 2
+ConsoleScroll.ZIndex = 14
+ConsoleScroll.Parent = ConsoleFrame
 
-local CDesc = Instance.new("TextLabel")
-CDesc.Size = UDim2.new(1, -32, 0, 160)
-CDesc.Position = UDim2.new(0, 16, 0, 48)
-CDesc.BackgroundTransparency = 1
-CDesc.Text = "Selamat datang di VoidHub Supreme v8.0 Luxury Edition!\n\n• Hapus total Egg ESP & Prediksi.\n• Perbaikan Player ESP agar dapat dinyalakan/dimatikan secara instan.\n• Pembaruan UI total dengan tema Cyberpunk Glassmorphic dan Tombol Bulat Presisi.\n• Penambahan fitur Auto Clicker, Movement Modifiers & Teleportation Suite."
-CDesc.TextColor3 = Color3.fromRGB(220, 200, 245)
-CDesc.TextSize = 11
-CDesc.Font = Enum.Font.GothamMedium
-CDesc.TextWrapped = true
-CDesc.TextXAlignment = Enum.TextXAlignment.Left
-CDesc.TextYAlignment = Enum.TextYAlignment.Top
-CDesc.ZIndex = 14
-CDesc.Parent = Card
+local CSLayout = Instance.new("UIListLayout")
+CSLayout.SortOrder = Enum.SortOrder.LayoutOrder
+CSLayout.Padding = UDim.new(0, 4)
+CSLayout.Parent = ConsoleScroll
 
--- ==========================================
--- 4. VISUAL TAB (FIXED PLAYER ESP)
--- ==========================================
-local function ClearPlayerESP()
-    for _, p in pairs(Players:GetPlayers()) do
-        if p.Character then
-            local hl = p.Character:FindFirstChild("VoidPlayerHL")
-            if hl then hl:Destroy() end
+local function LogConsole(msg)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, 0, 0, 18)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "[ADMIN]: " .. msg
+    lbl.TextColor3 = Color3.fromRGB(220, 180, 255)
+    lbl.TextSize = 11
+    lbl.Font = Enum.Font.Code
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.ZIndex = 15
+    lbl.Parent = ConsoleScroll
+    ConsoleScroll.CanvasPosition = Vector2.new(0, 9999)
+end
+
+LogConsole("VoidHub Luxury Admin Console Ready.")
+LogConsole("Ketik 'help' untuk melihat daftar perintah.")
+
+-- COMMAND INPUT BAR
+local CmdBarFrame = Instance.new("Frame")
+CmdBarFrame.Size = UDim2.new(1, 0, 0, 46)
+CmdBarFrame.BackgroundColor3 = Color3.fromRGB(28, 12, 48)
+CmdBarFrame.ZIndex = 13
+CmdBarFrame.Parent = AdminTabPage
+
+local CBCorner2 = Instance.new("UICorner")
+CBCorner2.CornerRadius = UDim.new(1, 0)
+CBCorner2.Parent = CmdBarFrame
+
+local CmdInput = Instance.new("TextBox")
+CmdInput.Size = UDim2.new(1, -110, 1, 0)
+CmdInput.Position = UDim2.new(0, 18, 0, 0)
+CmdInput.BackgroundTransparency = 1
+CmdInput.PlaceholderText = "Type command here... (e.g. fly, speed 50, god)"
+CmdInput.PlaceholderColor3 = Color3.fromRGB(160, 130, 190)
+CmdInput.Text = ""
+CmdInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+CmdInput.TextSize = 12
+CmdInput.Font = Enum.Font.GothamMedium
+CmdInput.TextXAlignment = Enum.TextXAlignment.Left
+CmdInput.ZIndex = 14
+CmdInput.Parent = CmdBarFrame
+
+local ExecBtn = Instance.new("TextButton")
+ExecBtn.Size = UDim2.new(0, 80, 0, 32)
+ExecBtn.Position = UDim2.new(1, -86, 0.5, -16)
+ExecBtn.BackgroundColor3 = Color3.fromRGB(160, 60, 255)
+ExecBtn.Text = "EXECUTE"
+ExecBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ExecBtn.TextSize = 10
+ExecBtn.Font = Enum.Font.GothamBold
+ExecBtn.ZIndex = 14
+ExecBtn.Parent = CmdBarFrame
+
+local EBCorner = Instance.new("UICorner")
+EBCorner.CornerRadius = UDim.new(1, 0)
+EBCorner.Parent = ExecBtn
+
+local function ProcessCommand(cmdText)
+    if cmdText == "" then return end
+    LogConsole("> " .. cmdText)
+    local args = string.split(cmdText, " ")
+    local cmd = string.lower(args[1])
+
+    if cmd == "help" then
+        LogConsole("Cmds: fly, unfly, speed [val], jump [val], god, ungod, noclip, clip, rj, clear")
+    elseif cmd == "fly" then
+        State.Flying = true
+        if args[2] and tonumber(args[2]) then State.FlySpeed = tonumber(args[2]) end
+        StartFlying()
+        LogConsole("Fly enabled. Speed: " .. tostring(State.FlySpeed))
+    elseif cmd == "unfly" then
+        State.Flying = false
+        StopFlying()
+        LogConsole("Fly disabled.")
+    elseif cmd == "speed" and args[2] then
+        local num = tonumber(args[2])
+        if num then
+            State.SpeedValue = num
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = num
+            end
+            LogConsole("Speed set to: " .. num)
         end
-    end
-end
-
-local function ApplyPlayerESP(player)
-    if player == LocalPlayer or not player.Character then return end
-    if not player.Character:FindFirstChild("VoidPlayerHL") then
-        local hl = Instance.new("Highlight")
-        hl.Name = "VoidPlayerHL"
-        hl.FillColor = Color3.fromRGB(150, 70, 255)
-        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-        hl.FillTransparency = 0.35
-        hl.OutlineTransparency = 0.1
-        hl.Parent = player.Character
-    end
-end
-
-CreateToggle(VisualTabPage, "👁 Player Highlight ESP", State.PlayerESP, function(active)
-    State.PlayerESP = active
-    if active then
-        for _, p in pairs(Players:GetPlayers()) do ApplyPlayerESP(p) end
-        ESPConnections["PlayerAdded"] = Players.PlayerAdded:Connect(function(p)
-            p.CharacterAdded:Connect(function()
-                if State.PlayerESP then task.wait(0.5); ApplyPlayerESP(p) end
-            end)
-        end)
-        ESPConnections["Loop"] = RunService.Heartbeat:Connect(function()
-            if State.PlayerESP then
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character and not p.Character:FindFirstChild("VoidPlayerHL") then
-                        ApplyPlayerESP(p)
-                    end
-                end
+    elseif cmd == "jump" and args[2] then
+        local num = tonumber(args[2])
+        if num then
+            State.JumpValue = num
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum.UseJumpPower = true hum.JumpPower = num end
+            LogConsole("JumpPower set to: " .. num)
+        end
+    elseif cmd == "god" then
+        State.GodMode = true
+        pcall(function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").MaxHealth = math.huge
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = math.huge
             end
         end)
+        LogConsole("Godmode activated.")
+    elseif cmd == "ungod" then
+        State.GodMode = false
+        pcall(function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").MaxHealth = 100
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = 100
+            end
+        end)
+        LogConsole("Godmode deactivated.")
+    elseif cmd == "noclip" then
+        State.Noclip = true
+        LogConsole("Noclip enabled.")
+    elseif cmd == "clip" then
+        State.Noclip = false
+        LogConsole("Noclip disabled.")
+    elseif cmd == "rj" or cmd == "rejoin" then
+        LogConsole("Rejoining server...")
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    elseif cmd == "clear" then
+        for _, child in pairs(ConsoleScroll:GetChildren()) do
+            if child:IsA("TextLabel") then child:Destroy() end
+        end
+        LogConsole("Console cleared.")
     else
-        for _, conn in pairs(ESPConnections) do conn:Disconnect() end
-        ESPConnections = {}
-        ClearPlayerESP()
+        LogConsole("Unknown command: " .. cmd)
+    end
+end
+
+ExecBtn.MouseButton1Click:Connect(function()
+    ProcessCommand(CmdInput.Text)
+    CmdInput.Text = ""
+end)
+
+CmdInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        ProcessCommand(CmdInput.Text)
+        CmdInput.Text = ""
     end
 end)
 
+-- QUICK COMMAND BUTTONS GRID
+local QuickCmdGrid = Instance.new("Frame")
+QuickCmdGrid.Size = UDim2.new(1, 0, 0, 110)
+QuickCmdGrid.BackgroundTransparency = 1
+QuickCmdGrid.ZIndex = 13
+QuickCmdGrid.Parent = AdminTabPage
+
+local QLayout = Instance.new("UIGridLayout")
+QLayout.CellSize = UDim2.new(0, 102, 0, 36)
+QLayout.CellPadding = UDim2.new(0, 8, 0, 8)
+QLayout.Parent = QuickCmdGrid
+
+local function CreateQuickCmd(name, cmdStr)
+    local qbtn = Instance.new("TextButton")
+    qbtn.BackgroundColor3 = Color3.fromRGB(38, 16, 62)
+    qbtn.Text = name
+    qbtn.TextColor3 = Color3.fromRGB(240, 220, 255)
+    qbtn.TextSize = 11
+    qbtn.Font = Enum.Font.GothamBold
+    qbtn.ZIndex = 14
+    qbtn.Parent = QuickCmdGrid
+
+    local qCorner = Instance.new("UICorner")
+    qCorner.CornerRadius = UDim.new(1, 0)
+    qCorner.Parent = qbtn
+
+    qbtn.MouseButton1Click:Connect(function()
+        ProcessCommand(cmdStr)
+    end)
+end
+
+CreateQuickCmd("⚡ Fly", "fly 50")
+CreateQuickCmd("🛑 Unfly", "unfly")
+CreateQuickCmd("👑 Godmode", "god")
+CreateQuickCmd("🛡 Ungod", "ungod")
+CreateQuickCmd("◇ Noclip", "noclip")
+CreateQuickCmd("◈ Clip", "clip")
+CreateQuickCmd("🔄 Rejoin", "rejoin")
+CreateQuickCmd("🗑 Clear Log", "clear")
+
 -- ==========================================
--- 5. MOVEMENT TAB
+-- 4. MOVEMENT & FLY TAB
 -- ==========================================
-CreateToggle(MovementTabPage, "⚡ Speed Boost (24)", State.WalkSpeed, function(active)
+CreateToggle(MovementTabPage, "⚡ Fly Mode (WASD + Shift/Space)", State.Flying, function(active)
+    State.Flying = active
+    if active then StartFlying() else StopFlying() end
+end)
+
+CreateToggle(MovementTabPage, "⚡ Speed Booster (24)", State.WalkSpeed, function(active)
     State.WalkSpeed = active
     task.spawn(function()
         while State.WalkSpeed do
@@ -628,69 +777,59 @@ CreateToggle(MovementTabPage, "◇ Noclip Mode", State.Noclip, function(active)
 end)
 
 -- ==========================================
--- 6. FARM & HELPERS TAB (STEAL ANEGG INSPIRED)
+-- 5. VISUAL & ESP TAB
 -- ==========================================
-CreateToggle(FarmTabPage, "⬢ Auto Clicker / Tap Simulator", State.AutoClicker, function(active)
-    State.AutoClicker = active
-    task.spawn(function()
-        while State.AutoClicker do
-            pcall(function()
-                local vim = game:GetService("VirtualInputManager")
-                vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-            end)
-            task.wait(0.05)
+local function ClearPlayerESP()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p.Character then
+            local hl = p.Character:FindFirstChild("VoidPlayerHL")
+            if hl then hl:Destroy() end
         end
-    end)
-end)
-
-CreateButton(FarmTabPage, "⚡", "Instant Hatch / Interaction Helper", function()
-    pcall(function()
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("ProximityPrompt") then
-                fireproximityprompt(v)
-            end
-        end
-    end)
-end)
-
--- ==========================================
--- 7. TELEPORT TAB
--- ==========================================
-local function TeleportTo(cframe)
-    pcall(function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = cframe
-        end
-    end)
+    end
 end
 
-CreateButton(TeleportTabPage, "▲", "Teleport to Spawn", function()
-    TeleportTo(CFrame.new(0, 10, 0))
-end)
-
-CreateButton(TeleportTabPage, "🛍", "Teleport to Shop Zone", function()
-    local shop = workspace:FindFirstChild("Shop") or workspace:FindFirstChild("Store")
-    if shop then
-        TeleportTo(shop:GetPivot())
-    else
-        TeleportTo(CFrame.new(50, 10, 50))
+local function ApplyPlayerESP(player)
+    if player == LocalPlayer or not player.Character then return end
+    if not player.Character:FindFirstChild("VoidPlayerHL") then
+        local hl = Instance.new("Highlight")
+        hl.Name = "VoidPlayerHL"
+        hl.FillColor = Color3.fromRGB(150, 70, 255)
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.FillTransparency = 0.35
+        hl.OutlineTransparency = 0.1
+        hl.Parent = player.Character
     end
-end)
+end
 
-CreateButton(TeleportTabPage, "👑", "Teleport to VIP / Upgrade Area", function()
-    local vip = workspace:FindFirstChild("VIP") or workspace:FindFirstChild("Upgrades")
-    if vip then
-        TeleportTo(vip:GetPivot())
+CreateToggle(VisualTabPage, "👁 Player Highlight ESP", State.PlayerESP, function(active)
+    State.PlayerESP = active
+    if active then
+        for _, p in pairs(Players:GetPlayers()) do ApplyPlayerESP(p) end
+        ESPConnections["PlayerAdded"] = Players.PlayerAdded:Connect(function(p)
+            p.CharacterAdded:Connect(function()
+                if State.PlayerESP then task.wait(0.5); ApplyPlayerESP(p) end
+            end)
+        end)
+        ESPConnections["Loop"] = RunService.Heartbeat:Connect(function()
+            if State.PlayerESP then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and not p.Character:FindFirstChild("VoidPlayerHL") then
+                        ApplyPlayerESP(p)
+                    end
+                end
+            end
+        end)
     else
-        TeleportTo(CFrame.new(-50, 10, -50))
+        for _, conn in pairs(ESPConnections) do conn:Disconnect() end
+        ESPConnections = {}
+        ClearPlayerESP()
     end
 end)
 
 -- ==========================================
--- 8. SYSTEM TOOLS TAB
+-- 6. SYSTEM TOOLS TAB
 -- ==========================================
-CreateToggle(MiscTabPage, "🛡 Safe Anti-AFK", State.AntiAFK, function(active)
+CreateToggle(MiscTabPage, "🛡 Safe Anti-AFK Mode", State.AntiAFK, function(active)
     State.AntiAFK = active
     task.spawn(function()
         while State.AntiAFK do
@@ -707,26 +846,11 @@ CreateToggle(MiscTabPage, "🛡 Safe Anti-AFK", State.AntiAFK, function(active)
     end)
 end)
 
-CreateToggle(MiscTabPage, "⚡ FPS Booster (Lower Graphics)", State.FPSBooster, function(active)
-    State.FPSBooster = active
-    if active then
-        pcall(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") and not v:IsA("MeshPart") then
-                    v.Material = Enum.Material.SmoothPlastic
-                elseif v:IsA("Decal") or v:IsA("Texture") then
-                    v:Destroy()
-                end
-            end
-        end)
-    end
-end)
-
-CreateButton(MiscTabPage, "🔄", "Rejoin Current Server", function()
+CreateButton(MiscTabPage, "🔄", "Rejoin Server", function()
     pcall(function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
 end)
 
-CreateButton(MiscTabPage, "🌐", "Server Hop (Low Player Server)", function()
+CreateButton(MiscTabPage, "🌐", "Server Hop (Cari Server Sepi)", function()
     pcall(function()
         local servers = {}
         local req = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
@@ -741,13 +865,11 @@ CreateButton(MiscTabPage, "🌐", "Server Hop (Low Player Server)", function()
     end)
 end)
 
-CreateButton(MiscTabPage, "📋", "Copy JobID to Clipboard", function()
-    if setclipboard then
-        setclipboard(game.JobId)
-    end
+CreateButton(MiscTabPage, "📋", "Copy Server JobID", function()
+    if setclipboard then setclipboard(game.JobId) end
 end)
 
--- OPEN BUTTON EVENT
+-- OPEN BUTTON CALLBACK
 OpenBtn.MouseButton1Click:Connect(function()
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.Visible = true
@@ -755,11 +877,11 @@ OpenBtn.MouseButton1Click:Connect(function()
     TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
 end)
 
--- INITIAL ANIMATED LOADING SEQUENCE
+-- ANIMATED INITIAL LOADING SEQUENCE
 task.spawn(function()
     for i = 1, 100 do
         BarFill.Size = UDim2.new(i/100, 0, 1, 0)
-        PercentText.Text = "Loading Cyberpunk Core... " .. i .. "%"
+        PercentText.Text = "Loading Luxury Core... " .. i .. "%"
         task.wait(0.008)
     end
     task.wait(0.15)
