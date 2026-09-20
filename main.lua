@@ -1,11 +1,13 @@
--- [[ VOIDHUB CUSTOM UI - ULTRA PREMIUM iOS EDITION v2.4 ]] --
--- Created by Kio (Split Categories & Refresh Egg ESP)
+-- [[ VOIDHUB CUSTOM UI - ULTRA PREMIUM iOS EDITION v2.5 ]] --
+-- Created by Kio (ESP Egg Text & Server Hop Added)
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
@@ -168,7 +170,7 @@ GlassStroke.Transparency = 0.4
 GlassStroke.Thickness = 1.5
 GlassStroke.Parent = MainFrame
 
--- TOPBAR / HEADER (Tanpa teks Steal an Egg)
+-- TOPBAR / HEADER
 local Topbar = Instance.new("Frame")
 Topbar.Name = "Topbar"
 Topbar.Size = UDim2.new(1, 0, 0, 42)
@@ -214,7 +216,7 @@ CloseBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- SIDEBAR NAVIGATION (3 KATEGORI: MAIN, WALK, MISC)
+-- SIDEBAR NAVIGATION
 -- ==========================================
 local Sidebar = Instance.new("ScrollingFrame")
 Sidebar.Size = UDim2.new(0, 130, 1, -52)
@@ -376,7 +378,7 @@ local function CreateToggle(parent, titleText, callback)
 end
 
 -- ==========================================
--- BUTTON BUILDER FUNCTION (UNTUK REFRESH)
+-- BUTTON BUILDER FUNCTION
 -- ==========================================
 local function CreateButton(parent, titleText, callback)
     local btn = Instance.new("TextButton")
@@ -442,34 +444,71 @@ CreateToggle(MainTabPage, "Player ESP", function(state)
     end
 end)
 
--- 2. Fungsi Refresh & Auto Detect Egg ESP (Telur yang belum diambil / reset otomatis)
+-- 2. Enhanced Egg & Item ESP (Menampilkan Teks Nama & Berat Telur)
 local function RefreshEggs()
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") and (obj.Name:lower():find("egg") or obj.Name:lower():find("item")) then
-            -- Pastikan objek aktif (tidak transparan total atau baru spawn)
-            if obj.Transparency < 0.9 and not obj:FindFirstChild("EggHighlight") then
-                local hl = Instance.new("Highlight")
-                hl.Name = "EggHighlight"
-                hl.FillColor = Color3.fromRGB(150, 50, 255)
-                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                hl.FillTransparency = 0.4
-                hl.Parent = obj
+            if obj.Transparency < 0.9 then
+                -- Highlight objek telur
+                if not obj:FindFirstChild("EggHighlight") then
+                    local hl = Instance.new("Highlight")
+                    hl.Name = "EggHighlight"
+                    hl.FillColor = Color3.fromRGB(150, 50, 255)
+                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    hl.FillTransparency = 0.4
+                    hl.Parent = obj
+                end
+                
+                -- Billboard Text untuk menampilkan info nama / berat / isi telur
+                if not obj:FindFirstChild("EggInfoTag") then
+                    local bill = Instance.new("BillboardGui")
+                    bill.Name = "EggInfoTag"
+                    bill.Size = UDim2.new(0, 100, 0, 40)
+                    bill.AlwaysOnTop = true
+                    bill.StudsOffset = Vector3.new(0, 2, 0)
+                    bill.Parent = obj
+                    
+                    local txt = Instance.new("TextLabel")
+                    txt.Name = "InfoText"
+                    txt.Size = UDim2.new(1, 0, 1, 0)
+                    txt.BackgroundTransparency = 1
+                    txt.TextColor3 = Color3.fromRGB(255, 220, 100)
+                    txt.TextSize = 11
+                    txt.Font = Enum.Font.GothamBold
+                    txt.TextStrokeTransparency = 0.3
+                    txt.Text = obj.Name
+                    txt.Parent = bill
+                else
+                    -- Update teks jika ada atribut berat/nilai di dalam objek telur
+                    local txt = obj.EggInfoTag:FindFirstChild("InfoText")
+                    if txt then
+                        local displayText = obj.Name
+                        -- Cek apakah ada nilai berat atau info tambahan di children/attributes
+                        for _, child in pairs(obj:GetChildren()) do
+                            if child:IsA("StringValue") or child:IsA("NumberValue") then
+                                displayText = obj.Name .. "\n[" .. tostring(child.Value) .. "]"
+                            end
+                        end
+                        txt.Text = displayText
+                    end
+                end
             end
         end
     end
 end
 
-CreateToggle(MainTabPage, "Egg & Item ESP (Auto Scan)", function(state)
+CreateToggle(MainTabPage, "Egg ESP (Auto Scan & Info)", function(state)
     _G.EggESPActive = state
     task.spawn(function()
         while _G.EggESPActive do
             pcall(RefreshEggs)
-            task.wait(1.5) -- Auto-refresh setiap 1.5 detik untuk mendeteksi telur baru / reset
+            task.wait(1.5)
         end
-        -- Bersihkan jika dimatikan
+        -- Bersihkan ESP saat dimatikan
         for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and obj:FindFirstChild("EggHighlight") then
-                obj.EggHighlight:Destroy()
+            if obj:IsA("BasePart") then
+                if obj:FindFirstChild("EggHighlight") then obj.EggHighlight:Destroy() end
+                if obj:FindFirstChild("EggInfoTag") then obj.EggInfoTag:Destroy() end
             end
         end
     end)
@@ -531,6 +570,34 @@ CreateToggle(MiscTabPage, "Anti-AFK Safe", function(state)
     else
         _G.AntiAFKActive = false
     end
+end)
+
+-- Tombol Rejoin Server
+CreateButton(MiscTabPage, "🔄 Rejoin Server", function()
+    pcall(function()
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end)
+end)
+
+-- Tombol Server Hop (Mencari Server Sepi)
+CreateButton(MiscTabPage, "🌐 Server Hop (Cari Server Sepi)", function()
+    pcall(function()
+        local servers = {}
+        local cursor = ""
+        local req = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
+        
+        for _, server in pairs(req.data) do
+            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                table.insert(servers, server.id)
+            end
+        end
+        
+        if #servers > 0 then
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)], LocalPlayer)
+        else
+            warn("Tidak ditemukan server sepi, coba lagi.")
+        end
+    end)
 end)
 
 -- ==========================================
