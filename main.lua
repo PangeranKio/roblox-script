@@ -1,5 +1,5 @@
--- [[ VOIDHUB SUPREME ULTRA v9.0 - LUXURY ADMIN PANEL EDITION ]] --
--- Rebuilt & Redesigned by Kio
+-- [[ VOIDHUB SUPREME v10.0 - iOS DARK EDITION ]] --
+-- Rebuilt & Redesigned with iOS UI / UX System
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -10,18 +10,19 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
--- Cleanup Previous Instances
-if CoreGui:FindFirstChild("VoidHubUI_v9") then
-    CoreGui.VoidHubUI_v9:Destroy()
+-- ==========================================
+-- 0. ANTI DOUBLE RE-EXECUTE SYSTEM
+-- ==========================================
+if CoreGui:FindFirstChild("VoidHubUI_iOS") then
+    CoreGui.VoidHubUI_iOS:Destroy()
 end
 
 local VoidHubUI = Instance.new("ScreenGui")
-VoidHubUI.Name = "VoidHubUI_v9"
+VoidHubUI.Name = "VoidHubUI_iOS"
 VoidHubUI.Parent = CoreGui
 VoidHubUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- SYSTEM STATE & CONFIG
-local ConfigFileName = "VoidHub_v9_Config.json"
+-- SYSTEM STATE
 local State = {
     PlayerESP = false,
     WalkSpeed = false,
@@ -32,14 +33,13 @@ local State = {
     FlySpeed = 50,
     SpeedValue = 24,
     JumpValue = 100,
-    GodMode = false,
     AntiAFK = true
 }
 
 local ESPConnections = {}
 local FlyBodyVel, FlyBodyGyro
 
--- SMOOTH DRAG SYSTEM
+-- SMOOTH DRAG SYSTEM FOR iOS WINDOW
 local function MakeDraggable(topbar, object)
     local dragging, dragInput, dragStart, startPos
     topbar.InputBegan:Connect(function(input)
@@ -60,7 +60,7 @@ local function MakeDraggable(topbar, object)
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
-            TweenService:Create(object, TweenInfo.new(0.1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            TweenService:Create(object, TweenInfo.new(0.08, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
                 Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
             }):Play()
         end
@@ -111,99 +111,17 @@ local function StopFlying()
 end
 
 -- ==========================================
--- 1. INTRO / LOADING SCREEN
+-- 1. FLOATING TOGGLE BUTTON (iOS WIDGET STYLE)
 -- ==========================================
-local LoadingGui = Instance.new("Frame")
-LoadingGui.Size = UDim2.new(0, 440, 0, 250)
-LoadingGui.Position = UDim2.new(0.5, -220, 0.5, -125)
-LoadingGui.BackgroundColor3 = Color3.fromRGB(10, 4, 18)
-LoadingGui.BackgroundTransparency = 0.05
-LoadingGui.ZIndex = 100
-LoadingGui.Parent = VoidHubUI
-
-local LGCorner = Instance.new("UICorner")
-LGCorner.CornerRadius = UDim.new(0, 28)
-LGCorner.Parent = LoadingGui
-
-local LGStroke = Instance.new("UIStroke")
-LGStroke.Color = Color3.fromRGB(220, 100, 255)
-LGStroke.Transparency = 0.15
-LGStroke.Thickness = 2.5
-LGStroke.Parent = LoadingGui
-
-local LGLoadingGradient = Instance.new("UIGradient")
-LGLoadingGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 25, 150)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(18, 6, 32)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 2, 14))
-}
-LGLoadingGradient.Rotation = 45
-LGLoadingGradient.Parent = LoadingGui
-
-local LTitle = Instance.new("TextLabel")
-LTitle.Size = UDim2.new(1, 0, 0, 45)
-LTitle.Position = UDim2.new(0, 0, 0, 30)
-LTitle.BackgroundTransparency = 1
-LTitle.Text = "◈ VOIDHUB SUPREME ◈"
-LTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-LTitle.TextSize = 20
-LTitle.Font = Enum.Font.GothamBold
-LTitle.ZIndex = 101
-LTitle.Parent = LoadingGui
-
-local LSub = Instance.new("TextLabel")
-LSub.Size = UDim2.new(1, 0, 0, 25)
-LSub.Position = UDim2.new(0, 0, 0, 70)
-LSub.BackgroundTransparency = 1
-LSub.Text = "Loading Luxury Admin Engine v9.0..."
-LSub.TextColor3 = Color3.fromRGB(200, 150, 255)
-LSub.TextSize = 11
-LSub.Font = Enum.Font.GothamMedium
-LSub.ZIndex = 101
-LSub.Parent = LoadingGui
-
-local BarBg = Instance.new("Frame")
-BarBg.Size = UDim2.new(0, 350, 0, 8)
-BarBg.Position = UDim2.new(0.5, -175, 0, 130)
-BarBg.BackgroundColor3 = Color3.fromRGB(28, 12, 48)
-BarBg.ZIndex = 101
-BarBg.Parent = LoadingGui
-
-local BBHCorner = Instance.new("UICorner")
-BBHCorner.CornerRadius = UDim.new(1, 0)
-BBHCorner.Parent = BarBg
-
-local BarFill = Instance.new("Frame")
-BarFill.Size = UDim2.new(0, 0, 1, 0)
-BarFill.BackgroundColor3 = Color3.fromRGB(220, 90, 255)
-BarFill.ZIndex = 102
-BarFill.Parent = BarBg
-
-local BFHCorner = Instance.new("UICorner")
-BFHCorner.CornerRadius = UDim.new(1, 0)
-BFHCorner.Parent = BarFill
-
-local PercentText = Instance.new("TextLabel")
-PercentText.Size = UDim2.new(1, 0, 0, 30)
-PercentText.Position = UDim2.new(0, 0, 0, 155)
-PercentText.BackgroundTransparency = 1
-PercentText.Text = "Initializing Core System... 0%"
-PercentText.TextColor3 = Color3.fromRGB(230, 200, 255)
-PercentText.TextSize = 11
-PercentText.Font = Enum.Font.GothamBold
-PercentText.ZIndex = 101
-PercentText.Parent = LoadingGui
-
--- FLOATING TOGGLE BUTTON (PILL SHAPE)
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Name = "OpenButton"
-OpenBtn.Size = UDim2.new(0, 115, 0, 44)
-OpenBtn.Position = UDim2.new(0.03, 0, 0.2, 0)
-OpenBtn.BackgroundColor3 = Color3.fromRGB(18, 8, 30)
-OpenBtn.BackgroundTransparency = 0.15
-OpenBtn.Text = "◈ ADMIN v9"
-OpenBtn.TextColor3 = Color3.fromRGB(245, 180, 255)
-OpenBtn.TextSize = 12
+OpenBtn.Size = UDim2.new(0, 110, 0, 40)
+OpenBtn.Position = UDim2.new(0.02, 0, 0.2, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 30)
+OpenBtn.BackgroundTransparency = 0.25
+OpenBtn.Text = " VoidHub"
+OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenBtn.TextSize = 13
 OpenBtn.Font = Enum.Font.GothamBold
 OpenBtn.Active = true
 OpenBtn.Visible = false
@@ -211,30 +129,30 @@ OpenBtn.ZIndex = 90
 OpenBtn.Parent = VoidHubUI
 
 local OpenCorner = Instance.new("UICorner")
-OpenCorner.CornerRadius = UDim.new(1, 0)
+OpenCorner.CornerRadius = UDim.new(0, 20)
 OpenCorner.Parent = OpenBtn
 
-local OpenGlow = Instance.new("UIStroke")
-OpenGlow.Color = Color3.fromRGB(220, 100, 255)
-OpenGlow.Transparency = 0.2
-OpenGlow.Thickness = 2.5
-OpenGlow.Parent = OpenBtn
+local OpenStroke = Instance.new("UIStroke")
+OpenStroke.Color = Color3.fromRGB(255, 255, 255)
+OpenStroke.Transparency = 0.85
+OpenStroke.Thickness = 1
+OpenStroke.Parent = OpenBtn
 
 MakeDraggable(OpenBtn, OpenBtn)
 
 -- ==========================================
--- 2. MAIN WINDOW FRAME
+-- 2. MAIN WINDOW FRAME (iOS DARK GLASS)
 -- ==========================================
-local TargetSize = UDim2.new(0, 640, 0, 410)
+local TargetSize = UDim2.new(0, 580, 0, 370)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(0.5, -320, 0.5, -205)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 4, 16)
-MainFrame.BackgroundTransparency = 0.05
+MainFrame.Position = UDim2.new(0.5, -290, 0.5, -185)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
+MainFrame.BackgroundTransparency = 0.15
 MainFrame.ClipsDescendants = true
 MainFrame.Active = true
-MainFrame.Visible = false
+MainFrame.Visible = true
 MainFrame.ZIndex = 10
 MainFrame.Parent = VoidHubUI
 
@@ -242,33 +160,24 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 28)
 MainCorner.Parent = MainFrame
 
-local GlassGradient = Instance.new("UIGradient")
-GlassGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 20, 145)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(16, 6, 28)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 2, 10))
-}
-GlassGradient.Rotation = 135
-GlassGradient.Parent = MainFrame
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(255, 255, 255)
+MainStroke.Transparency = 0.88
+MainStroke.Thickness = 1.2
+MainStroke.Parent = MainFrame
 
-local GlassStroke = Instance.new("UIStroke")
-GlassStroke.Color = Color3.fromRGB(230, 110, 255)
-GlassStroke.Transparency = 0.25
-GlassStroke.Thickness = 2
-GlassStroke.Parent = MainFrame
-
--- TOPBAR
+-- iOS TOP BAR
 local Topbar = Instance.new("Frame")
-Topbar.Size = UDim2.new(1, 0, 0, 58)
+Topbar.Size = UDim2.new(1, 0, 0, 52)
 Topbar.BackgroundTransparency = 1
 Topbar.ZIndex = 11
 Topbar.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 400, 1, 0)
-Title.Position = UDim2.new(0, 24, 0, 0)
+Title.Size = UDim2.new(0, 300, 1, 0)
+Title.Position = UDim2.new(0, 22, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "◈ VoidHub <font color=\"#E080FF\">Admin Panel v9.0</font>"
+Title.Text = " VoidHub <font color=\"#A0A0A5\">v10.0 Dark</font>"
 Title.RichText = true
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
@@ -279,14 +188,15 @@ Title.Parent = Topbar
 
 MakeDraggable(Topbar, MainFrame)
 
+-- iOS WINDOW CONTROL BUTTONS
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 34, 0, 34)
-CloseBtn.Position = UDim2.new(1, -48, 0, 12)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(45, 15, 70)
-CloseBtn.BackgroundTransparency = 0.2
+CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+CloseBtn.Position = UDim2.new(1, -40, 0, 12)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(44, 44, 46)
+CloseBtn.BackgroundTransparency = 0.3
 CloseBtn.Text = "✕"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 200, 255)
-CloseBtn.TextSize = 14
+CloseBtn.TextColor3 = Color3.fromRGB(235, 235, 245)
+CloseBtn.TextSize = 12
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.ZIndex = 12
 CloseBtn.Parent = Topbar
@@ -296,7 +206,7 @@ CBCorner.CornerRadius = UDim.new(1, 0)
 CBCorner.Parent = CloseBtn
 
 CloseBtn.MouseButton1Click:Connect(function()
-    local CloseTween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+    local CloseTween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
     CloseTween:Play()
     CloseTween.Completed:Connect(function()
         MainFrame.Visible = false
@@ -304,10 +214,10 @@ CloseBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- SIDEBAR
+-- iOS SIDEBAR NAVIGATION
 local Sidebar = Instance.new("ScrollingFrame")
-Sidebar.Size = UDim2.new(0, 160, 1, -70)
-Sidebar.Position = UDim2.new(0, 16, 0, 62)
+Sidebar.Size = UDim2.new(0, 150, 1, -64)
+Sidebar.Position = UDim2.new(0, 14, 0, 54)
 Sidebar.BackgroundTransparency = 1
 Sidebar.BorderSizePixel = 0
 Sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -318,15 +228,15 @@ Sidebar.Parent = MainFrame
 
 local SBLayout = Instance.new("UIListLayout")
 SBLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SBLayout.Padding = UDim.new(0, 8)
+SBLayout.Padding = UDim.new(0, 6)
 SBLayout.Parent = Sidebar
 
 -- CONTENT CONTAINER
 local ContentArea = Instance.new("Frame")
-ContentArea.Size = UDim2.new(1, -196, 1, -72)
-ContentArea.Position = UDim2.new(0, 182, 0, 60)
-ContentArea.BackgroundColor3 = Color3.fromRGB(14, 6, 24)
-ContentArea.BackgroundTransparency = 0.35
+ContentArea.Size = UDim2.new(1, -184, 1, -66)
+ContentArea.Position = UDim2.new(0, 170, 0, 54)
+ContentArea.BackgroundColor3 = Color3.fromRGB(28, 28, 30)
+ContentArea.BackgroundTransparency = 0.4
 ContentArea.ZIndex = 11
 ContentArea.Parent = MainFrame
 
@@ -348,92 +258,92 @@ local function CreatePage(name)
     page.CanvasSize = UDim2.new(0, 0, 0, 0)
     page.AutomaticCanvasSize = Enum.AutomaticSize.Y
     page.ScrollBarThickness = 2
-    page.ScrollBarImageColor3 = Color3.fromRGB(220, 100, 255)
+    page.ScrollBarImageColor3 = Color3.fromRGB(120, 120, 128)
     page.Visible = false
     page.ZIndex = 12
     page.Parent = PagesFolder
     
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 10)
+    layout.Padding = UDim.new(0, 8)
     layout.Parent = page
     return page
 end
 
-local AdminTabPage = CreatePage("Admin")
+local MainTabPage = CreatePage("Main")
 local MovementTabPage = CreatePage("Movement")
 local VisualTabPage = CreatePage("Visual")
 local MiscTabPage = CreatePage("Misc")
 
-AdminTabPage.Visible = true
+MainTabPage.Visible = true
 
 local function CreateTabButton(symbol, text, pageTarget, defaultActive)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 42)
-    btn.BackgroundColor3 = defaultActive and Color3.fromRGB(160, 60, 255) or Color3.fromRGB(24, 10, 40)
-    btn.BackgroundTransparency = defaultActive and 0.1 or 0.4
+    btn.Size = UDim2.new(1, 0, 0, 38)
+    btn.BackgroundColor3 = defaultActive and Color3.fromRGB(0, 122, 255) or Color3.fromRGB(36, 36, 38)
+    btn.BackgroundTransparency = defaultActive and 0 or 0.5
     btn.Text = "   " .. symbol .. "  " .. text
-    btn.TextColor3 = defaultActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 150, 220)
+    btn.TextColor3 = defaultActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 190, 198)
     btn.TextSize = 12
-    btn.Font = Enum.Font.GothamBold
+    btn.Font = Enum.Font.GothamMedium
     btn.TextXAlignment = Enum.TextXAlignment.Left
     btn.ZIndex = 12
     btn.Parent = Sidebar
     
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
+    corner.CornerRadius = UDim.new(0, 12)
     corner.Parent = btn
 
     btn.MouseButton1Click:Connect(function()
         for _, p in pairs(PagesFolder:GetChildren()) do p.Visible = false end
         for _, b in pairs(Sidebar:GetChildren()) do 
             if b:IsA("TextButton") then
-                TweenService:Create(b, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundColor3 = Color3.fromRGB(24, 10, 40), BackgroundTransparency = 0.4}):Play()
-                b.TextColor3 = Color3.fromRGB(180, 150, 220)
+                TweenService:Create(b, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {BackgroundColor3 = Color3.fromRGB(36, 36, 38), BackgroundTransparency = 0.5}):Play()
+                b.TextColor3 = Color3.fromRGB(190, 190, 198)
             end
         end
         pageTarget.Visible = true
-        TweenService:Create(btn, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundColor3 = Color3.fromRGB(160, 60, 255), BackgroundTransparency = 0.1}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {BackgroundColor3 = Color3.fromRGB(0, 122, 255), BackgroundTransparency = 0}):Play()
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end)
 end
 
-CreateTabButton("⚡", "Admin Console", AdminTabPage, true)
-CreateTabButton("◈", "Movement & Fly", MovementTabPage, false)
+CreateTabButton("🏠", "Main", MainTabPage, true)
+CreateTabButton("⚡", "Movement", MovementTabPage, false)
 CreateTabButton("👁", "Visual & ESP", VisualTabPage, false)
 CreateTabButton("⚙", "System Tools", MiscTabPage, false)
 
 -- ==========================================
--- UI HELPER COMPONENTS
+-- iOS COMPONENTS (TOGGLES & BUTTONS)
 -- ==========================================
 local function CreateToggle(parent, titleText, defaultState, callback)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 48)
-    frame.BackgroundColor3 = Color3.fromRGB(24, 10, 40)
-    frame.BackgroundTransparency = 0.3
+    frame.Size = UDim2.new(1, 0, 0, 44)
+    frame.BackgroundColor3 = Color3.fromRGB(44, 44, 46)
+    frame.BackgroundTransparency = 0.4
     frame.ZIndex = 13
     frame.Parent = parent
     
     local fCorner = Instance.new("UICorner")
-    fCorner.CornerRadius = UDim.new(1, 0)
+    fCorner.CornerRadius = UDim.new(0, 12)
     fCorner.Parent = frame
     
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -75, 1, 0)
-    label.Position = UDim2.new(0, 20, 0, 0)
+    label.Size = UDim2.new(1, -70, 1, 0)
+    label.Position = UDim2.new(0, 16, 0, 0)
     label.BackgroundTransparency = 1
     label.Text = titleText
-    label.TextColor3 = Color3.fromRGB(245, 235, 255)
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.TextSize = 12
-    label.Font = Enum.Font.GothamBold
+    label.Font = Enum.Font.GothamMedium
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.ZIndex = 14
     label.Parent = frame
     
     local switch = Instance.new("TextButton")
-    switch.Size = UDim2.new(0, 48, 0, 26)
-    switch.Position = UDim2.new(1, -58, 0.5, -13)
-    switch.BackgroundColor3 = defaultState and Color3.fromRGB(170, 70, 255) or Color3.fromRGB(38, 16, 60)
+    switch.Size = UDim2.new(0, 44, 0, 24)
+    switch.Position = UDim2.new(1, -52, 0.5, -12)
+    switch.BackgroundColor3 = defaultState and Color3.fromRGB(52, 199, 89) or Color3.fromRGB(78, 78, 80)
     switch.Text = ""
     switch.ZIndex = 14
     switch.Parent = frame
@@ -443,8 +353,8 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     sCorner.Parent = switch
     
     local circle = Instance.new("Frame")
-    circle.Size = UDim2.new(0, 20, 0, 20)
-    circle.Position = defaultState and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0, 3, 0.5, -10)
+    circle.Size = UDim2.new(0, 18, 0, 18)
+    circle.Position = defaultState and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
     circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     circle.ZIndex = 15
     circle.Parent = switch
@@ -457,11 +367,11 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     switch.MouseButton1Click:Connect(function()
         active = not active
         if active then
-            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(170, 70, 255)}):Play()
-            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -23, 0.5, -10)}):Play()
+            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(52, 199, 89)}):Play()
+            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -21, 0.5, -9)}):Play()
         else
-            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(38, 16, 60)}):Play()
-            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -10)}):Play()
+            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(78, 78, 80)}):Play()
+            TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -9)}):Play()
         end
         callback(active)
     end)
@@ -469,24 +379,24 @@ end
 
 local function CreateButton(parent, symbol, titleText, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 44)
-    btn.BackgroundColor3 = Color3.fromRGB(38, 16, 62)
-    btn.BackgroundTransparency = 0.25
+    btn.Size = UDim2.new(1, 0, 0, 42)
+    btn.BackgroundColor3 = Color3.fromRGB(44, 44, 46)
+    btn.BackgroundTransparency = 0.3
     btn.Text = "   " .. symbol .. "  " .. titleText
-    btn.TextColor3 = Color3.fromRGB(255, 240, 255)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 12
-    btn.Font = Enum.Font.GothamBold
+    btn.Font = Enum.Font.GothamMedium
     btn.TextXAlignment = Enum.TextXAlignment.Left
     btn.ZIndex = 13
     btn.Parent = parent
     
     local bCorner = Instance.new("UICorner")
-    bCorner.CornerRadius = UDim.new(1, 0)
+    bCorner.CornerRadius = UDim.new(0, 12)
     bCorner.Parent = btn
 
     btn.MouseButton1Click:Connect(function()
         local origColor = btn.BackgroundColor3
-        TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(180, 80, 255)}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.08), {BackgroundColor3 = Color3.fromRGB(0, 122, 255)}):Play()
         task.wait(0.1)
         TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = origColor}):Play()
         callback()
@@ -494,223 +404,92 @@ local function CreateButton(parent, symbol, titleText, callback)
 end
 
 -- ==========================================
--- 3. ADMIN CONSOLE & COMMAND SYSTEM
+-- 3. TAB MAIN (ANNOUNCEMENTS & DISCORD)
 -- ==========================================
-local ConsoleFrame = Instance.new("Frame")
-ConsoleFrame.Size = UDim2.new(1, 0, 0, 140)
-ConsoleFrame.BackgroundColor3 = Color3.fromRGB(12, 5, 20)
-ConsoleFrame.BackgroundTransparency = 0.2
-ConsoleFrame.ZIndex = 13
-ConsoleFrame.Parent = AdminTabPage
+-- ANNOUNCEMENT CARD
+local AnnounceCard = Instance.new("Frame")
+AnnounceCard.Size = UDim2.new(1, 0, 0, 130)
+AnnounceCard.BackgroundColor3 = Color3.fromRGB(44, 44, 46)
+AnnounceCard.BackgroundTransparency = 0.3
+AnnounceCard.ZIndex = 13
+AnnounceCard.Parent = MainTabPage
 
-local CFCorner = Instance.new("UICorner")
-CFCorner.CornerRadius = UDim.new(0, 16)
-CFCorner.Parent = ConsoleFrame
+local ACCorner = Instance.new("UICorner")
+ACCorner.CornerRadius = UDim.new(0, 16)
+ACCorner.Parent = AnnounceCard
 
-local ConsoleScroll = Instance.new("ScrollingFrame")
-ConsoleScroll.Size = UDim2.new(1, -20, 1, -20)
-ConsoleScroll.Position = UDim2.new(0, 10, 0, 10)
-ConsoleScroll.BackgroundTransparency = 1
-ConsoleScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-ConsoleScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-ConsoleScroll.ScrollBarThickness = 2
-ConsoleScroll.ZIndex = 14
-ConsoleScroll.Parent = ConsoleFrame
+local AnnounceTitle = Instance.new("TextLabel")
+AnnounceTitle.Size = UDim2.new(1, -24, 0, 24)
+AnnounceTitle.Position = UDim2.new(0, 12, 0, 10)
+AnnounceTitle.BackgroundTransparency = 1
+AnnounceTitle.Text = "📢 Pengumuman Hub (v10.0)"
+AnnounceTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+AnnounceTitle.TextSize = 13
+AnnounceTitle.Font = Enum.Font.GothamBold
+AnnounceTitle.TextXAlignment = Enum.TextXAlignment.Left
+AnnounceTitle.ZIndex = 14
+AnnounceTitle.Parent = AnnounceCard
 
-local CSLayout = Instance.new("UIListLayout")
-CSLayout.SortOrder = Enum.SortOrder.LayoutOrder
-CSLayout.Padding = UDim.new(0, 4)
-CSLayout.Parent = ConsoleScroll
+local AnnounceBody = Instance.new("TextLabel")
+AnnounceBody.Size = UDim2.new(1, -24, 0, 80)
+AnnounceBody.Position = UDim2.new(0, 12, 0, 38)
+AnnounceBody.BackgroundTransparency = 1
+AnnounceBody.Text = "Selamat datang di VoidHub v10.0 iOS Dark Edition!\n• UI telah diperbarui ke gaya iOS Dark Mode.\n• Anti Double Execute otomatis aktif.\n• Kunjungi Discord resmi kami untuk update terbaru."
+AnnounceBody.TextColor3 = Color3.fromRGB(200, 200, 210)
+AnnounceBody.TextSize = 11
+AnnounceBody.Font = Enum.Font.Gotham
+AnnounceBody.TextXAlignment = Enum.TextXAlignment.Left
+AnnounceBody.TextYAlignment = Enum.TextYAlignment.Top
+AnnounceBody.TextWrapped = true
+AnnounceBody.ZIndex = 14
+AnnounceBody.Parent = AnnounceCard
 
-local function LogConsole(msg)
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, 0, 0, 18)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = "[ADMIN]: " .. msg
-    lbl.TextColor3 = Color3.fromRGB(220, 180, 255)
-    lbl.TextSize = 11
-    lbl.Font = Enum.Font.Code
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.ZIndex = 15
-    lbl.Parent = ConsoleScroll
-    ConsoleScroll.CanvasPosition = Vector2.new(0, 9999)
-end
+-- JOIN DISCORD CARD / BUTTON
+local DiscordInviteLink = "https://discord.gg/voidhub"
 
-LogConsole("VoidHub Luxury Admin Console Ready.")
-LogConsole("Ketik 'help' untuk melihat daftar perintah.")
-
--- COMMAND INPUT BAR
-local CmdBarFrame = Instance.new("Frame")
-CmdBarFrame.Size = UDim2.new(1, 0, 0, 46)
-CmdBarFrame.BackgroundColor3 = Color3.fromRGB(28, 12, 48)
-CmdBarFrame.ZIndex = 13
-CmdBarFrame.Parent = AdminTabPage
-
-local CBCorner2 = Instance.new("UICorner")
-CBCorner2.CornerRadius = UDim.new(1, 0)
-CBCorner2.Parent = CmdBarFrame
-
-local CmdInput = Instance.new("TextBox")
-CmdInput.Size = UDim2.new(1, -110, 1, 0)
-CmdInput.Position = UDim2.new(0, 18, 0, 0)
-CmdInput.BackgroundTransparency = 1
-CmdInput.PlaceholderText = "Type command here... (e.g. fly, speed 50, god)"
-CmdInput.PlaceholderColor3 = Color3.fromRGB(160, 130, 190)
-CmdInput.Text = ""
-CmdInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-CmdInput.TextSize = 12
-CmdInput.Font = Enum.Font.GothamMedium
-CmdInput.TextXAlignment = Enum.TextXAlignment.Left
-CmdInput.ZIndex = 14
-CmdInput.Parent = CmdBarFrame
-
-local ExecBtn = Instance.new("TextButton")
-ExecBtn.Size = UDim2.new(0, 80, 0, 32)
-ExecBtn.Position = UDim2.new(1, -86, 0.5, -16)
-ExecBtn.BackgroundColor3 = Color3.fromRGB(160, 60, 255)
-ExecBtn.Text = "EXECUTE"
-ExecBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ExecBtn.TextSize = 10
-ExecBtn.Font = Enum.Font.GothamBold
-ExecBtn.ZIndex = 14
-ExecBtn.Parent = CmdBarFrame
-
-local EBCorner = Instance.new("UICorner")
-EBCorner.CornerRadius = UDim.new(1, 0)
-EBCorner.Parent = ExecBtn
-
-local function ProcessCommand(cmdText)
-    if cmdText == "" then return end
-    LogConsole("> " .. cmdText)
-    local args = string.split(cmdText, " ")
-    local cmd = string.lower(args[1])
-
-    if cmd == "help" then
-        LogConsole("Cmds: fly, unfly, speed [val], jump [val], god, ungod, noclip, clip, rj, clear")
-    elseif cmd == "fly" then
-        State.Flying = true
-        if args[2] and tonumber(args[2]) then State.FlySpeed = tonumber(args[2]) end
-        StartFlying()
-        LogConsole("Fly enabled. Speed: " .. tostring(State.FlySpeed))
-    elseif cmd == "unfly" then
-        State.Flying = false
-        StopFlying()
-        LogConsole("Fly disabled.")
-    elseif cmd == "speed" and args[2] then
-        local num = tonumber(args[2])
-        if num then
-            State.SpeedValue = num
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = num
-            end
-            LogConsole("Speed set to: " .. num)
-        end
-    elseif cmd == "jump" and args[2] then
-        local num = tonumber(args[2])
-        if num then
-            State.JumpValue = num
-            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if hum then hum.UseJumpPower = true hum.JumpPower = num end
-            LogConsole("JumpPower set to: " .. num)
-        end
-    elseif cmd == "god" then
-        State.GodMode = true
-        pcall(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").MaxHealth = math.huge
-                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = math.huge
-            end
-        end)
-        LogConsole("Godmode activated.")
-    elseif cmd == "ungod" then
-        State.GodMode = false
-        pcall(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").MaxHealth = 100
-                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = 100
-            end
-        end)
-        LogConsole("Godmode deactivated.")
-    elseif cmd == "noclip" then
-        State.Noclip = true
-        LogConsole("Noclip enabled.")
-    elseif cmd == "clip" then
-        State.Noclip = false
-        LogConsole("Noclip disabled.")
-    elseif cmd == "rj" or cmd == "rejoin" then
-        LogConsole("Rejoining server...")
-        TeleportService:Teleport(game.PlaceId, LocalPlayer)
-    elseif cmd == "clear" then
-        for _, child in pairs(ConsoleScroll:GetChildren()) do
-            if child:IsA("TextLabel") then child:Destroy() end
-        end
-        LogConsole("Console cleared.")
-    else
-        LogConsole("Unknown command: " .. cmd)
-    end
-end
-
-ExecBtn.MouseButton1Click:Connect(function()
-    ProcessCommand(CmdInput.Text)
-    CmdInput.Text = ""
-end)
-
-CmdInput.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        ProcessCommand(CmdInput.Text)
-        CmdInput.Text = ""
+CreateButton(MainTabPage, "💬", "Join Official Discord", function()
+    if setclipboard then
+        setclipboard(DiscordInviteLink)
+        
+        -- Notification Toast
+        local toast = Instance.new("Frame")
+        toast.Size = UDim2.new(0, 220, 0, 36)
+        toast.Position = UDim2.new(0.5, -110, 0.85, 0)
+        toast.BackgroundColor3 = Color3.fromRGB(52, 199, 89)
+        toast.ZIndex = 100
+        toast.Parent = VoidHubUI
+        
+        local tCorner = Instance.new("UICorner")
+        tCorner.CornerRadius = UDim.new(0, 12)
+        tCorner.Parent = toast
+        
+        local tLbl = Instance.new("TextLabel")
+        tLbl.Size = UDim2.new(1, 0, 1, 0)
+        tLbl.BackgroundTransparency = 1
+        tLbl.Text = "✓ Link Copied to Clipboard!"
+        tLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+        tLbl.TextSize = 11
+        tLbl.Font = Enum.Font.GothamBold
+        tLbl.ZIndex = 101
+        tLbl.Parent = toast
+        
+        task.wait(2)
+        TweenService:Create(toast, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(tLbl, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        task.wait(0.3)
+        toast:Destroy()
     end
 end)
 
--- QUICK COMMAND BUTTONS GRID
-local QuickCmdGrid = Instance.new("Frame")
-QuickCmdGrid.Size = UDim2.new(1, 0, 0, 110)
-QuickCmdGrid.BackgroundTransparency = 1
-QuickCmdGrid.ZIndex = 13
-QuickCmdGrid.Parent = AdminTabPage
-
-local QLayout = Instance.new("UIGridLayout")
-QLayout.CellSize = UDim2.new(0, 102, 0, 36)
-QLayout.CellPadding = UDim2.new(0, 8, 0, 8)
-QLayout.Parent = QuickCmdGrid
-
-local function CreateQuickCmd(name, cmdStr)
-    local qbtn = Instance.new("TextButton")
-    qbtn.BackgroundColor3 = Color3.fromRGB(38, 16, 62)
-    qbtn.Text = name
-    qbtn.TextColor3 = Color3.fromRGB(240, 220, 255)
-    qbtn.TextSize = 11
-    qbtn.Font = Enum.Font.GothamBold
-    qbtn.ZIndex = 14
-    qbtn.Parent = QuickCmdGrid
-
-    local qCorner = Instance.new("UICorner")
-    qCorner.CornerRadius = UDim.new(1, 0)
-    qCorner.Parent = qbtn
-
-    qbtn.MouseButton1Click:Connect(function()
-        ProcessCommand(cmdStr)
-    end)
-end
-
-CreateQuickCmd("⚡ Fly", "fly 50")
-CreateQuickCmd("🛑 Unfly", "unfly")
-CreateQuickCmd("👑 Godmode", "god")
-CreateQuickCmd("🛡 Ungod", "ungod")
-CreateQuickCmd("◇ Noclip", "noclip")
-CreateQuickCmd("◈ Clip", "clip")
-CreateQuickCmd("🔄 Rejoin", "rejoin")
-CreateQuickCmd("🗑 Clear Log", "clear")
-
 -- ==========================================
--- 4. MOVEMENT & FLY TAB
+-- 4. MOVEMENT TAB
 -- ==========================================
 CreateToggle(MovementTabPage, "⚡ Fly Mode (WASD + Shift/Space)", State.Flying, function(active)
     State.Flying = active
     if active then StartFlying() else StopFlying() end
 end)
 
-CreateToggle(MovementTabPage, "⚡ Speed Booster (24)", State.WalkSpeed, function(active)
+CreateToggle(MovementTabPage, "⚡ WalkSpeed Booster (24)", State.WalkSpeed, function(active)
     State.WalkSpeed = active
     task.spawn(function()
         while State.WalkSpeed do
@@ -729,7 +508,7 @@ CreateToggle(MovementTabPage, "⚡ Speed Booster (24)", State.WalkSpeed, functio
     end)
 end)
 
-CreateToggle(MovementTabPage, "▲ Super Jump Power (100)", State.JumpPower, function(active)
+CreateToggle(MovementTabPage, "▲ JumpPower Booster (100)", State.JumpPower, function(active)
     State.JumpPower = active
     task.spawn(function()
         while State.JumpPower do
@@ -793,9 +572,9 @@ local function ApplyPlayerESP(player)
     if not player.Character:FindFirstChild("VoidPlayerHL") then
         local hl = Instance.new("Highlight")
         hl.Name = "VoidPlayerHL"
-        hl.FillColor = Color3.fromRGB(150, 70, 255)
+        hl.FillColor = Color3.fromRGB(0, 122, 255)
         hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-        hl.FillTransparency = 0.35
+        hl.FillTransparency = 0.4
         hl.OutlineTransparency = 0.1
         hl.Parent = player.Character
     end
@@ -850,7 +629,7 @@ CreateButton(MiscTabPage, "🔄", "Rejoin Server", function()
     pcall(function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
 end)
 
-CreateButton(MiscTabPage, "🌐", "Server Hop (Cari Server Sepi)", function()
+CreateButton(MiscTabPage, "🌐", "Server Hop (Low Player Server)", function()
     pcall(function()
         local servers = {}
         local req = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
@@ -865,35 +644,13 @@ CreateButton(MiscTabPage, "🌐", "Server Hop (Cari Server Sepi)", function()
     end)
 end)
 
-CreateButton(MiscTabPage, "📋", "Copy Server JobID", function()
-    if setclipboard then setclipboard(game.JobId) end
-end)
-
 -- OPEN BUTTON CALLBACK
 OpenBtn.MouseButton1Click:Connect(function()
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.Visible = true
     OpenBtn.Visible = false
-    TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
+    TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
 end)
 
--- ANIMATED INITIAL LOADING SEQUENCE
-task.spawn(function()
-    for i = 1, 100 do
-        BarFill.Size = UDim2.new(i/100, 0, 1, 0)
-        PercentText.Text = "Loading Luxury Core... " .. i .. "%"
-        task.wait(0.008)
-    end
-    task.wait(0.15)
-    
-    local fadeTween = TweenService:Create(LoadingGui, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {BackgroundTransparency = 1})
-    fadeTween:Play()
-    
-    task.wait(0.35)
-    LoadingGui:Destroy()
-    
-    MainFrame.Visible = true
-    OpenBtn.Visible = false
-    
-    TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
-end)
+-- INITIAL LAUNCH ANIMATION
+TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
