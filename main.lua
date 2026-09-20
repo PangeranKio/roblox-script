@@ -125,40 +125,39 @@ LoadStatus.Font = Enum.Font.SourceSans
 LoadStatus.Parent = LoadingFrame
 
 -- ==========================================
--- 3. MAIN FRAME (WINDOW UTAMA GLASS)
+-- 3. MAIN FRAME (WINDOW UTAMA SOLID & GRADIENT GLOW)
 -- ==========================================
-local TargetSize = UDim2.new(0, 340, 0, 220)
+local TargetSize = UDim2.new(0, 380, 0, 260)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(0.5, -170, 0.5, -110)
-MainFrame.BackgroundColor3 = Color3.fromRGB(24, 15, 34)
-MainFrame.BackgroundTransparency = 0.25
+MainFrame.Position = UDim2.new(0.5, -190, 0.5, -130)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 10, 26)
+MainFrame.BackgroundTransparency = 0 -- Transparansi 0% (Solid tapi mewah)
 MainFrame.ClipsDescendants = true
 MainFrame.Active = true
 MainFrame.Visible = false
 MainFrame.Parent = VoidHubUI
 
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 18)
+MainCorner.CornerRadius = UDim.new(0, 20)
 MainCorner.Parent = MainFrame
 
--- Gradient Kaca Ungu-Hitam
+-- Gradient Ungu-Hitam Premium Deep iOS
 local GlassGradient = Instance.new("UIGradient")
 GlassGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(55, 30, 80)),
-    ColorSequenceKeypoint.new(0.6, Color3.fromRGB(26, 14, 38)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 8, 22))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 20, 68)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(20, 10, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 5, 15))
 }
-GlassGradient.Rotation = 45
+GlassGradient.Rotation = 135
 GlassGradient.Parent = MainFrame
 
--- Border Kaca Transparan iOS
 local GlassStroke = Instance.new("UIStroke")
-GlassStroke.Color = Color3.fromRGB(255, 255, 255)
-GlassStroke.Transparency = 0.82
-GlassStroke.Thickness = 1.2
+GlassStroke.Color = Color3.fromRGB(180, 120, 255)
+GlassStroke.Transparency = 0.5
+GlassStroke.Thickness = 1.5
 GlassStroke.Parent = MainFrame
 
 -- TOPBAR TITLE & DRAG AREA
@@ -194,47 +193,185 @@ CloseBtn.TextSize = 18
 CloseBtn.Font = Enum.Font.SourceSans
 CloseBtn.Parent = MainFrame
 
--- CONTENT AREA (CONTAINER FITUR)
-local ContentContainer = Instance.new("Frame")
-ContentContainer.Name = "ContentContainer"
-ContentContainer.Size = UDim2.new(1, -24, 1, -52)
-ContentContainer.Position = UDim2.new(0, 12, 0, 42)
-ContentContainer.BackgroundTransparency = 1
-ContentContainer.Parent = MainFrame
+-- ==========================================
+-- TAB SYSTEM & CATEGories (KATEGORI MENU)
+-- ==========================================
+local TabBar = Instance.new("Frame")
+TabBar.Size = UDim2.new(1, -32, 0, 32)
+TabBar.Position = UDim2.new(0, 16, 0, 44)
+TabBar.BackgroundTransparency = 1
+TabBar.Parent = MainFrame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.Parent = TabBar
+
+local PagesFolder = Instance.new("Folder")
+PagesFolder.Name = "PagesFolder"
+PagesFolder.Parent = MainFrame
+
+local function CreatePage(name)
+    local page = Instance.new("ScrollingFrame")
+    page.Name = name .. "Page"
+    page.Size = UDim2.new(1, -32, 1, -92)
+    page.Position = UDim2.new(0, 16, 0, 84)
+    page.BackgroundTransparency = 1
+    page.BorderSizePixel = 0
+    page.CanvasSize = UDim2.new(0, 0, 0, 0)
+    page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    page.ScrollBarThickness = 3
+    page.Visible = false
+    page.Parent = PagesFolder
+    
+    local layout = Instance.new("UIListLayout")
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 8)
+    layout.Parent = page
+    
+    return page
+end
+
+local MainTabPage = CreatePage("Main")
+local VisualTabPage = CreatePage("Visual")
+MainTabPage.Visible = true
+
+local function CreateTabButton(text, pageTarget, defaultActive)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.5, -4, 1, 0)
+    btn.BackgroundColor3 = defaultActive and Color3.fromRGB(120, 60, 200) or Color3.fromRGB(30, 18, 45)
+    btn.BackgroundTransparency = defaultActive and 0 or 0.4
+    btn.Text = text
+    btn.TextColor3 = defaultActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(170, 145, 205)
+    btn.TextSize = 13
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Parent = TabBar
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = btn
+    
+    btn.MouseButton1Click:Connect(function()
+        for _, p in pairs(PagesFolder:GetChildren()) do p.Visible = false end
+        for _, b in pairs(TabBar:GetChildren()) do 
+            if b:IsA("TextButton") then
+                TweenService:Create(b, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 18, 45), BackgroundTransparency = 0.4}):Play()
+                b.TextColor3 = Color3.fromRGB(170, 145, 205)
+            end
+        end
+        pageTarget.Visible = true
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(120, 60, 200), BackgroundTransparency = 0}):Play()
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end)
+end
+
+CreateTabButton("Steal Farm", MainTabPage, true)
+CreateTabButton("Misc & Walk", VisualTabPage, false)
 
 -- ==========================================
--- 4. FITUR ANTI-AFK SAFE BYPASS (CAMERA MICRO-MOVE)
+-- FITUR 1: AUTO COLLECT EGGS (Tab Main - Steal an Egg)
+-- ==========================================
+local FarmToggleFrame = Instance.new("Frame")
+FarmToggleFrame.Size = UDim2.new(1, 0, 0, 44)
+FarmToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 18, 45)
+FarmToggleFrame.BackgroundTransparency = 0.3
+FarmToggleFrame.Parent = MainTabPage
+
+local FTCorner = Instance.new("UICorner")
+FTCorner.CornerRadius = UDim.new(0, 10)
+FTCorner.Parent = FarmToggleFrame
+
+local FTLabel = Instance.new("TextLabel")
+FTLabel.Size = UDim2.new(1, -70, 1, 0)
+FTLabel.Position = UDim2.new(0, 12, 0, 0)
+FTLabel.BackgroundTransparency = 1
+FTLabel.Text = "Auto Collect Nearby Eggs"
+FTLabel.TextColor3 = Color3.fromRGB(240, 235, 255)
+FTLabel.TextSize = 13
+FTLabel.Font = Enum.Font.SourceSansBold
+FTLabel.TextXAlignment = Enum.TextXAlignment.Left
+FTLabel.Parent = FarmToggleFrame
+
+local FTSwitch = Instance.new("TextButton")
+FTSwitch.Size = UDim2.new(0, 40, 0, 22)
+FTSwitch.Position = UDim2.new(1, -50, 0.5, -11)
+FTSwitch.BackgroundColor3 = Color3.fromRGB(50, 35, 65)
+FTSwitch.Text = ""
+FTSwitch.Parent = FarmToggleFrame
+
+local FTSCorner = Instance.new("UICorner")
+FTSCorner.CornerRadius = UDim.new(1, 0)
+FTSCorner.Parent = FTSwitch
+
+local FTSCircle = Instance.new("Frame")
+FTSCircle.Size = UDim2.new(0, 18, 0, 18)
+FTSCircle.Position = UDim2.new(0, 2, 0.5, -9)
+FTSCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+FTSCircle.Parent = FTSwitch
+
+local FTSCCorner = Instance.new("UICorner")
+FTSCCorner.CornerRadius = UDim.new(1, 0)
+FTSCCorner.Parent = FTSCircle
+
+local AutoFarmActive = false
+FTSwitch.MouseButton1Click:Connect(function()
+    AutoFarmActive = not AutoFarmActive
+    if AutoFarmActive then
+        TweenService:Create(FTSwitch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(140, 80, 220)}):Play()
+        TweenService:Create(FTSCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -20, 0.5, -9)}):Play()
+        
+        task.spawn(function()
+            while AutoFarmActive do
+                pcall(function()
+                    local char = Players.LocalPlayer.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        for _, obj in pairs(workspace:GetDescendants()) do
+                            if obj:IsA("BasePart") and (obj.Name:lower():find("egg") or obj.Name:lower():find("collect")) then
+                                if (obj.Position - char.HumanoidRootPart.Position).Magnitude < 40 then
+                                    firetouchinterest(char.HumanoidRootPart, obj, 0)
+                                    firetouchinterest(char.HumanoidRootPart, obj, 1)
+                                end
+                            end
+                        end
+                    end
+                end)
+                task.wait(0.5)
+            end
+        end)
+    else
+        TweenService:Create(FTSwitch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 35, 65)}):Play()
+        TweenService:Create(FTSCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -9)}):Play()
+    end
+end)
+
+-- ==========================================
+-- FITUR 2: ANTI-AFK SAFE BYPASS (Tab Main)
 -- ==========================================
 local AFKToggleFrame = Instance.new("Frame")
-AFKToggleFrame.Size = UDim2.new(1, 0, 0, 48)
-AFKToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 18, 42)
-AFKToggleFrame.BackgroundTransparency = 0.35
-AFKToggleFrame.Parent = ContentContainer
+AFKToggleFrame.Size = UDim2.new(1, 0, 0, 44)
+AFKToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 18, 45)
+AFKToggleFrame.BackgroundTransparency = 0.3
+AFKToggleFrame.Parent = MainTabPage
 
 local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 12)
+ToggleCorner.CornerRadius = UDim.new(0, 10)
 ToggleCorner.Parent = AFKToggleFrame
-
-local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(255, 255, 255)
-ToggleStroke.Transparency = 0.9
-ToggleStroke.Parent = AFKToggleFrame
 
 local AFKLabel = Instance.new("TextLabel")
 AFKLabel.Size = UDim2.new(1, -70, 1, 0)
-AFKLabel.Position = UDim2.new(0, 14, 0, 0)
+AFKLabel.Position = UDim2.new(0, 12, 0, 0)
 AFKLabel.BackgroundTransparency = 1
 AFKLabel.Text = "Anti-AFK Safe"
 AFKLabel.TextColor3 = Color3.fromRGB(240, 235, 255)
-AFKLabel.TextSize = 14
+AFKLabel.TextSize = 13
 AFKLabel.Font = Enum.Font.SourceSansBold
 AFKLabel.TextXAlignment = Enum.TextXAlignment.Left
 AFKLabel.Parent = AFKToggleFrame
 
--- Switch Sakelar iOS
 local SwitchBtn = Instance.new("TextButton")
-SwitchBtn.Size = UDim2.new(0, 44, 0, 24)
-SwitchBtn.Position = UDim2.new(1, -54, 0.5, -12)
+SwitchBtn.Size = UDim2.new(0, 40, 0, 22)
+SwitchBtn.Position = UDim2.new(1, -50, 0.5, -11)
 SwitchBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 65)
 SwitchBtn.Text = ""
 SwitchBtn.Parent = AFKToggleFrame
@@ -244,8 +381,8 @@ SwitchCorner.CornerRadius = UDim.new(1, 0)
 SwitchCorner.Parent = SwitchBtn
 
 local SwitchCircle = Instance.new("Frame")
-SwitchCircle.Size = UDim2.new(0, 20, 0, 20)
-SwitchCircle.Position = UDim2.new(0, 2, 0.5, -10)
+SwitchCircle.Size = UDim2.new(0, 18, 0, 18)
+SwitchCircle.Position = UDim2.new(0, 2, 0.5, -9)
 SwitchCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SwitchCircle.Parent = SwitchBtn
 
@@ -253,7 +390,6 @@ local CircleCorner = Instance.new("UICorner")
 CircleCorner.CornerRadius = UDim.new(1, 0)
 CircleCorner.Parent = SwitchCircle
 
--- LOGIKA ANTI-AFK AMAN (MENGGUNAKAN MICRO-MOVEMENT KAMERA YANG TIDAK TERDETEKSI EXPLOIT DETECTOR)
 local AntiAFKActive = false
 local AFKConnection = nil
 
@@ -262,12 +398,11 @@ SwitchBtn.MouseButton1Click:Connect(function()
     
     if AntiAFKActive then
         TweenService:Create(SwitchBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(140, 80, 220)}):Play()
-        TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -22, 0.5, -10)}):Play()
+        TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -20, 0.5, -9)}):Play()
         
-        -- Menggunakan RenderStepped dengan interval waktu untuk menggeser kamera sangat halus tanpa terdeteksi cheat engine
         local lastMove = tick()
         AFKConnection = RunService.RenderStepped:Connect(function()
-            if tick() - lastMove >= 30 then -- Mengirim sinyal aktif ke server tiap 30 detik
+            if tick() - lastMove >= 30 then
                 lastMove = tick()
                 pcall(function()
                     local currentCam = workspace.CurrentCamera
@@ -281,12 +416,85 @@ SwitchBtn.MouseButton1Click:Connect(function()
         end)
     else
         TweenService:Create(SwitchBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 35, 65)}):Play()
-        TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -10)}):Play()
+        TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -9)}):Play()
         
         if AFKConnection then
             AFKConnection:Disconnect()
             AFKConnection = nil
         end
+    end
+end)
+
+-- ==========================================
+-- FITUR 3: CUSTOM WALKSPEED (Tab Misc)
+-- ==========================================
+local SpeedFrame = Instance.new("Frame")
+SpeedFrame.Size = UDim2.new(1, 0, 0, 44)
+SpeedFrame.BackgroundColor3 = Color3.fromRGB(30, 18, 45)
+SpeedFrame.BackgroundTransparency = 0.3
+SpeedFrame.Parent = VisualTabPage
+
+local SFCorner = Instance.new("UICorner")
+SFCorner.CornerRadius = UDim.new(0, 10)
+SFCorner.Parent = SpeedFrame
+
+local SFLabel = Instance.new("TextLabel")
+SFLabel.Size = UDim2.new(1, -70, 1, 0)
+SFLabel.Position = UDim2.new(0, 12, 0, 0)
+SFLabel.BackgroundTransparency = 1
+SFLabel.Text = "Custom WalkSpeed (24)"
+SFLabel.TextColor3 = Color3.fromRGB(240, 235, 255)
+SFLabel.TextSize = 13
+SFLabel.Font = Enum.Font.SourceSansBold
+SFLabel.TextXAlignment = Enum.TextXAlignment.Left
+SFLabel.Parent = SpeedFrame
+
+local SFSwitch = Instance.new("TextButton")
+SFSwitch.Size = UDim2.new(0, 40, 0, 22)
+SFSwitch.Position = UDim2.new(1, -50, 0.5, -11)
+SFSwitch.BackgroundColor3 = Color3.fromRGB(50, 35, 65)
+SFSwitch.Text = ""
+SFSwitch.Parent = SpeedFrame
+
+local SFSCorner = Instance.new("UICorner")
+SFSCorner.CornerRadius = UDim.new(1, 0)
+SFSCorner.Parent = SFSwitch
+
+local SFSCircle = Instance.new("Frame")
+SFSCircle.Size = UDim2.new(0, 18, 0, 18)
+SFSCircle.Position = UDim2.new(0, 2, 0.5, -9)
+SFSCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SFSCircle.Parent = SFSwitch
+
+local SFSCCorner = Instance.new("UICorner")
+SFSCCorner.CornerRadius = UDim.new(1, 0)
+SFSCCorner.Parent = SFSCircle
+
+local SpeedActive = false
+SFSwitch.MouseButton1Click:Connect(function()
+    SpeedActive = not SpeedActive
+    if SpeedActive then
+        TweenService:Create(SFSwitch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(140, 80, 220)}):Play()
+        TweenService:Create(SFSCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -20, 0.5, -9)}):Play()
+        
+        task.spawn(function()
+            while SpeedActive do
+                pcall(function()
+                    local hum = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum.WalkSpeed = 24
+                    end
+                end)
+                task.wait(0.2)
+            end
+        end)
+    else
+        TweenService:Create(SFSwitch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 35, 65)}):Play()
+        TweenService:Create(SFSCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -9)}):Play()
+        pcall(function()
+            local hum = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum.WalkSpeed = 16 end
+        end)
     end
 end)
 
@@ -332,41 +540,4 @@ end)
 
 -- ==========================================
 -- 6. ANIMASI SMOOTH OPEN / CLOSE TWEEN
--- ==========================================
-local TweenBack = TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-local TweenIn = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-
--- Open Window
-OpenBtn.MouseButton1Click:Connect(function()
-    MainFrame.Size = UDim2.new(0, 0, 0, 0)
-    MainFrame.Visible = true
-    OpenBtn.Visible = false
-    
-    TweenService:Create(MainFrame, TweenBack, {Size = TargetSize}):Play()
-end)
-
--- Close Window
-CloseBtn.MouseButton1Click:Connect(function()
-    local CloseTween = TweenService:Create(MainFrame, TweenIn, {Size = UDim2.new(0, 0, 0, 0)})
-    CloseTween:Play()
-    CloseTween.Completed:Connect(function()
-        MainFrame.Visible = false
-        OpenBtn.Visible = true
-    end)
-end)
-
--- ==========================================
--- 7. EXECUTION PROCESS (LOADING)
--- ==========================================
-task.spawn(function()
-    task.wait(0.7)
-    LoadStatus.Text = "Loading Anti-AFK Module..."
-    task.wait(0.7)
-    LoadStatus.Text = "Applying Security Protections..."
-    task.wait(0.6)
-    
-    -- Destroy Loading & Open Main UI
-    LoadingFrame:Destroy()
-    MainFrame.Visible = true
-    TweenService:Create(MainFrame, TweenBack, {Size = TargetSize}):Play()
-end)
+-- =
