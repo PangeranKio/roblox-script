@@ -6,10 +6,11 @@ local Window = Rayfield:CreateWindow({
    Name = "VoidHub",
    LoadingTitle = "Loading Script...",
    LoadingSubtitle = "by Akio",
+   CustomUI = "VoidHub",
    ConfigurationSaving = {
       Enabled = true,
       FolderName = "VoidHubConfig",
-      FileName = "BigHub"
+      FileName = "Config"
    },
    Discord = {
       Enabled = false
