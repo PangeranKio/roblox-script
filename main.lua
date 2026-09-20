@@ -1,6 +1,6 @@
 -- [[ VOIDHUB SUPREME v13.0 - LUXURY EXECUTIVE EDITION ]] --
 -- UI/UX: Bento Obsidian Glassmorphism with Liquid Gold Accents
--- Integrated Features: Movement, Protections, Player Tools & Steal An Egg Mechanics
+-- Features: Anti Double Re-Execute Guard, Instant Rejoin, Server Hop, Solo Server Scanner & Mechanics
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -46,6 +46,7 @@ VoidHubUI.ResetOnSpawn = false
 local C_BG = Color3.fromRGB(8, 9, 12)
 local C_PANEL = Color3.fromRGB(15, 17, 22)
 local C_ACCENT = Color3.fromRGB(235, 185, 95)
+local C_ACCENT_DARK = Color3.fromRGB(170, 125, 50)
 local C_TEXT = Color3.fromRGB(245, 247, 250)
 local C_SUBTEXT = Color3.fromRGB(135, 140, 155)
 local C_ITEM = Color3.fromRGB(22, 25, 33)
@@ -57,16 +58,18 @@ local State = {
     WalkSpeed = false, SpeedValue = 24,
     JumpPower = false, JumpValue = 100,
     InfJump = false, Noclip = false,
+    GravityMod = false, GravityVal = 196.2,
+    Spinbot = false, SpinSpeed = 30,
     
-    InstantPrompt = false, AutoPrompt = false,
+    InstantPrompt = false, AutoPrompt = false, ReachMod = false,
     
-    -- STEAL AN EGG FEATURES
-    AutoSteal = false,
-    AutoFarmEgg = false,
-    InstantBaseTP = false,
+    AntiVoid = false, AntiAFK = true, AutoClicker = false,
+    AntiRagdoll = false, AutoRejoin = false,
     
-    AntiVoid = false, AntiAFK = true,
-    PlayerESP = false, Fullbright = false, ClickTP = false
+    PlayerESP = false, HidePlayers = false,
+    Fullbright = false, LowGraphics = false,
+    CustomFOV = false, FOVValue = 70,
+    ClickTP = false
 }
 
 local FlyVel, FlyGyro
@@ -128,7 +131,9 @@ local function ServerHop()
     end)
 end
 
+-- ==========================================
 -- FLOATING TOGGLE BUTTON
+-- ==========================================
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Size = UDim2.new(0, 125, 0, 36)
 OpenBtn.Position = UDim2.new(0.02, 0, 0.15, 0)
@@ -146,7 +151,9 @@ OpenStroke.Color = C_ACCENT
 OpenStroke.Thickness = 1
 MakeDraggable(OpenBtn, OpenBtn)
 
+-- ==========================================
 -- MAIN EXECUTIVE WINDOW
+-- ==========================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 720, 0, 470)
 MainFrame.Position = UDim2.new(0.5, -360, 0.5, -235)
@@ -247,11 +254,11 @@ local function CreatePage(name)
 end
 
 local MainTabPage = CreatePage("Main")
-local EggTabPage = CreatePage("Egg")
 local MovementTabPage = CreatePage("Movement")
 local MechanicsTabPage = CreatePage("Mechanics")
 local UtilityTabPage = CreatePage("Utility")
 local VisualTabPage = CreatePage("Visual")
+local WorldTabPage = CreatePage("World")
 local ServerTabPage = CreatePage("Server")
 local PlayersTabPage = CreatePage("Players")
 
@@ -285,15 +292,17 @@ local function CreateTabButton(text, pageTarget, defaultActive)
 end
 
 CreateTabButton("Dashboard", MainTabPage, true)
-CreateTabButton("🥚 Egg Mechanics", EggTabPage, false)
 CreateTabButton("Movement", MovementTabPage, false)
 CreateTabButton("Game Mechanics", MechanicsTabPage, false)
 CreateTabButton("Utility & Auto", UtilityTabPage, false)
 CreateTabButton("Visuals & ESP", VisualTabPage, false)
+CreateTabButton("Camera & World", WorldTabPage, false)
 CreateTabButton("Server Finder", ServerTabPage, false)
 CreateTabButton("Player List", PlayersTabPage, false)
 
--- UI BUILDERS
+-- ==========================================
+-- UI BUILDERS (TOGGLES, SLIDERS, BUTTONS)
+-- ==========================================
 local function CreateToggle(parent, titleText, defaultState, callback)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, -6, 0, 38)
@@ -301,6 +310,9 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     frame.ZIndex = 13
     frame.Parent = parent
     Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+    local stroke = Instance.new("UIStroke", frame)
+    stroke.Color = C_STROKE
+    stroke.Transparency = 0.8
 
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -55, 1, 0)
@@ -345,6 +357,80 @@ local function CreateToggle(parent, titleText, defaultState, callback)
     end)
 end
 
+local function CreateSlider(parent, titleText, minVal, maxVal, defaultVal, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, -6, 0, 50)
+    frame.BackgroundColor3 = C_ITEM
+    frame.ZIndex = 13
+    frame.Parent = parent
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -60, 0, 22)
+    label.Position = UDim2.new(0, 12, 0, 4)
+    label.BackgroundTransparency = 1
+    label.Text = titleText
+    label.TextColor3 = C_TEXT
+    label.TextSize = 11
+    label.Font = Enum.Font.GothamMedium
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.ZIndex = 14
+    label.Parent = frame
+
+    local valLabel = Instance.new("TextLabel")
+    valLabel.Size = UDim2.new(0, 45, 0, 22)
+    valLabel.Position = UDim2.new(1, -55, 0, 4)
+    valLabel.BackgroundTransparency = 1
+    valLabel.Text = tostring(defaultVal)
+    valLabel.TextColor3 = C_ACCENT
+    valLabel.TextSize = 11
+    valLabel.Font = Enum.Font.GothamBold
+    valLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valLabel.ZIndex = 14
+    valLabel.Parent = frame
+
+    local sliderBg = Instance.new("Frame")
+    sliderBg.Size = UDim2.new(1, -24, 0, 6)
+    sliderBg.Position = UDim2.new(0, 12, 0, 34)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(40, 45, 55)
+    sliderBg.ZIndex = 14
+    sliderBg.Parent = frame
+    Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
+
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Size = UDim2.new((defaultVal - minVal) / (maxVal - minVal), 0, 1, 0)
+    sliderFill.BackgroundColor3 = C_ACCENT
+    sliderFill.ZIndex = 15
+    sliderFill.Parent = sliderBg
+    Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
+
+    local dragging = false
+    local function UpdateSlider(input)
+        local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+        local val = math.floor(minVal + (maxVal - minVal) * pos)
+        sliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        valLabel.Text = tostring(val)
+        callback(val)
+    end
+
+    RegisterConnection(sliderBg.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            UpdateSlider(input)
+        end
+    end))
+    RegisterConnection(UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end))
+    RegisterConnection(UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateSlider(input)
+        end
+    end))
+end
+
 local function CreateButton(parent, titleText, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -6, 0, 36)
@@ -356,6 +442,9 @@ local function CreateButton(parent, titleText, callback)
     btn.ZIndex = 13
     btn.Parent = parent
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = C_STROKE
+    stroke.Transparency = 0.8
 
     btn.MouseButton1Click:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.08), {BackgroundColor3 = C_ACCENT, TextColor3 = C_BG}):Play()
@@ -366,7 +455,7 @@ local function CreateButton(parent, titleText, callback)
 end
 
 -- ==========================================
--- DASHBOARD TAB
+-- 1. DASHBOARD TAB
 -- ==========================================
 local ProfileCard = Instance.new("Frame")
 ProfileCard.Size = UDim2.new(1, -6, 0, 70)
@@ -375,9 +464,18 @@ ProfileCard.ZIndex = 13
 ProfileCard.Parent = MainTabPage
 Instance.new("UICorner", ProfileCard).CornerRadius = UDim.new(0, 10)
 
+local AvatarImg = Instance.new("ImageLabel")
+AvatarImg.Size = UDim2.new(0, 50, 0, 50)
+AvatarImg.Position = UDim2.new(0, 10, 0, 10)
+AvatarImg.BackgroundTransparency = 1
+AvatarImg.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+AvatarImg.ZIndex = 14
+AvatarImg.Parent = ProfileCard
+Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0)
+
 local WelcomeText = Instance.new("TextLabel")
-WelcomeText.Size = UDim2.new(1, -20, 0, 20)
-WelcomeText.Position = UDim2.new(0, 15, 0, 15)
+WelcomeText.Size = UDim2.new(1, -75, 0, 20)
+WelcomeText.Position = UDim2.new(0, 70, 0, 14)
 WelcomeText.BackgroundTransparency = 1
 WelcomeText.Text = "Welcome back, <font color=\"#EBB95F\">" .. LocalPlayer.DisplayName .. "</font>"
 WelcomeText.RichText = true
@@ -388,79 +486,135 @@ WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
 WelcomeText.ZIndex = 14
 WelcomeText.Parent = ProfileCard
 
+local StatsText = Instance.new("TextLabel")
+StatsText.Size = UDim2.new(1, -75, 0, 18)
+StatsText.Position = UDim2.new(0, 70, 0, 36)
+StatsText.BackgroundTransparency = 1
+StatsText.Text = "Tier: Executive  |  FPS: 60  |  Ping: 0 ms"
+StatsText.TextColor3 = C_SUBTEXT
+StatsText.TextSize = 10
+StatsText.Font = Enum.Font.Gotham
+StatsText.TextXAlignment = Enum.TextXAlignment.Left
+StatsText.ZIndex = 14
+StatsText.Parent = ProfileCard
+
+RegisterConnection(RunService.RenderStepped:Connect(function(dt)
+    local fps = math.floor(1 / dt)
+    local ping = 0
+    pcall(function() ping = math.floor(StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()) end)
+    StatsText.Text = string.format("Tier: Executive  |  FPS: %d  |  Ping: %d ms", fps, ping)
+end))
+
+-- ANNOUNCEMENT BOARD
+local NoticeCard = Instance.new("Frame")
+NoticeCard.Size = UDim2.new(1, -6, 0, 90)
+NoticeCard.BackgroundColor3 = C_ITEM
+NoticeCard.ZIndex = 13
+NoticeCard.Parent = MainTabPage
+Instance.new("UICorner", NoticeCard).CornerRadius = UDim.new(0, 10)
+local NoticeStroke = Instance.new("UIStroke", NoticeCard)
+NoticeStroke.Color = C_ACCENT
+NoticeStroke.Transparency = 0.7
+
+local NoticeTitle = Instance.new("TextLabel")
+NoticeTitle.Size = UDim2.new(1, -20, 0, 22)
+NoticeTitle.Position = UDim2.new(0, 12, 0, 8)
+NoticeTitle.BackgroundTransparency = 1
+NoticeTitle.Text = "📢 OFFICIAL ANNOUNCEMENT"
+NoticeTitle.TextColor3 = C_ACCENT
+NoticeTitle.TextSize = 11
+NoticeTitle.Font = Enum.Font.GothamBold
+NoticeTitle.TextXAlignment = Enum.TextXAlignment.Left
+NoticeTitle.ZIndex = 14
+NoticeTitle.Parent = NoticeCard
+
+local NoticeBody = Instance.new("TextLabel")
+NoticeBody.Size = UDim2.new(1, -24, 0, 50)
+NoticeBody.Position = UDim2.new(0, 12, 0, 30)
+NoticeBody.BackgroundTransparency = 1
+NoticeBody.Text = "Sistem Anti Double-Execution aktif! Fitur Server Hop & Rejoin telah ditambahkan ke menu utama Dashboard dan Server Finder."
+NoticeBody.TextColor3 = C_TEXT
+NoticeBody.TextSize = 10
+NoticeBody.Font = Enum.Font.Gotham
+NoticeBody.TextWrapped = true
+NoticeBody.TextYAlignment = Enum.TextYAlignment.Top
+NoticeBody.TextXAlignment = Enum.TextXAlignment.Left
+NoticeBody.ZIndex = 14
+NoticeBody.Parent = NoticeCard
+
+-- QUICK SERVER CONTROLS ON DASHBOARD
 CreateButton(MainTabPage, "⚡ Instant Rejoin Server", function() RejoinServer() end)
 CreateButton(MainTabPage, "🌐 Random Server Hop", function() ServerHop() end)
 
 -- ==========================================
--- EGG MECHANICS TAB (STEAL AN EGG FEATURES)
+-- 2. MOVEMENT TAB
 -- ==========================================
-local function StealEggLogic()
-    pcall(function()
-        local char = LocalPlayer.Character
-        local root = char and char:FindFirstChild("HumanoidRootPart")
-        if not root then return end
+local function StartFlying()
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local root = char.HumanoidRootPart
+    FlyVel = Instance.new("BodyVelocity", root)
+    FlyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    FlyGyro = Instance.new("BodyGyro", root)
+    FlyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
 
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("ProximityPrompt") and (v.Parent.Name:lower():find("egg") or v.ObjectText:lower():find("egg") or v.ActionText:lower():find("steal")) then
-                if v.Parent:IsA("BasePart") then
-                    root.CFrame = v.Parent.CFrame * CFrame.new(0, 2, 0)
-                    task.wait(0.1)
-                    fireproximityprompt(v)
-                end
-            end
+    task.spawn(function()
+        while State.Flying and char and root:FindFirstChild("BodyVelocity") do
+            local cam = workspace.CurrentCamera
+            local dir = Vector3.zero
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
+            FlyVel.Velocity = dir * State.FlySpeed
+            FlyGyro.CFrame = cam.CFrame
+            task.wait()
         end
     end)
 end
 
-CreateToggle(EggTabPage, "Auto Steal Egg (Auto Teleport & Grab)", State.AutoSteal, function(a)
-    State.AutoSteal = a
+CreateToggle(MovementTabPage, "Kinetic Flight Mode", State.Flying, function(a)
+    State.Flying = a
+    if a then StartFlying() else if FlyVel then FlyVel:Destroy() end if FlyGyro then FlyGyro:Destroy() end end
+end)
+CreateSlider(MovementTabPage, "Flight Speed Rate", 20, 200, 50, function(v) State.FlySpeed = v end)
+
+CreateToggle(MovementTabPage, "Speed Modifier Engine", State.WalkSpeed, function(a)
+    State.WalkSpeed = a
     task.spawn(function()
-        while State.AutoSteal do
-            StealEggLogic()
-            task.wait(0.3)
+        while State.WalkSpeed do
+            pcall(function() if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = State.SpeedValue end end)
+            task.wait(0.2)
         end
+        pcall(function() if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16 end end)
     end)
 end)
+CreateSlider(MovementTabPage, "Custom WalkSpeed", 16, 250, 24, function(v) State.SpeedValue = v end)
 
-CreateToggle(EggTabPage, "Auto Farm Nearby Eggs", State.AutoFarmEgg, function(a)
-    State.AutoFarmEgg = a
+CreateToggle(MovementTabPage, "Jump Power Multiplier", State.JumpPower, function(a)
+    State.JumpPower = a
     task.spawn(function()
-        while State.AutoFarmEgg do
+        while State.JumpPower do
             pcall(function()
-                for _, prompt in pairs(workspace:GetDescendants()) do
-                    if prompt:IsA("ProximityPrompt") and prompt.Enabled then
-                        fireproximityprompt(prompt)
-                    end
-                end
+                local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if h then h.UseJumpPower = true h.JumpPower = State.JumpValue end
             end)
             task.wait(0.2)
         end
     end)
 end)
+CreateSlider(MovementTabPage, "Custom Jump Value", 50, 300, 100, function(v) State.JumpValue = v end)
 
-CreateButton(EggTabPage, "🚀 Instant Teleport to Own Base", function()
-    pcall(function()
-        local myBase = workspace:FindFirstChild("Bases") and workspace.Bases:FindFirstChild(LocalPlayer.Name)
-        if myBase and myBase:FindFirstChild("Spawn") and LocalPlayer.Character then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = myBase.Spawn.CFrame * CFrame.new(0, 3, 0)
-        end
-    end)
-end)
+CreateToggle(MovementTabPage, "Infinite Air Jump", State.InfJump, function(a) State.InfJump = a end)
+RegisterConnection(UserInputService.JumpRequest:Connect(function()
+    if State.InfJump and LocalPlayer.Character then
+        local h = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end))
 
-CreateButton(EggTabPage, "🔄 Refresh Workspace Prompt Objects", function()
-    pcall(function()
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("ProximityPrompt") then
-                v.RequiresLineOfSight = false
-                v.HoldDuration = 0
-            end
-        end
-    end)
-end)
-
--- ==========================================
--- MOVEMENT TAB
--- ==========================================
 CreateToggle(MovementTabPage, "Ghost Noclip", State.Noclip, function(a)
     State.Noclip = a
     task.spawn(function()
@@ -478,16 +632,44 @@ CreateToggle(MovementTabPage, "Ghost Noclip", State.Noclip, function(a)
 end)
 
 -- ==========================================
--- GAME MECHANICS TAB
+-- 3. GAME MECHANICS TAB
 -- ==========================================
 CreateToggle(MechanicsTabPage, "Instant Proximity Prompt (No Hold)", State.InstantPrompt, function(a) State.InstantPrompt = a end)
 RegisterConnection(ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt)
     if State.InstantPrompt then fireproximityprompt(prompt) end
 end))
 
+CreateToggle(MechanicsTabPage, "Auto Click Proximity Prompts", State.AutoPrompt, function(a)
+    State.AutoPrompt = a
+    task.spawn(function()
+        while State.AutoPrompt do
+            for _, p in pairs(workspace:GetDescendants()) do
+                if p:IsA("ProximityPrompt") then fireproximityprompt(p) end
+            end
+            task.wait(0.5)
+        end
+    end)
+end)
+
 -- ==========================================
--- UTILITY TAB
+-- 4. UTILITY & AUTOMATION TAB
 -- ==========================================
+CreateToggle(UtilityTabPage, "Anti-Void Fall Recovery", State.AntiVoid, function(a)
+    State.AntiVoid = a
+    task.spawn(function()
+        while State.AntiVoid do
+            pcall(function()
+                local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if root and root.Position.Y < -50 then
+                    root.CFrame = CFrame.new(root.Position.X, 50, root.Position.Z)
+                    root.Velocity = Vector3.zero
+                end
+            end)
+            task.wait(0.5)
+        end
+    end)
+end)
+
 CreateToggle(UtilityTabPage, "Anti-AFK Disconnect Guard", State.AntiAFK, function(a)
     State.AntiAFK = a
     task.spawn(function()
@@ -506,7 +688,209 @@ CreateToggle(UtilityTabPage, "Anti-AFK Disconnect Guard", State.AntiAFK, functio
 end)
 
 -- ==========================================
--- VISUALS & SERVER TABS
+-- 5. VISUALS & ESP TAB
+-- ==========================================
+local function ApplyESP(p)
+    if p == LocalPlayer or not p.Character then return end
+    if not p.Character:FindFirstChild("VoidHL") then
+        local hl = Instance.new("Highlight")
+        hl.Name = "VoidHL"
+        hl.FillColor = C_ACCENT
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.FillTransparency = 0.5
+        hl.Parent = p.Character
+    end
+end
+
+CreateToggle(VisualTabPage, "Player Highlight ESP", State.PlayerESP, function(a)
+    State.PlayerESP = a
+    if a then
+        for _, p in pairs(Players:GetPlayers()) do ApplyESP(p) end
+        RegisterConnection(RunService.Heartbeat:Connect(function()
+            if State.PlayerESP then for _, p in pairs(Players:GetPlayers()) do ApplyESP(p) end end
+        end))
+    else
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("VoidHL") then p.Character.VoidHL:Destroy() end
+        end
+    end
+end)
+
+-- ==========================================
+-- 6. CAMERA & WORLD TAB
+-- ==========================================
+CreateToggle(WorldTabPage, "Fullbright Vision Ambient", State.Fullbright, function(a)
+    State.Fullbright = a
+    if a then
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+    else
+        Lighting.Brightness = 1
+        Lighting.GlobalShadows = true
+    end
+end)
+
+-- ==========================================
+-- 7. SERVER FINDER TAB
 -- ==========================================
 CreateButton(ServerTabPage, "⚡ Rejoin Current Server", function() RejoinServer() end)
 CreateButton(ServerTabPage, "🌐 Random Server Hop", function() ServerHop() end)
+
+local ServerListFrame = Instance.new("ScrollingFrame")
+ServerListFrame.Size = UDim2.new(1, -6, 1, -90)
+ServerListFrame.BackgroundTransparency = 1
+ServerListFrame.ScrollBarThickness = 2
+ServerListFrame.ScrollBarImageColor3 = C_ACCENT
+ServerListFrame.ZIndex = 13
+ServerListFrame.Parent = ServerTabPage
+
+local ServerListLayout = Instance.new("UIListLayout", ServerListFrame)
+ServerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ServerListLayout.Padding = UDim.new(0, 6)
+
+local function ScanSoloServers()
+    for _, child in pairs(ServerListFrame:GetChildren()) do
+        if child:IsA("Frame") then child:Destroy() end
+    end
+
+    local status = Instance.new("TextLabel")
+    status.Size = UDim2.new(1, 0, 0, 25)
+    status.BackgroundTransparency = 1
+    status.Text = "Scanning active 1-player servers..."
+    status.TextColor3 = C_SUBTEXT
+    status.TextSize = 11
+    status.Font = Enum.Font.Gotham
+    status.Parent = ServerListFrame
+
+    task.spawn(function()
+        pcall(function()
+            local raw = game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100")
+            local data = HttpService:JSONDecode(raw)
+            status:Destroy()
+
+            for _, s in pairs(data.data) do
+                if s.playing == 1 and s.id ~= game.JobId then
+                    local card = Instance.new("Frame")
+                    card.Size = UDim2.new(1, 0, 0, 40)
+                    card.BackgroundColor3 = C_ITEM
+                    card.ZIndex = 14
+                    card.Parent = ServerListFrame
+                    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 7)
+
+                    local info = Instance.new("TextLabel")
+                    info.Size = UDim2.new(1, -100, 1, 0)
+                    info.Position = UDim2.new(0, 10, 0, 0)
+                    info.BackgroundTransparency = 1
+                    info.Text = "Server ID: " .. string.sub(s.id, 1, 14) .. "... [1 Player]"
+                    info.TextColor3 = C_TEXT
+                    info.TextSize = 11
+                    info.Font = Enum.Font.GothamMedium
+                    info.TextXAlignment = Enum.TextXAlignment.Left
+                    info.ZIndex = 15
+                    info.Parent = card
+
+                    local tp = Instance.new("TextButton")
+                    tp.Size = UDim2.new(0, 75, 0, 24)
+                    tp.Position = UDim2.new(1, -82, 0.5, -12)
+                    tp.BackgroundColor3 = C_ACCENT
+                    tp.Text = "TP SOLO"
+                    tp.TextColor3 = C_BG
+                    tp.TextSize = 10
+                    tp.Font = Enum.Font.GothamBold
+                    tp.ZIndex = 15
+                    tp.Parent = card
+                    Instance.new("UICorner", tp).CornerRadius = UDim.new(0, 5)
+
+                    tp.MouseButton1Click:Connect(function()
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+                    end)
+                end
+            end
+        end)
+    end)
+end
+
+CreateButton(ServerTabPage, "🔍 Scan 1-Player Solo Servers", function() ScanSoloServers() end)
+
+-- ==========================================
+-- 8. PLAYER LIST TAB
+-- ==========================================
+local PlayerListFrame = Instance.new("ScrollingFrame")
+PlayerListFrame.Size = UDim2.new(1, -6, 1, -45)
+PlayerListFrame.BackgroundTransparency = 1
+PlayerListFrame.ScrollBarThickness = 2
+PlayerListFrame.ScrollBarImageColor3 = C_ACCENT
+PlayerListFrame.ZIndex = 13
+PlayerListFrame.Parent = PlayersTabPage
+
+local PlayerListLayout = Instance.new("UIListLayout", PlayerListFrame)
+PlayerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+PlayerListLayout.Padding = UDim.new(0, 6)
+
+local function RenderPlayerList()
+    for _, c in pairs(PlayerListFrame:GetChildren()) do if c:IsA("Frame") then c:Destroy() end end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            local card = Instance.new("Frame")
+            card.Size = UDim2.new(1, 0, 0, 44)
+            card.BackgroundColor3 = C_ITEM
+            card.ZIndex = 14
+            card.Parent = PlayerListFrame
+            Instance.new("UICorner", card).CornerRadius = UDim.new(0, 7)
+
+            local img = Instance.new("ImageLabel")
+            img.Size = UDim2.new(0, 32, 0, 32)
+            img.Position = UDim2.new(0, 6, 0.5, -16)
+            img.BackgroundTransparency = 1
+            img.Image = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+            img.ZIndex = 15
+            img.Parent = card
+            Instance.new("UICorner", img).CornerRadius = UDim.new(1, 0)
+
+            local pName = Instance.new("TextLabel")
+            pName.Size = UDim2.new(1, -140, 1, 0)
+            pName.Position = UDim2.new(0, 44, 0, 0)
+            pName.BackgroundTransparency = 1
+            pName.Text = p.DisplayName .. " (@" .. p.Name .. ")"
+            pName.TextColor3 = C_TEXT
+            pName.TextSize = 10
+            pName.Font = Enum.Font.GothamMedium
+            pName.TextXAlignment = Enum.TextXAlignment.Left
+            pName.ZIndex = 15
+            pName.Parent = card
+
+            local tpBtn = Instance.new("TextButton")
+            tpBtn.Size = UDim2.new(0, 85, 0, 24)
+            tpBtn.Position = UDim2.new(1, -92, 0.5, -12)
+            tpBtn.BackgroundColor3 = C_ACCENT
+            tpBtn.Text = "TP TO PLAYER"
+            tpBtn.TextColor3 = C_BG
+            tpBtn.TextSize = 9
+            tpBtn.Font = Enum.Font.GothamBold
+            tpBtn.ZIndex = 15
+            tpBtn.Parent = card
+            Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 5)
+
+            tpBtn.MouseButton1Click:Connect(function()
+                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
+                end
+            end)
+        end
+    end
+end
+
+CreateToggle(PlayersTabPage, "Click Teleport (Shift + Left Click)", State.ClickTP, function(a) State.ClickTP = a end)
+RegisterConnection(UserInputService.InputBegan:Connect(function(input, gpe)
+    if not gpe and State.ClickTP and input.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+        if Mouse.Hit and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Mouse.Hit.Position + Vector3.new(0, 3, 0))
+        end
+    end
+end))
+
+RegisterConnection(Players.PlayerAdded:Connect(RenderPlayerList))
+RegisterConnection(Players.PlayerRemoving:Connect(RenderPlayerList))
+RenderPlayerList()
