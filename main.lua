@@ -1128,7 +1128,7 @@ task.spawn(function()
     end
 end)
 
-CreateSectionLabel(MechanicsTabPage, Automation")
+CreateSectionLabel(MechanicsTabPage, "Automation")
 CreateToggle(MechanicsTabPage, "Tanpa Hold Delay", State.InstantPrompt, function(activeState)
     State.InstantPrompt = activeState
 end)
