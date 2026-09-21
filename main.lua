@@ -53,22 +53,19 @@ VoidHubUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 VoidHubUI.ResetOnSpawn = false
 
 -- ==========================================
--- PALET WARNA PURPLE CYBERPUNK GLASSMORPHISM
+-- PALET WARNA CYBERPUNK GLASSMORPHISM
 -- ==========================================
-local C_BG = Color3.fromRGB(12, 10, 20)           -- Dark Deep Purple Background
-local C_PANEL = Color3.fromRGB(20, 16, 30)        -- Dark Panel
-local C_ITEM = Color3.fromRGB(30, 24, 44)         -- Item Base Frame
-local C_ITEM_DARK = Color3.fromRGB(48, 36, 56)    -- Container/Inactive State Accent (rgb(48, 36, 56))
-
-local C_ACCENT_PURPLE = Color3.fromRGB(188, 0, 252) -- Primary Accent Neon Purple (#bc00fc)
-local C_ACCENT_VIOLET = Color3.fromRGB(140, 40, 255) -- Secondary Soft Purple
-local C_ACCENT_PINK = Color3.fromRGB(244, 192, 255)   -- Highlight rgb(244,192,255)
-local C_ACCENT_GOLD = Color3.fromRGB(255, 200, 0)   -- Alert / Warning
-local C_ACCENT_GREEN = Color3.fromRGB(0, 255, 136)  -- Success Indicator
-
-local C_TEXT = Color3.fromRGB(245, 240, 255)       -- Clean Off-White Text
-local C_SUBTEXT = Color3.fromRGB(160, 145, 185)    -- Muted Purple Subtext
-local C_STROKE = Color3.fromRGB(188, 0, 252)     -- Neon Purple Border Stroke
+local C_BG = Color3.fromRGB(12, 14, 24)
+local C_PANEL = Color3.fromRGB(18, 22, 36)
+local C_ITEM = Color3.fromRGB(26, 32, 50)
+local C_ACCENT_CYAN = Color3.fromRGB(0, 240, 255)
+local C_ACCENT_PINK = Color3.fromRGB(255, 0, 128)
+local C_ACCENT_PURPLE = Color3.fromRGB(140, 40, 255)
+local C_ACCENT_GOLD = Color3.fromRGB(255, 200, 0)
+local C_ACCENT_GREEN = Color3.fromRGB(0, 255, 136)
+local C_TEXT = Color3.fromRGB(245, 248, 255)
+local C_SUBTEXT = Color3.fromRGB(130, 145, 180)
+local C_STROKE = Color3.fromRGB(0, 180, 220)
 
 -- ==========================================
 -- GLOBAL STATE MANAGER
