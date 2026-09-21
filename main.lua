@@ -1,4 +1,4 @@
--- [[ VOIDHUB SUPREME v15.0 - CYBERPUNK OVERLOAD EDITION ]] --
+-- [[ VOIDHUB v1.0 ]] --
 -- UI/UX: Ultra-Luxury Cyberpunk Glassmorphism Clean Overlay
 -- Features: 100% Retained & Expanded Engine Core (1500+ Lines Expanded)
 
@@ -260,7 +260,7 @@ local function RejoinServer()
     Notify("SYSTEM", "Rejoining current instance...", 2)
     local currentPlayers = Players:GetPlayers()
     if #currentPlayers <= 1 then
-        LocalPlayer:Kick("\n[VOIDHUB CYBERPUNK]: Rejoining Current Instance...")
+        LocalPlayer:Kick("\n[VoidHub]: Rejoining Current Instance...")
         task.wait(0.25)
         TeleportService:Teleport(game.PlaceId, LocalPlayer)
     else
@@ -323,7 +323,7 @@ LoadingHeader.Name = "LoadingHeader"
 LoadingHeader.Size = UDim2.new(1, 0, 0, 36)
 LoadingHeader.Position = UDim2.new(0, 0, 0, 18)
 LoadingHeader.BackgroundTransparency = 1
-LoadingHeader.Text = "VOIDHUB <font color=\"#FF0080\">CYBER</font> v15.0"
+LoadingHeader.Text = "VoidHub v1.0"
 LoadingHeader.RichText = true
 LoadingHeader.TextColor3 = C_TEXT
 LoadingHeader.TextSize = 22
@@ -336,7 +336,7 @@ LoadingSubHeader.Name = "LoadingSubHeader"
 LoadingSubHeader.Size = UDim2.new(1, 0, 0, 20)
 LoadingSubHeader.Position = UDim2.new(0, 0, 0, 54)
 LoadingSubHeader.BackgroundTransparency = 1
-LoadingSubHeader.Text = "INITIALIZING OVERLOAD CORE ENGINES"
+LoadingSubHeader.Text = "Initializing"
 LoadingSubHeader.TextColor3 = C_ACCENT_CYAN
 LoadingSubHeader.TextSize = 10
 LoadingSubHeader.Font = Enum.Font.Code
@@ -378,7 +378,7 @@ LoadingStatusText.Name = "StatusTerminal"
 LoadingStatusText.Size = UDim2.new(1, -30, 0, 40)
 LoadingStatusText.Position = UDim2.new(0, 15, 0.68, 0)
 LoadingStatusText.BackgroundTransparency = 1
-LoadingStatusText.Text = "Connecting to Void Security Protocol..."
+LoadingStatusText.Text = "Connecting to VoidHub..."
 LoadingStatusText.TextColor3 = C_SUBTEXT
 LoadingStatusText.TextSize = 10
 LoadingStatusText.Font = Enum.Font.Code
@@ -405,7 +405,7 @@ task.spawn(function()
         task.wait(taskData.duration)
     end
 
-    LoadingStatusText.Text = "OVERLOAD ENGINE READY & ACTIVE"
+    LoadingStatusText.Text = "VoidHub Ready & Active"
     task.wait(0.15)
 
     TweenService:Create(LoadingCard, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
@@ -420,7 +420,7 @@ task.spawn(function()
 
     task.wait(0.3)
     LoadingCard:Destroy()
-    Notify("VOIDHUB CYBERPUNK", "Engine Loaded Successfully! Enjoy.", 4)
+    Notify("VoidHub", "Engine Loaded Successfully! Enjoy.", 4)
 end)
 
 -- ==========================================
@@ -431,7 +431,7 @@ OpenBtn.Name = "OpenToggleButton"
 OpenBtn.Size = UDim2.new(0, 140, 0, 38)
 OpenBtn.Position = UDim2.new(0.02, 0, 0.12, 0)
 OpenBtn.BackgroundColor3 = C_BG
-OpenBtn.Text = "⚡ VOID-OVERLOAD"
+OpenBtn.Text = "VOIDHUB"
 OpenBtn.TextColor3 = C_ACCENT_CYAN
 OpenBtn.TextSize = 11
 OpenBtn.Font = Enum.Font.GothamBold
@@ -487,7 +487,7 @@ TitleLabel.Name = "TitleLabel"
 TitleLabel.Size = UDim2.new(0, 400, 1, 0)
 TitleLabel.Position = UDim2.new(0, 14, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "VOIDHUB <font color=\"#FF0080\">CYBERPUNK</font> <font color=\"#00F0FF\">v15.0</font>"
+TitleLabel.Text = "VoidHub <font color=\"#bc00fc\">v1.0</font>"
 TitleLabel.RichText = true
 TitleLabel.TextColor3 = C_TEXT
 TitleLabel.TextSize = 13
@@ -638,15 +638,15 @@ local function CreateTabButton(buttonText, pageTarget, defaultActive)
     end)
 end
 
-CreateTabButton("⚡ DASHBOARD", MainTabPage, true)
-CreateTabButton("🛡️ BOSS & EGG", MechanicsTabPage, false)
-CreateTabButton("🚀 MOVEMENT", MovementTabPage, false)
-CreateTabButton("🛠️ UTILITY & AUTO", UtilityTabPage, false)
-CreateTabButton("👁️ VISUALS & ESP", VisualTabPage, false)
-CreateTabButton("🌐 WORLD & CAM", WorldTabPage, false)
-CreateTabButton("🔍 SERVER FINDER", ServerTabPage, false)
-CreateTabButton("👥 PLAYER LIST", PlayersTabPage, false)
-CreateTabButton("⚙️ SETTINGS & LOGS", SettingsTabPage, false)
+CreateTabButton("Main", MainTabPage, true)
+CreateTabButton("Farm", MechanicsTabPage, false)
+CreateTabButton("Movement", MovementTabPage, false)
+CreateTabButton("Utility", UtilityTabPage, false)
+CreateTabButton("Visual", VisualTabPage, false)
+CreateTabButton("World", WorldTabPage, false)
+CreateTabButton("Server", ServerTabPage, false)
+CreateTabButton("Player", PlayersTabPage, false)
+CreateTabButton("Config", SettingsTabPage, false)
 
 -- ==========================================
 -- COMPONENT BUILDERS ENGINE
@@ -700,7 +700,7 @@ local function CreateToggle(parentContainer, titleText, defaultState, toggleCall
     switchButton.Name = "Switch"
     switchButton.Size = UDim2.new(0, 36, 0, 18)
     switchButton.Position = UDim2.new(1, -44, 0.5, -9)
-    switchButton.BackgroundColor3 = defaultState and C_ACCENT_PINK or Color3.fromRGB(35, 40, 55)
+    switchButton.BackgroundColor3 = defaultState and C_ACCENT_PINK or Color3.fromRGB(48, 36, 56)
     switchButton.Text = ""
     switchButton.ZIndex = 14
     switchButton.Parent = toggleFrame
@@ -731,7 +731,7 @@ local function CreateToggle(parentContainer, titleText, defaultState, toggleCall
                 BackgroundColor3 = C_BG
             }):Play()
         else
-            TweenService:Create(switchButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 40, 55)}):Play()
+            TweenService:Create(switchButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(48, 36, 56)}):Play()
             TweenService:Create(circleIndicator, TweenInfo.new(0.2), {
                 Position = UDim2.new(0, 3, 0.5, -6),
                 BackgroundColor3 = C_TEXT
@@ -783,7 +783,7 @@ local function CreateSlider(parentContainer, titleText, minimumValue, maximumVal
     trackBackground.Name = "TrackBg"
     trackBackground.Size = UDim2.new(1, -24, 0, 6)
     trackBackground.Position = UDim2.new(0, 12, 0, 30)
-    trackBackground.BackgroundColor3 = Color3.fromRGB(35, 40, 55)
+    trackBackground.BackgroundColor3 = Color3.fromRGB(48, 36, 56)
     trackBackground.ZIndex = 14
     trackBackground.Parent = sliderFrame
 
@@ -899,7 +899,7 @@ UserWelcomeLabel.Name = "UserWelcomeText"
 UserWelcomeLabel.Size = UDim2.new(1, -66, 0, 18)
 UserWelcomeLabel.Position = UDim2.new(0, 60, 0, 10)
 UserWelcomeLabel.BackgroundTransparency = 1
-UserWelcomeLabel.Text = "ACTIVE SESSION // <font color=\"#00F0FF\">" .. LocalPlayer.DisplayName .. "</font>"
+UserWelcomeLabel.Text = "Welcome, <font color=\"#bc00fc\">" .. LocalPlayer.DisplayName .. "</font>"
 UserWelcomeLabel.RichText = true
 UserWelcomeLabel.TextColor3 = C_TEXT
 UserWelcomeLabel.TextSize = 11
@@ -951,7 +951,7 @@ BannerHeader.Name = "BannerHeader"
 BannerHeader.Size = UDim2.new(1, -20, 0, 18)
 BannerHeader.Position = UDim2.new(0, 10, 0, 6)
 BannerHeader.BackgroundTransparency = 1
-BannerHeader.Text = "📢 VOIDHUB OVERLOAD EDITION v15.0"
+BannerHeader.Text = "VoidHub v1.0"
 BannerHeader.TextColor3 = C_ACCENT_CYAN
 BannerHeader.TextSize = 10
 BannerHeader.Font = Enum.Font.GothamBold
@@ -964,7 +964,7 @@ BannerText.Name = "BannerBody"
 BannerText.Size = UDim2.new(1, -20, 0, 42)
 BannerText.Position = UDim2.new(0, 10, 0, 24)
 BannerText.BackgroundTransparency = 1
-BannerText.Text = "Fitur Boss Disabler, Auto-Run To Base saat pegang Telur, serta Loading Overlay transparan telah disesuaikan penuh untuk performa maksimal."
+BannerText.Text = "Script Ini Masih Dalam Pengembangan Dan Masih Dalam Tahap Percobaan (BETA)"
 BannerText.TextColor3 = C_TEXT
 BannerText.TextSize = 10
 BannerText.Font = Enum.Font.Gotham
@@ -974,23 +974,23 @@ BannerText.TextYAlignment = Enum.TextYAlignment.Top
 BannerText.ZIndex = 14
 BannerText.Parent = BannerNotice
 
-CreateSectionLabel(MainTabPage, "QUICK SERVER CONTROL")
-CreateButton(MainTabPage, "⚡ Rejoin Server Seketika", function() RejoinServer() end)
-CreateButton(MainTabPage, "🌐 Random Server Hop (Public)", function() ServerHop() end)
+CreateSectionLabel(MainTabPage, "Quick Server Control")
+CreateButton(MainTabPage, "Rejoin Server", function() RejoinServer() end)
+CreateButton(MainTabPage, "Server Hop", function() ServerHop() end)
 
 -- ==========================================
 -- 2. BOSS & EGG MECHANICS TAB
 -- ==========================================
-CreateSectionLabel(MechanicsTabPage, "BASE COORD & TELEPORT")
-CreateButton(MechanicsTabPage, "📍 Simpan Koordinat Posisi Saat Ini Sebagai Base", function()
+CreateSectionLabel(MechanicsTabPage, "Base")
+CreateButton(MechanicsTabPage, "Simpan Koordinat Posisi Saat Ini Sebagai Base", function()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         State.BaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
         Notify("BASE SAVED", "Koordinat posisi berhasil disimpan sebagai lokasi Base!", 3)
     end
 end)
 
-CreateSectionLabel(MechanicsTabPage, "BOSS & HITBOX MODIFIERS")
-CreateToggle(MechanicsTabPage, "Disable Hitbox Attack & Anti-Knockback Boss", State.BossDisableAttack, function(activeState)
+CreateSectionLabel(MechanicsTabPage, "Boss")
+CreateToggle(MechanicsTabPage, "Disable Knockback", State.BossDisableAttack, function(activeState)
     State.BossDisableAttack = activeState
     Notify("BOSS ENGINE", activeState and "Boss Attack Hitbox Disabler Aktif!" or "Boss Attack Normal.", 2)
 end)
@@ -1028,7 +1028,7 @@ RegisterConnection(RunService.Stepped:Connect(function()
     end
 end))
 
-CreateToggle(MechanicsTabPage, "Freeze Boss / Guard Position (Diam Di Tempat)", State.FreezeBossGuard, function(activeState)
+CreateToggle(MechanicsTabPage, "Freeze Boss", State.FreezeBossGuard, function(activeState)
     State.FreezeBossGuard = activeState
     Notify("BOSS ENGINE", activeState and "Freeze Boss Active!" or "Boss Normal Unfrozen.", 2)
     task.spawn(function()
@@ -1066,13 +1066,13 @@ CreateToggle(MechanicsTabPage, "Freeze Boss / Guard Position (Diam Di Tempat)", 
     end)
 end)
 
-CreateSectionLabel(MechanicsTabPage, "EGG AUTOMATION ENGINE")
-CreateToggle(MechanicsTabPage, "Auto-Run / TP Ke Base Saat Memegang Telur", State.AutoRunToBaseWithEgg, function(activeState)
+CreateSectionLabel(MechanicsTabPage, "Egg Automation")
+CreateToggle(MechanicsTabPage, "Auto Run", State.AutoRunToBaseWithEgg, function(activeState)
     State.AutoRunToBaseWithEgg = activeState
     Notify("EGG ENGINE", activeState and "Auto TP Base saat memegang Telur Aktif!" or "Auto TP Nonaktif.", 2)
 end)
 
-CreateToggle(MechanicsTabPage, "Auto Equip Telur Dari Backpack", State.AutoEquipEgg, function(activeState)
+CreateToggle(MechanicsTabPage, "Auto Equip Telur", State.AutoEquipEgg, function(activeState)
     State.AutoEquipEgg = activeState
 end)
 
@@ -1128,8 +1128,8 @@ task.spawn(function()
     end
 end)
 
-CreateSectionLabel(MechanicsTabPage, "PROXIMITY PROMPT AUTOMATION")
-CreateToggle(MechanicsTabPage, "Instant Proximity Prompt (Tanpa Hold Delay)", State.InstantPrompt, function(activeState)
+CreateSectionLabel(MechanicsTabPage, Automation")
+CreateToggle(MechanicsTabPage, "Tanpa Hold Delay", State.InstantPrompt, function(activeState)
     State.InstantPrompt = activeState
 end)
 
@@ -1139,7 +1139,7 @@ RegisterConnection(ProximityPromptService.PromptButtonHoldBegan:Connect(function
     end
 end))
 
-CreateToggle(MechanicsTabPage, "Auto Click Semua Proximity Prompts", State.AutoPrompt, function(activeState)
+CreateToggle(MechanicsTabPage, "Auto Click Proximity Prompts", State.AutoPrompt, function(activeState)
     State.AutoPrompt = activeState
     task.spawn(function()
         while State.AutoPrompt do
@@ -1156,8 +1156,8 @@ end)
 -- ==========================================
 -- 3. MOVEMENT TAB
 -- ==========================================
-CreateSectionLabel(MovementTabPage, "FLIGHT ENGINE")
-CreateToggle(MovementTabPage, "Kinetic Flight Engine", State.Flying, function(activeState)
+CreateSectionLabel(MovementTabPage, "Flight")
+CreateToggle(MovementTabPage, "Kinetic Flight", State.Flying, function(activeState)
     State.Flying = activeState
     if activeState then
         local character = LocalPlayer.Character
@@ -1207,12 +1207,12 @@ CreateToggle(MovementTabPage, "Kinetic Flight Engine", State.Flying, function(ac
     end
 end)
 
-CreateSlider(MovementTabPage, "Flight Speed Multiplier", 20, 200, 50, function(value)
+CreateSlider(MovementTabPage, "Flight Speed", 20, 200, 50, function(value)
     State.FlySpeed = value
 end)
 
-CreateSectionLabel(MovementTabPage, "SPEED & JUMP MODIFIERS")
-CreateToggle(MovementTabPage, "WalkSpeed Modifier Engine", State.WalkSpeed, function(activeState)
+CreateSectionLabel(MovementTabPage, "Speed & Jump")
+CreateToggle(MovementTabPage, "WalkSpeed", State.WalkSpeed, function(activeState)
     State.WalkSpeed = activeState
     task.spawn(function()
         while State.WalkSpeed do
@@ -1231,11 +1231,11 @@ CreateToggle(MovementTabPage, "WalkSpeed Modifier Engine", State.WalkSpeed, func
     end)
 end)
 
-CreateSlider(MovementTabPage, "Custom WalkSpeed Value", 16, 250, 24, function(value)
+CreateSlider(MovementTabPage, "Custom WalkSpeed", 16, 250, 24, function(value)
     State.SpeedValue = value
 end)
 
-CreateToggle(MovementTabPage, "Jump Power Multiplier", State.JumpPower, function(activeState)
+CreateToggle(MovementTabPage, "Jump Power", State.JumpPower, function(activeState)
     State.JumpPower = activeState
     task.spawn(function()
         while State.JumpPower do
@@ -1251,11 +1251,11 @@ CreateToggle(MovementTabPage, "Jump Power Multiplier", State.JumpPower, function
     end)
 end)
 
-CreateSlider(MovementTabPage, "Custom Jump Value", 50, 300, 100, function(value)
+CreateSlider(MovementTabPage, "Jump Value", 50, 300, 100, function(value)
     State.JumpValue = value
 end)
 
-CreateToggle(MovementTabPage, "Infinite Jump Air Drift", State.InfJump, function(activeState)
+CreateToggle(MovementTabPage, "Infinite Jump", State.InfJump, function(activeState)
     State.InfJump = activeState
 end)
 
@@ -1268,8 +1268,8 @@ RegisterConnection(UserInputService.JumpRequest:Connect(function()
     end
 end))
 
-CreateSectionLabel(MovementTabPage, "PHYSICS & NOCLIP MODIFIERS")
-CreateToggle(MovementTabPage, "Ghost Noclip Mode", State.Noclip, function(activeState)
+CreateSectionLabel(MovementTabPage, "Physics & Noclip")
+CreateToggle(MovementTabPage, "Noclip", State.Noclip, function(activeState)
     State.Noclip = activeState
     task.spawn(function()
         while State.Noclip do
@@ -1287,7 +1287,7 @@ CreateToggle(MovementTabPage, "Ghost Noclip Mode", State.Noclip, function(active
     end)
 end)
 
-CreateToggle(MovementTabPage, "Custom World Gravity", State.GravityMod, function(activeState)
+CreateToggle(MovementTabPage, "Gravity", State.GravityMod, function(activeState)
     State.GravityMod = activeState
     if not activeState then
         workspace.Gravity = 196.2
@@ -1300,11 +1300,11 @@ CreateToggle(MovementTabPage, "Custom World Gravity", State.GravityMod, function
     end)
 end)
 
-CreateSlider(MovementTabPage, "Gravity Force Power", 0, 196, 196, function(value)
+CreateSlider(MovementTabPage, "Gravity Power", 0, 196, 196, function(value)
     State.GravityVal = value
 end)
 
-CreateToggle(MovementTabPage, "Spinbot Matrix Mode", State.Spinbot, function(activeState)
+CreateToggle(MovementTabPage, "Spinbot", State.Spinbot, function(activeState)
     State.Spinbot = activeState
     task.spawn(function()
         while State.Spinbot do
@@ -1319,11 +1319,11 @@ CreateToggle(MovementTabPage, "Spinbot Matrix Mode", State.Spinbot, function(act
     end)
 end)
 
-CreateSlider(MovementTabPage, "Spinbot Speed Velocity", 10, 100, 30, function(value)
+CreateSlider(MovementTabPage, "Spinbot Speed", 10, 100, 30, function(value)
     State.SpinSpeed = value
 end)
 
-CreateToggle(MovementTabPage, "Custom HipHeight Altitude", State.HipHeightMod, function(activeState)
+CreateToggle(MovementTabPage, "HipHeight", State.HipHeightMod, function(activeState)
     State.HipHeightMod = activeState
     task.spawn(function()
         while State.HipHeightMod do
@@ -1344,15 +1344,15 @@ CreateToggle(MovementTabPage, "Custom HipHeight Altitude", State.HipHeightMod, f
     end)
 end)
 
-CreateSlider(MovementTabPage, "HipHeight Offset Value", 0, 30, 2, function(value)
+CreateSlider(MovementTabPage, "HipHeight Value", 0, 30, 2, function(value)
     State.HipHeightVal = value
 end)
 
 -- ==========================================
 -- 4. UTILITY & AUTOMATION TAB
 -- ==========================================
-CreateSectionLabel(UtilityTabPage, "SAFETY & DISCONNECT PROTECTION")
-CreateToggle(UtilityTabPage, "Anti-Void Fall Recovery Protocol", State.AntiVoid, function(activeState)
+CreateSectionLabel(UtilityTabPage, "Protection")
+CreateToggle(UtilityTabPage, "Anti Void", State.AntiVoid, function(activeState)
     State.AntiVoid = activeState
     task.spawn(function()
         while State.AntiVoid do
@@ -1369,7 +1369,7 @@ CreateToggle(UtilityTabPage, "Anti-Void Fall Recovery Protocol", State.AntiVoid,
     end)
 end)
 
-CreateToggle(UtilityTabPage, "Anti-AFK Disconnect Guard", State.AntiAFK, function(activeState)
+CreateToggle(UtilityTabPage, "Anti AFK", State.AntiAFK, function(activeState)
     State.AntiAFK = activeState
     task.spawn(function()
         while State.AntiAFK do
@@ -1386,8 +1386,8 @@ CreateToggle(UtilityTabPage, "Anti-AFK Disconnect Guard", State.AntiAFK, functio
     end)
 end)
 
-CreateSectionLabel(UtilityTabPage, "AUTO CLICKER ENGINE")
-CreateToggle(UtilityTabPage, "Auto Clicker Engine", State.AutoClicker, function(activeState)
+CreateSectionLabel(UtilityTabPage, "Clicker")
+CreateToggle(UtilityTabPage, "Auto Clicker", State.AutoClicker, function(activeState)
     State.AutoClicker = activeState
     task.spawn(function()
         while State.AutoClicker do
@@ -1399,14 +1399,14 @@ CreateToggle(UtilityTabPage, "Auto Clicker Engine", State.AutoClicker, function(
     end)
 end)
 
-CreateSlider(UtilityTabPage, "Auto Clicker CPS Speed", 1, 30, 10, function(value)
+CreateSlider(UtilityTabPage, "Clicker Speed", 1, 30, 10, function(value)
     State.ClickerCPS = value
 end)
 
 -- ==========================================
 -- 5. VISUALS & ESP TAB
 -- ==========================================
-CreateSectionLabel(VisualTabPage, "PLAYER HIGHLIGHT & ESP")
+CreateSectionLabel(VisualTabPage, "ESP")
 
 local function ApplyPlayerESP(targetPlayer)
     if targetPlayer == LocalPlayer or not targetPlayer.Character then return end
@@ -1421,7 +1421,7 @@ local function ApplyPlayerESP(targetPlayer)
     end
 end
 
-CreateToggle(VisualTabPage, "Player Highlight ESP", State.PlayerESP, function(activeState)
+CreateToggle(VisualTabPage, "Player ESP", State.PlayerESP, function(activeState)
     State.PlayerESP = activeState
     if activeState then
         for _, playerInstance in pairs(Players:GetPlayers()) do
@@ -1446,8 +1446,8 @@ end)
 -- ==========================================
 -- 6. CAMERA & WORLD TAB
 -- ==========================================
-CreateSectionLabel(WorldTabPage, "WORLD LIGHTING MODIFIERS")
-CreateToggle(WorldTabPage, "Fullbright Vision Ambient", State.Fullbright, function(activeState)
+CreateSectionLabel(WorldTabPage, "World")
+CreateToggle(WorldTabPage, "Fullbright", State.Fullbright, function(activeState)
     State.Fullbright = activeState
     if activeState then
         Lighting.Brightness = 2
@@ -1460,7 +1460,7 @@ CreateToggle(WorldTabPage, "Fullbright Vision Ambient", State.Fullbright, functi
     end
 end)
 
-CreateToggle(WorldTabPage, "Remove World Fog & Atmosphere", State.NoFog, function(activeState)
+CreateToggle(WorldTabPage, "Fog & Atmosphere", State.NoFog, function(activeState)
     State.NoFog = activeState
     if activeState then
         Lighting.FogEnd = 9e9
@@ -1472,8 +1472,8 @@ CreateToggle(WorldTabPage, "Remove World Fog & Atmosphere", State.NoFog, functio
     end
 end)
 
-CreateSectionLabel(WorldTabPage, "CAMERA FOV MODIFIERS")
-CreateToggle(WorldTabPage, "Custom Field Of View (FOV)", State.CustomFOV, function(activeState)
+CreateSectionLabel(WorldTabPage, "Camera")
+CreateToggle(WorldTabPage, "Field Of View", State.CustomFOV, function(activeState)
     State.CustomFOV = activeState
     if not activeState then
         workspace.CurrentCamera.FieldOfView = 70
@@ -1493,11 +1493,11 @@ end)
 -- ==========================================
 -- 7. SERVER FINDER TAB
 -- ==========================================
-CreateSectionLabel(ServerTabPage, "SERVER ACTIONS")
-CreateButton(ServerTabPage, "⚡ Rejoin Server Saat Ini", function() RejoinServer() end)
-CreateButton(ServerTabPage, "🌐 Hop Ke Server Acak", function() ServerHop() end)
+CreateSectionLabel(ServerTabPage, "Server")
+CreateButton(ServerTabPage, "Rejoin", function() RejoinServer() end)
+CreateButton(ServerTabPage, "Server Hop", function() ServerHop() end)
 
-CreateSectionLabel(ServerTabPage, "1-PLAYER SOLO SERVER SCANNER")
+CreateSectionLabel(ServerTabPage, "Server 1 Player")
 
 local ServerListScroll = Instance.new("ScrollingFrame")
 ServerListScroll.Name = "ServerListScroll"
@@ -1600,12 +1600,12 @@ local function ScanSoloServers()
     end)
 end
 
-CreateButton(ServerTabPage, "🔍 Scan 1-Player Solo Servers", function() ScanSoloServers() end)
+CreateButton(ServerTabPage, "Scan Server 1 Player", function() ScanSoloServers() end)
 
 -- ==========================================
 -- 8. PLAYER LIST TAB
 -- ==========================================
-CreateSectionLabel(PlayersTabPage, "ACTIVE PLAYERS IN INSTANCE")
+CreateSectionLabel(PlayersTabPage, "Active Players In Server")
 
 local PlayerListScroll = Instance.new("ScrollingFrame")
 PlayerListScroll.Name = "PlayerListScroll"
@@ -1689,8 +1689,8 @@ local function RenderPlayerList()
     end
 end
 
-CreateSectionLabel(PlayersTabPage, "CLICK TELEPORT INTERACTION")
-CreateToggle(PlayersTabPage, "Click Teleport (Shift + Left Click)", State.ClickTP, function(activeState)
+CreateSectionLabel(PlayersTabPage, "Click TeleporT")
+CreateToggle(PlayersTabPage, "Teleport (Shift + Left Click)", State.ClickTP, function(activeState)
     State.ClickTP = activeState
 end)
 
@@ -1709,7 +1709,7 @@ RenderPlayerList()
 -- ==========================================
 -- 9. SETTINGS & LOGS TAB
 -- ==========================================
-CreateSectionLabel(SettingsTabPage, "SYSTEM LOG CONSOLE")
+CreateSectionLabel(SettingsTabPage, "System Console")
 
 local LogDisplayFrame = Instance.new("ScrollingFrame")
 LogDisplayFrame.Name = "LogDisplayFrame"
@@ -1758,15 +1758,15 @@ local function RefreshLogsDisplay()
     end
 end
 
-CreateButton(SettingsTabPage, "🔄 Refresh Logs Console", function() RefreshLogsDisplay() end)
-CreateButton(SettingsTabPage, "🗑️ Clear Logs History", function()
+CreateButton(SettingsTabPage, "Refresh Logs", function() RefreshLogsDisplay() end)
+CreateButton(SettingsTabPage, "Clear Logs", function()
     State.SystemLogs = {}
     RefreshLogsDisplay()
     Notify("LOGS", "History Logs dibersihkan.", 2)
 end)
 
-CreateSectionLabel(SettingsTabPage, "SCRIPT UNLOAD")
-CreateButton(SettingsTabPage, "❌ Unload VoidHub Engine", function()
+CreateSectionLabel(SettingsTabPage, "Script Unload")
+CreateButton(SettingsTabPage, "Unload VoidHub", function()
     if _G.VoidHubSupremeConnections then
         for _, conn in pairs(_G.VoidHubSupremeConnections) do
             if conn.Connected then conn:Disconnect() end
@@ -1777,4 +1777,4 @@ CreateButton(SettingsTabPage, "❌ Unload VoidHub Engine", function()
 end)
 
 AddLog("VoidHub Supreme Engine initialized.")
-print("[VOIDHUB CYBERPUNK v15.0] OVERLOAD ENGINE LOADED SUCCESSFULLY!")
+print("[VOIDHUB v1.0] LOADED SUCCESSFULLY!")
