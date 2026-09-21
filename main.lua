@@ -1,6 +1,6 @@
 -- [[ VOIDHUB v1.0 ]] --
--- UI/UX: Ultra-Luxury Cyberpunk Glassmorphism Clean Overlay
--- Features: 100% Retained & Expanded Engine Core (1500+ Lines Expanded)
+-- UI/UX: Ultra-Luxury Purple Cyberpunk Glassmorphism Clean Overlay
+-- Features: 100% Retained Engine Core
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -53,25 +53,27 @@ VoidHubUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 VoidHubUI.ResetOnSpawn = false
 
 -- ==========================================
--- PALET WARNA CYBERPUNK GLASSMORPHISM
+-- PALET WARNA PURPLE CYBERPUNK GLASSMORPHISM
 -- ==========================================
 local C_BG = Color3.fromRGB(12, 10, 20)
 local C_PANEL = Color3.fromRGB(20, 16, 30)
 local C_ITEM = Color3.fromRGB(30, 24, 44)
-local C_ACCENT_CYAN = Color3.fromRGB(48, 36, 56)
-local C_ACCENT_PINK = Color3.fromRGB(140, 40, 255) -- Secondary Soft Purple
-local C_ACCENT_PURPLE = Color3.fromRGB(244, 192, 255)   -- Highlight rgb(244,192,255)
-local C_ACCENT_GOLD = Color3.fromRGB(255, 200, 0)   -- Alert / Warning
-local C_ACCENT_GREEN = Color3.fromRGB(0, 255, 136)  -- Success Indicator
-local C_TEXT = Color3.fromRGB(245, 240, 255)       -- Clean Off-White Text
+local C_ITEM_DARK = Color3.fromRGB(48, 36, 56)
+
+local C_ACCENT_PURPLE = Color3.fromRGB(188, 0, 252) -- Primary Accent Neon Purple (#bc00fc)
+local C_ACCENT_VIOLET = Color3.fromRGB(140, 40, 255)
+local C_ACCENT_PINK = Color3.fromRGB(255, 0, 128)
+local C_ACCENT_GOLD = Color3.fromRGB(255, 200, 0)
+local C_ACCENT_GREEN = Color3.fromRGB(0, 255, 136)
+
+local C_TEXT = Color3.fromRGB(245, 240, 255)
 local C_SUBTEXT = Color3.fromRGB(160, 145, 185)
-local C_STROKE = Color3.fromRGB(188, 0, 252)     
+local C_STROKE = Color3.fromRGB(188, 0, 252)
 
 -- ==========================================
 -- GLOBAL STATE MANAGER
 -- ==========================================
 local State = {
-    -- Movement Features
     Flying = false,
     FlySpeed = 50,
     WalkSpeed = false,
@@ -86,8 +88,6 @@ local State = {
     SpinSpeed = 30,
     HipHeightMod = false,
     HipHeightVal = 2,
-    
-    -- Mechanics Features
     InstantPrompt = false,
     AutoPrompt = false,
     FreezeBossGuard = false,
@@ -95,16 +95,12 @@ local State = {
     AutoRunToBaseWithEgg = false,
     BaseCFrame = nil,
     AutoEquipEgg = false,
-    
-    -- Utility & Automation
     AntiVoid = false,
     AntiAFK = true,
     AutoClicker = false,
     ClickerCPS = 10,
     AutoRejoinError = true,
     FPSCap = 60,
-    
-    -- Visuals & World
     PlayerESP = false,
     ESPBoxes = false,
     ESPNames = false,
@@ -114,8 +110,6 @@ local State = {
     FOVValue = 70,
     ClickTP = false,
     NoFog = false,
-    
-    -- System Log
     SystemLogs = {}
 }
 
@@ -163,7 +157,7 @@ local function Notify(titleText, descText, durationTime)
     notifyCorner.Parent = notifyCard
 
     local notifyStroke = Instance.new("UIStroke")
-    notifyStroke.Color = C_ACCENT_CYAN
+    notifyStroke.Color = C_ACCENT_PURPLE
     notifyStroke.Thickness = 1.5
     notifyStroke.Parent = notifyCard
 
@@ -172,7 +166,7 @@ local function Notify(titleText, descText, durationTime)
     titleLabel.Position = UDim2.new(0, 10, 0, 6)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = titleText
-    titleLabel.TextColor3 = C_ACCENT_CYAN
+    titleLabel.TextColor3 = C_ACCENT_PURPLE
     titleLabel.TextSize = 11
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -296,14 +290,13 @@ local function ServerHop()
 end
 
 -- ==========================================
--- 1. CLEAN LOADING OVERLAY (NO BACKGROUND FULLSCREEN)
--- UPDATE TERBARU: Background hitam dihapus total, hanya card melayang
+-- 1. CLEAN LOADING OVERLAY
 -- ==========================================
 local LoadingCard = Instance.new("Frame")
 LoadingCard.Name = "LoadingCard"
 LoadingCard.Size = UDim2.new(0, 420, 0, 220)
 LoadingCard.Position = UDim2.new(0.5, -210, 0.5, -110)
-LoadingCard.BackgroundColor3 = Color3.fromRGB(16, 20, 32)
+LoadingCard.BackgroundColor3 = C_PANEL
 LoadingCard.BackgroundTransparency = 0.15
 LoadingCard.ZIndex = 101
 LoadingCard.Parent = VoidHubUI
@@ -313,7 +306,7 @@ LoadingCardCorner.CornerRadius = UDim.new(0, 16)
 LoadingCardCorner.Parent = LoadingCard
 
 local LoadingCardStroke = Instance.new("UIStroke")
-LoadingCardStroke.Color = C_ACCENT_CYAN
+LoadingCardStroke.Color = C_ACCENT_PURPLE
 LoadingCardStroke.Thickness = 2
 LoadingCardStroke.Transparency = 0.2
 LoadingCardStroke.Parent = LoadingCard
@@ -337,7 +330,7 @@ LoadingSubHeader.Size = UDim2.new(1, 0, 0, 20)
 LoadingSubHeader.Position = UDim2.new(0, 0, 0, 54)
 LoadingSubHeader.BackgroundTransparency = 1
 LoadingSubHeader.Text = "Initializing"
-LoadingSubHeader.TextColor3 = C_ACCENT_CYAN
+LoadingSubHeader.TextColor3 = C_ACCENT_PURPLE
 LoadingSubHeader.TextSize = 10
 LoadingSubHeader.Font = Enum.Font.Code
 LoadingSubHeader.ZIndex = 102
@@ -347,7 +340,7 @@ local LoadingProgressBackground = Instance.new("Frame")
 LoadingProgressBackground.Name = "ProgressBarBackground"
 LoadingProgressBackground.Size = UDim2.new(0.85, 0, 0, 8)
 LoadingProgressBackground.Position = UDim2.new(0.075, 0, 0.52, 0)
-LoadingProgressBackground.BackgroundColor3 = Color3.fromRGB(28, 34, 52)
+LoadingProgressBackground.BackgroundColor3 = C_ITEM_DARK
 LoadingProgressBackground.ZIndex = 102
 LoadingProgressBackground.Parent = LoadingCard
 
@@ -358,7 +351,7 @@ ProgressBgCorner.Parent = LoadingProgressBackground
 local LoadingProgressFill = Instance.new("Frame")
 LoadingProgressFill.Name = "ProgressBarFill"
 LoadingProgressFill.Size = UDim2.new(0, 0, 1, 0)
-LoadingProgressFill.BackgroundColor3 = C_ACCENT_PINK
+LoadingProgressFill.BackgroundColor3 = C_ACCENT_PURPLE
 LoadingProgressFill.ZIndex = 103
 LoadingProgressFill.Parent = LoadingProgressBackground
 
@@ -368,8 +361,8 @@ ProgressFillCorner.Parent = LoadingProgressFill
 
 local ProgressGlow = Instance.new("UIGradient")
 ProgressGlow.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, C_ACCENT_PINK),
-    ColorSequenceKeypoint.new(1, C_ACCENT_PURPLE)
+    ColorSequenceKeypoint.new(0, C_ACCENT_PURPLE),
+    ColorSequenceKeypoint.new(1, C_ACCENT_VIOLET)
 })
 ProgressGlow.Parent = LoadingProgressFill
 
@@ -424,7 +417,7 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- FLOATING TOGGLE BUTTON BARU
+-- FLOATING TOGGLE BUTTON
 -- ==========================================
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Name = "OpenToggleButton"
@@ -432,7 +425,7 @@ OpenBtn.Size = UDim2.new(0, 140, 0, 38)
 OpenBtn.Position = UDim2.new(0.02, 0, 0.12, 0)
 OpenBtn.BackgroundColor3 = C_BG
 OpenBtn.Text = "VOIDHUB"
-OpenBtn.TextColor3 = C_ACCENT_CYAN
+OpenBtn.TextColor3 = C_ACCENT_PURPLE
 OpenBtn.TextSize = 11
 OpenBtn.Font = Enum.Font.GothamBold
 OpenBtn.Visible = false
@@ -444,14 +437,14 @@ OpenBtnCorner.CornerRadius = UDim.new(0, 8)
 OpenBtnCorner.Parent = OpenBtn
 
 local OpenBtnStroke = Instance.new("UIStroke")
-OpenBtnStroke.Color = C_ACCENT_CYAN
+OpenBtnStroke.Color = C_ACCENT_PURPLE
 OpenBtnStroke.Thickness = 1.5
 OpenBtnStroke.Parent = OpenBtn
 
 MakeDraggable(OpenBtn, OpenBtn)
 
 -- ==========================================
--- MAIN CYBERPUNK WINDOW (OPTIMIZED LAYOUT)
+-- MAIN CYBERPUNK WINDOW
 -- ==========================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainCyberFrame"
@@ -468,7 +461,7 @@ MainFrameCorner.CornerRadius = UDim.new(0, 14)
 MainFrameCorner.Parent = MainFrame
 
 local MainFrameStroke = Instance.new("UIStroke")
-MainFrameStroke.Color = C_ACCENT_CYAN
+MainFrameStroke.Color = C_ACCENT_PURPLE
 MainFrameStroke.Thickness = 1.5
 MainFrameStroke.Parent = MainFrame
 
@@ -523,8 +516,7 @@ OpenBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- TOP CATEGORY NAVIGATION BAR (RESPONSIVE SCROLL)
--- FIX: Dibuat ScrollingFrame horizontal agar tidak menutupi isi Konten
+-- TOP CATEGORY NAVIGATION BAR
 -- ==========================================
 local TopNavFrame = Instance.new("ScrollingFrame")
 TopNavFrame.Name = "TopCategoryNav"
@@ -535,7 +527,7 @@ TopNavFrame.BackgroundTransparency = 0.2
 TopNavFrame.BorderSizePixel = 0
 TopNavFrame.CanvasSize = UDim2.new(0, 1100, 0, 0)
 TopNavFrame.ScrollBarThickness = 2
-TopNavFrame.ScrollBarImageColor3 = C_ACCENT_CYAN
+TopNavFrame.ScrollBarImageColor3 = C_ACCENT_PURPLE
 TopNavFrame.ZIndex = 11
 TopNavFrame.Parent = MainFrame
 
@@ -556,7 +548,7 @@ TopNavPadding.PaddingLeft = UDim.new(0, 6)
 TopNavPadding.PaddingRight = UDim.new(0, 6)
 TopNavPadding.Parent = TopNavFrame
 
--- CONTENT AREA (Disesuaikan agar muat sempurna)
+-- CONTENT AREA
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentAreaFrame"
 ContentArea.Size = UDim2.new(1, -20, 1, -92)
@@ -577,7 +569,7 @@ local function CreatePage(pageName)
     pageScroll.BorderSizePixel = 0
     pageScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
     pageScroll.ScrollBarThickness = 3
-    pageScroll.ScrollBarImageColor3 = C_ACCENT_CYAN
+    pageScroll.ScrollBarImageColor3 = C_ACCENT_PURPLE
     pageScroll.Visible = false
     pageScroll.ZIndex = 12
     pageScroll.Parent = PagesFolder
@@ -610,7 +602,7 @@ local function CreateTabButton(buttonText, pageTarget, defaultActive)
     local tabBtn = Instance.new("TextButton")
     tabBtn.Name = buttonText .. "TabBtn"
     tabBtn.Size = UDim2.new(0, 125, 1, 0)
-    tabBtn.BackgroundColor3 = defaultActive and C_ACCENT_CYAN or C_ITEM
+    tabBtn.BackgroundColor3 = defaultActive and C_ACCENT_PURPLE or C_ITEM
     tabBtn.Text = buttonText
     tabBtn.TextColor3 = defaultActive and C_BG or C_SUBTEXT
     tabBtn.TextSize = 10
@@ -633,7 +625,7 @@ local function CreateTabButton(buttonText, pageTarget, defaultActive)
             end
         end
         pageTarget.Visible = true
-        TweenService:Create(tabBtn, TweenInfo.new(0.18), {BackgroundColor3 = C_ACCENT_CYAN}):Play()
+        TweenService:Create(tabBtn, TweenInfo.new(0.18), {BackgroundColor3 = C_ACCENT_PURPLE}):Play()
         tabBtn.TextColor3 = C_BG
     end)
 end
@@ -657,7 +649,7 @@ local function CreateSectionLabel(parentContainer, sectionTitleText)
     sectionLabel.Size = UDim2.new(1, -6, 0, 22)
     sectionLabel.BackgroundTransparency = 1
     sectionLabel.Text = "  //" .. string.upper(sectionTitleText)
-    sectionLabel.TextColor3 = C_ACCENT_CYAN
+    sectionLabel.TextColor3 = C_ACCENT_PURPLE
     sectionLabel.TextSize = 10
     sectionLabel.Font = Enum.Font.GothamBold
     sectionLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -700,7 +692,7 @@ local function CreateToggle(parentContainer, titleText, defaultState, toggleCall
     switchButton.Name = "Switch"
     switchButton.Size = UDim2.new(0, 36, 0, 18)
     switchButton.Position = UDim2.new(1, -44, 0.5, -9)
-    switchButton.BackgroundColor3 = defaultState and C_ACCENT_PINK or Color3.fromRGB(48, 36, 56)
+    switchButton.BackgroundColor3 = defaultState and C_ACCENT_PURPLE or C_ITEM_DARK
     switchButton.Text = ""
     switchButton.ZIndex = 14
     switchButton.Parent = toggleFrame
@@ -725,13 +717,13 @@ local function CreateToggle(parentContainer, titleText, defaultState, toggleCall
     switchButton.MouseButton1Click:Connect(function()
         isActive = not isActive
         if isActive then
-            TweenService:Create(switchButton, TweenInfo.new(0.2), {BackgroundColor3 = C_ACCENT_PINK}):Play()
+            TweenService:Create(switchButton, TweenInfo.new(0.2), {BackgroundColor3 = C_ACCENT_PURPLE}):Play()
             TweenService:Create(circleIndicator, TweenInfo.new(0.2), {
                 Position = UDim2.new(1, -15, 0.5, -6),
                 BackgroundColor3 = C_BG
             }):Play()
         else
-            TweenService:Create(switchButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(48, 36, 56)}):Play()
+            TweenService:Create(switchButton, TweenInfo.new(0.2), {BackgroundColor3 = C_ITEM_DARK}):Play()
             TweenService:Create(circleIndicator, TweenInfo.new(0.2), {
                 Position = UDim2.new(0, 3, 0.5, -6),
                 BackgroundColor3 = C_TEXT
@@ -772,7 +764,7 @@ local function CreateSlider(parentContainer, titleText, minimumValue, maximumVal
     valueLabel.Position = UDim2.new(1, -55, 0, 4)
     valueLabel.BackgroundTransparency = 1
     valueLabel.Text = tostring(defaultValue)
-    valueLabel.TextColor3 = C_ACCENT_CYAN
+    valueLabel.TextColor3 = C_ACCENT_PURPLE
     valueLabel.TextSize = 10
     valueLabel.Font = Enum.Font.GothamBold
     valueLabel.TextXAlignment = Enum.TextXAlignment.Right
@@ -783,7 +775,7 @@ local function CreateSlider(parentContainer, titleText, minimumValue, maximumVal
     trackBackground.Name = "TrackBg"
     trackBackground.Size = UDim2.new(1, -24, 0, 6)
     trackBackground.Position = UDim2.new(0, 12, 0, 30)
-    trackBackground.BackgroundColor3 = Color3.fromRGB(48, 36, 56)
+    trackBackground.BackgroundColor3 = C_ITEM_DARK
     trackBackground.ZIndex = 14
     trackBackground.Parent = sliderFrame
 
@@ -794,7 +786,7 @@ local function CreateSlider(parentContainer, titleText, minimumValue, maximumVal
     local trackFill = Instance.new("Frame")
     trackFill.Name = "TrackFill"
     trackFill.Size = UDim2.new((defaultValue - minimumValue) / (maximumValue - minimumValue), 0, 1, 0)
-    trackFill.BackgroundColor3 = C_ACCENT_CYAN
+    trackFill.BackgroundColor3 = C_ACCENT_PURPLE
     trackFill.ZIndex = 15
     trackFill.Parent = trackBackground
 
@@ -854,7 +846,7 @@ local function CreateButton(parentContainer, buttonText, clickCallback)
 
     actionButton.MouseButton1Click:Connect(function()
         TweenService:Create(actionButton, TweenInfo.new(0.08), {
-            BackgroundColor3 = C_ACCENT_CYAN,
+            BackgroundColor3 = C_ACCENT_PURPLE,
             TextColor3 = C_BG
         }):Play()
         task.wait(0.1)
@@ -868,7 +860,6 @@ end
 
 -- ==========================================
 -- 1. MAIN DASHBOARD PAGE
--- PERBAIKAN: local BannerText untuk mencegah error script
 -- ==========================================
 local ProfileCard = Instance.new("Frame")
 ProfileCard.Name = "UserProfileCard"
@@ -942,7 +933,7 @@ BannerCorner.CornerRadius = UDim.new(0, 8)
 BannerCorner.Parent = BannerNotice
 
 local BannerStroke = Instance.new("UIStroke")
-BannerStroke.Color = C_ACCENT_CYAN
+BannerStroke.Color = C_ACCENT_PURPLE
 BannerStroke.Transparency = 0.7
 BannerStroke.Parent = BannerNotice
 
@@ -952,7 +943,7 @@ BannerHeader.Size = UDim2.new(1, -20, 0, 18)
 BannerHeader.Position = UDim2.new(0, 10, 0, 6)
 BannerHeader.BackgroundTransparency = 1
 BannerHeader.Text = "VoidHub v1.0"
-BannerHeader.TextColor3 = C_ACCENT_CYAN
+BannerHeader.TextColor3 = C_ACCENT_PURPLE
 BannerHeader.TextSize = 10
 BannerHeader.Font = Enum.Font.GothamBold
 BannerHeader.TextXAlignment = Enum.TextXAlignment.Left
@@ -995,7 +986,7 @@ CreateToggle(MechanicsTabPage, "Disable Knockback", State.BossDisableAttack, fun
     Notify("BOSS ENGINE", activeState and "Boss Attack Hitbox Disabler Aktif!" or "Boss Attack Normal.", 2)
 end)
 
--- ENGINE HITBOX & ANTI-KNOCKBACK BOSS (OPTIMIZED LOOP)
+-- ENGINE HITBOX & ANTI-KNOCKBACK BOSS
 RegisterConnection(RunService.Stepped:Connect(function()
     if State.BossDisableAttack then
         pcall(function()
@@ -1128,6 +1119,7 @@ task.spawn(function()
     end
 end)
 
+-- FIX SYNTAX ERROR TERHUBUNG SINI: "Automation"
 CreateSectionLabel(MechanicsTabPage, "Automation")
 CreateToggle(MechanicsTabPage, "Tanpa Hold Delay", State.InstantPrompt, function(activeState)
     State.InstantPrompt = activeState
@@ -1414,7 +1406,7 @@ local function ApplyPlayerESP(targetPlayer)
     if State.PlayerESP and not targetPlayer.Character:FindFirstChild("VoidHighlight") then
         local highlight = Instance.new("Highlight")
         highlight.Name = "VoidHighlight"
-        highlight.FillColor = C_ACCENT_CYAN
+        highlight.FillColor = C_ACCENT_PURPLE
         highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
         highlight.FillTransparency = 0.5
         highlight.Parent = targetPlayer.Character
@@ -1504,7 +1496,7 @@ ServerListScroll.Name = "ServerListScroll"
 ServerListScroll.Size = UDim2.new(1, -6, 0, 220)
 ServerListScroll.BackgroundTransparency = 1
 ServerListScroll.ScrollBarThickness = 3
-ServerListScroll.ScrollBarImageColor3 = C_ACCENT_CYAN
+ServerListScroll.ScrollBarImageColor3 = C_ACCENT_PURPLE
 ServerListScroll.ZIndex = 13
 ServerListScroll.Parent = ServerTabPage
 
@@ -1567,7 +1559,7 @@ local function ScanSoloServers()
                         local joinButton = Instance.new("TextButton")
                         joinButton.Size = UDim2.new(0, 85, 0, 24)
                         joinButton.Position = UDim2.new(1, -92, 0.5, -12)
-                        joinButton.BackgroundColor3 = C_ACCENT_CYAN
+                        joinButton.BackgroundColor3 = C_ACCENT_PURPLE
                         joinButton.Text = "JOIN SERVER"
                         joinButton.TextColor3 = C_BG
                         joinButton.TextSize = 9
@@ -1612,7 +1604,7 @@ PlayerListScroll.Name = "PlayerListScroll"
 PlayerListScroll.Size = UDim2.new(1, -6, 0, 220)
 PlayerListScroll.BackgroundTransparency = 1
 PlayerListScroll.ScrollBarThickness = 3
-PlayerListScroll.ScrollBarImageColor3 = C_ACCENT_CYAN
+PlayerListScroll.ScrollBarImageColor3 = C_ACCENT_PURPLE
 PlayerListScroll.ZIndex = 13
 PlayerListScroll.Parent = PlayersTabPage
 
@@ -1667,7 +1659,7 @@ local function RenderPlayerList()
             local tpButton = Instance.new("TextButton")
             tpButton.Size = UDim2.new(0, 85, 0, 24)
             tpButton.Position = UDim2.new(1, -92, 0.5, -12)
-            tpButton.BackgroundColor3 = C_ACCENT_CYAN
+            tpButton.BackgroundColor3 = C_ACCENT_PURPLE
             tpButton.Text = "TP TO PLAYER"
             tpButton.TextColor3 = C_BG
             tpButton.TextSize = 9
@@ -1689,7 +1681,7 @@ local function RenderPlayerList()
     end
 end
 
-CreateSectionLabel(PlayersTabPage, "Click TeleporT")
+CreateSectionLabel(PlayersTabPage, "Click Teleport")
 CreateToggle(PlayersTabPage, "Teleport (Shift + Left Click)", State.ClickTP, function(activeState)
     State.ClickTP = activeState
 end)
@@ -1714,11 +1706,11 @@ CreateSectionLabel(SettingsTabPage, "System Console")
 local LogDisplayFrame = Instance.new("ScrollingFrame")
 LogDisplayFrame.Name = "LogDisplayFrame"
 LogDisplayFrame.Size = UDim2.new(1, -6, 0, 180)
-LogDisplayFrame.BackgroundColor3 = Color3.fromRGB(10, 12, 20)
+LogDisplayFrame.BackgroundColor3 = Color3.fromRGB(10, 8, 16)
 LogDisplayFrame.BorderSizePixel = 0
 LogDisplayFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 LogDisplayFrame.ScrollBarThickness = 3
-LogDisplayFrame.ScrollBarImageColor3 = C_ACCENT_CYAN
+LogDisplayFrame.ScrollBarImageColor3 = C_ACCENT_PURPLE
 LogDisplayFrame.ZIndex = 13
 LogDisplayFrame.Parent = SettingsTabPage
 
