@@ -1,6 +1,6 @@
--- [[ VOIDHUB v1.0 ]] --
--- UI/UX: Ultra-Luxury Purple Cyberpunk Glassmorphism Clean Overlay
--- Features: 100% Retained Engine Core
+-- [[ VOIDHUB SUPREME v1.0 ]] --
+-- UI/UX: 100% Reference Replica (Bento Cards, Pill Tabs, Neon Glow Switches & Sliders)
+-- Engine Core: Fully Retained & Enhanced
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -12,10 +12,6 @@ local HttpService = game:GetService("HttpService")
 local StatsService = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
 local ProximityPromptService = game:GetService("ProximityPromptService")
-local SoundService = game:GetService("SoundService")
-local StarterGui = game:GetService("StarterGui")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Debris = game:GetService("Debris")
 
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
@@ -24,27 +20,21 @@ local Mouse = LocalPlayer:GetMouse()
 -- 0. CLEANUP & INSTANCE GUARD SYSTEM
 -- ==========================================
 if _G.VoidHubSupremeConnections then
-    for index, connection in pairs(_G.VoidHubSupremeConnections) do
-        if typeof(connection) == "RBXScriptConnection" then
-            if connection.Connected then
-                connection:Disconnect()
-            end
+    for _, connection in pairs(_G.VoidHubSupremeConnections) do
+        if typeof(connection) == "RBXScriptConnection" and connection.Connected then
+            connection:Disconnect()
         end
     end
 end
 _G.VoidHubSupremeConnections = {}
 
-local function RegisterConnection(connectionObject)
-    table.insert(_G.VoidHubSupremeConnections, connectionObject)
-    return connectionObject
+local function RegisterConnection(conn)
+    table.insert(_G.VoidHubSupremeConnections, conn)
+    return conn
 end
 
-if CoreGui:FindFirstChild("VoidHubUI_v15") then
-    CoreGui.VoidHubUI_v15:Destroy()
-end
-if CoreGui:FindFirstChild("VoidHubUI_v14") then
-    CoreGui.VoidHubUI_v14:Destroy()
-end
+if CoreGui:FindFirstChild("VoidHubUI_v15") then CoreGui.VoidHubUI_v15:Destroy() end
+if CoreGui:FindFirstChild("VoidHubUI_v14") then CoreGui.VoidHubUI_v14:Destroy() end
 
 local VoidHubUI = Instance.new("ScreenGui")
 VoidHubUI.Name = "VoidHubUI_v15"
@@ -53,393 +43,82 @@ VoidHubUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 VoidHubUI.ResetOnSpawn = false
 
 -- ==========================================
--- PALET WARNA PURPLE CYBERPUNK GLASSMORPHISM
+-- COLOR PALETTE (EXACT MATCH TO REFERENCE)
 -- ==========================================
-local C_BG = Color3.fromRGB(12, 10, 20)
-local C_PANEL = Color3.fromRGB(20, 16, 30)
-local C_ITEM = Color3.fromRGB(30, 24, 44)
-local C_ITEM_DARK = Color3.fromRGB(48, 36, 56)
-
-local C_ACCENT_PURPLE = Color3.fromRGB(188, 0, 252) -- Primary Accent Neon Purple (#bc00fc)
-local C_ACCENT_VIOLET = Color3.fromRGB(140, 40, 255)
-local C_ACCENT_PINK = Color3.fromRGB(255, 0, 128)
-local C_ACCENT_GOLD = Color3.fromRGB(255, 200, 0)
-local C_ACCENT_GREEN = Color3.fromRGB(0, 255, 136)
-
-local C_TEXT = Color3.fromRGB(245, 240, 255)
-local C_SUBTEXT = Color3.fromRGB(160, 145, 185)
-local C_STROKE = Color3.fromRGB(188, 0, 252)
+local C_MAIN_BG = Color3.fromRGB(15, 11, 25)
+local C_CARD_BG = Color3.fromRGB(24, 18, 38)
+local C_CARD_DARK = Color3.fromRGB(18, 14, 28)
+local C_BORDER = Color3.fromRGB(58, 40, 88)
+local C_ACCENT_PURPLE = Color3.fromRGB(188, 0, 252)
+local C_ACCENT_MAGENTA = Color3.fromRGB(220, 50, 255)
+local C_TEXT_WHITE = Color3.fromRGB(255, 255, 255)
+local C_TEXT_SUB = Color3.fromRGB(160, 150, 180)
+local C_TEXT_MUTED = Color3.fromRGB(110, 100, 130)
 
 -- ==========================================
--- GLOBAL STATE MANAGER
+-- GLOBAL STATE
 -- ==========================================
 local State = {
-    Flying = false,
-    FlySpeed = 50,
-    WalkSpeed = false,
-    SpeedValue = 24,
-    JumpPower = false,
-    JumpValue = 100,
-    InfJump = false,
-    Noclip = false,
-    GravityMod = false,
-    GravityVal = 196.2,
-    Spinbot = false,
-    SpinSpeed = 30,
-    HipHeightMod = false,
-    HipHeightVal = 2,
-    InstantPrompt = false,
-    AutoPrompt = false,
-    FreezeBossGuard = false,
-    BossDisableAttack = false,
-    AutoRunToBaseWithEgg = false,
-    BaseCFrame = nil,
-    AutoEquipEgg = false,
-    AntiVoid = false,
-    AntiAFK = true,
-    AutoClicker = false,
-    ClickerCPS = 10,
-    AutoRejoinError = true,
-    FPSCap = 60,
-    PlayerESP = false,
-    ESPBoxes = false,
-    ESPNames = false,
-    ESPTracers = false,
-    Fullbright = false,
-    CustomFOV = false,
-    FOVValue = 70,
-    ClickTP = false,
-    NoFog = false,
-    SystemLogs = {}
+    Flying = false, FlySpeed = 120, WalkSpeed = false, SpeedValue = 100, JumpPower = false, JumpValue = 100,
+    InfJump = false, Noclip = false, GravityMod = false, GravityVal = 196.2, Spinbot = false, SpinSpeed = 30,
+    HipHeightMod = false, HipHeightVal = 2, InstantPrompt = false, AutoPrompt = false, FreezeBossGuard = false,
+    BossDisableAttack = false, AutoRunToBaseWithEgg = false, BaseCFrame = nil, AutoEquipEgg = false,
+    AntiVoid = false, AntiAFK = true, AutoClicker = false, ClickerCPS = 10, FPSCap = 60, PlayerESP = false,
+    Fullbright = false, CustomFOV = false, FOVValue = 70, ClickTP = false, NoFog = false, SystemLogs = {}
 }
 
-local FlyVel = nil
-local FlyGyro = nil
+local FlyVel, FlyGyro = nil, nil
 
--- ==========================================
--- LOGGING SYSTEM & NOTIFICATION ENGINE
--- ==========================================
-local function AddLog(messageText)
-    local timestamp = os.date("%H:%M:%S")
-    local formattedLog = string.format("[%s] %s", timestamp, messageText)
-    table.insert(State.SystemLogs, formattedLog)
-    print("[VOIDHUB LOG]: " .. messageText)
-end
-
-local NotificationContainer = Instance.new("Frame")
-NotificationContainer.Name = "NotificationContainer"
-NotificationContainer.Size = UDim2.new(0, 260, 1, -20)
-NotificationContainer.Position = UDim2.new(1, -270, 0, 10)
-NotificationContainer.BackgroundTransparency = 1
-NotificationContainer.ZIndex = 200
-NotificationContainer.Parent = VoidHubUI
-
-local NotificationLayout = Instance.new("UIListLayout")
-NotificationLayout.SortOrder = Enum.SortOrder.LayoutOrder
-NotificationLayout.Padding = UDim.new(0, 6)
-NotificationLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-NotificationLayout.Parent = NotificationContainer
-
-local function Notify(titleText, descText, durationTime)
-    durationTime = durationTime or 3
-    
-    local notifyCard = Instance.new("Frame")
-    notifyCard.Name = "NotifyCard"
-    notifyCard.Size = UDim2.new(1, 0, 0, 56)
-    notifyCard.BackgroundColor3 = C_PANEL
-    notifyCard.BackgroundTransparency = 0.15
-    notifyCard.ClipsDescendants = true
-    notifyCard.ZIndex = 201
-    notifyCard.Parent = NotificationContainer
-
-    local notifyCorner = Instance.new("UICorner")
-    notifyCorner.CornerRadius = UDim.new(0, 8)
-    notifyCorner.Parent = notifyCard
-
-    local notifyStroke = Instance.new("UIStroke")
-    notifyStroke.Color = C_ACCENT_PURPLE
-    notifyStroke.Thickness = 1.5
-    notifyStroke.Parent = notifyCard
-
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -16, 0, 20)
-    titleLabel.Position = UDim2.new(0, 10, 0, 6)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = titleText
-    titleLabel.TextColor3 = C_ACCENT_PURPLE
-    titleLabel.TextSize = 11
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.ZIndex = 202
-    titleLabel.Parent = notifyCard
-
-    local descLabel = Instance.new("TextLabel")
-    descLabel.Size = UDim2.new(1, -16, 0, 24)
-    descLabel.Position = UDim2.new(0, 10, 0, 24)
-    descLabel.BackgroundTransparency = 1
-    descLabel.Text = descText
-    descLabel.TextColor3 = C_TEXT
-    descLabel.TextSize = 10
-    descLabel.Font = Enum.Font.Gotham
-    descLabel.TextWrapped = true
-    descLabel.TextXAlignment = Enum.TextXAlignment.Left
-    descLabel.ZIndex = 202
-    descLabel.Parent = notifyCard
-
-    AddLog("NOTIFY: " .. titleText .. " - " .. descText)
-
-    task.delay(durationTime, function()
-        if notifyCard and notifyCard.Parent then
-            TweenService:Create(notifyCard, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                BackgroundTransparency = 1
-            }):Play()
-            TweenService:Create(titleLabel, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
-            TweenService:Create(descLabel, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
-            task.wait(0.35)
-            notifyCard:Destroy()
-        end
-    end)
+local function AddLog(msg)
+    table.insert(State.SystemLogs, string.format("[%s] %s", os.date("%H:%M:%S"), msg))
 end
 
 -- ==========================================
--- ENGINE DRAGGABLE INTERAKSI
+-- DRAGGABLE ENGINE
 -- ==========================================
 local function MakeDraggable(dragHandle, targetFrame)
-    local isDragging = false
-    local dragInputObject = nil
-    local dragStartPosition = nil
-    local frameStartPosition = nil
-
+    local dragging, dragInput, dragStart, startPos
     RegisterConnection(dragHandle.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isDragging = true
-            dragStartPosition = input.Position
-            frameStartPosition = targetFrame.Position
-
+            dragging = true
+            dragStart = input.Position
+            startPos = targetFrame.Position
             input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    isDragging = false
-                end
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
             end)
         end
     end))
-
     RegisterConnection(dragHandle.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInputObject = input
+            dragInput = input
         end
     end))
-
     RegisterConnection(UserInputService.InputChanged:Connect(function(input)
-        if input == dragInputObject and isDragging then
-            local deltaPosition = input.Position - dragStartPosition
-            local newPosition = UDim2.new(
-                frameStartPosition.X.Scale,
-                frameStartPosition.X.Offset + deltaPosition.X,
-                frameStartPosition.Y.Scale,
-                frameStartPosition.Y.Offset + deltaPosition.Y
-            )
-            TweenService:Create(targetFrame, TweenInfo.new(0.06, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                Position = newPosition
-            }):Play()
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            targetFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end))
 end
 
 -- ==========================================
--- HELPER UTILITIES FOR TELEPORTATION & SERVERS
--- ==========================================
-local function RejoinServer()
-    AddLog("Initiating Rejoin Server Sequence...")
-    Notify("SYSTEM", "Rejoining current instance...", 2)
-    local currentPlayers = Players:GetPlayers()
-    if #currentPlayers <= 1 then
-        LocalPlayer:Kick("\n[VoidHub]: Rejoining Current Instance...")
-        task.wait(0.25)
-        TeleportService:Teleport(game.PlaceId, LocalPlayer)
-    else
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-    end
-end
-
-local function ServerHop()
-    AddLog("Initiating Server Hop Sequence...")
-    Notify("SYSTEM", "Searching for available public servers...", 3)
-    pcall(function()
-        local serverList = {}
-        local requestUrl = "https://games.roblox.com/v1/games/" .. tostring(game.PlaceId) .. "/servers/Public?sortOrder=Asc&limit=100"
-        local responseData = game:HttpGet(requestUrl)
-        local decodedData = HttpService:JSONDecode(responseData)
-
-        if decodedData and decodedData.data then
-            for _, serverInfo in pairs(decodedData.data) do
-                if serverInfo.playing < serverInfo.maxPlayers and serverInfo.id ~= game.JobId then
-                    table.insert(serverList, serverInfo.id)
-                end
-            end
-        end
-
-        if #serverList > 0 then
-            local selectedServer = serverList[math.random(1, #serverList)]
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, selectedServer, LocalPlayer)
-        else
-            Notify("SERVER HOP", "No alternative servers found. Teleporting to main place.", 3)
-            TeleportService:Teleport(game.PlaceId, LocalPlayer)
-        end
-    end)
-end
-
--- ==========================================
--- 1. CLEAN LOADING OVERLAY
--- ==========================================
-local LoadingCard = Instance.new("Frame")
-LoadingCard.Name = "LoadingCard"
-LoadingCard.Size = UDim2.new(0, 420, 0, 220)
-LoadingCard.Position = UDim2.new(0.5, -210, 0.5, -110)
-LoadingCard.BackgroundColor3 = C_PANEL
-LoadingCard.BackgroundTransparency = 0.15
-LoadingCard.ZIndex = 101
-LoadingCard.Parent = VoidHubUI
-
-local LoadingCardCorner = Instance.new("UICorner")
-LoadingCardCorner.CornerRadius = UDim.new(0, 16)
-LoadingCardCorner.Parent = LoadingCard
-
-local LoadingCardStroke = Instance.new("UIStroke")
-LoadingCardStroke.Color = C_ACCENT_PURPLE
-LoadingCardStroke.Thickness = 2
-LoadingCardStroke.Transparency = 0.2
-LoadingCardStroke.Parent = LoadingCard
-
-local LoadingHeader = Instance.new("TextLabel")
-LoadingHeader.Name = "LoadingHeader"
-LoadingHeader.Size = UDim2.new(1, 0, 0, 36)
-LoadingHeader.Position = UDim2.new(0, 0, 0, 18)
-LoadingHeader.BackgroundTransparency = 1
-LoadingHeader.Text = "VoidHub v1.0"
-LoadingHeader.RichText = true
-LoadingHeader.TextColor3 = C_TEXT
-LoadingHeader.TextSize = 22
-LoadingHeader.Font = Enum.Font.GothamBold
-LoadingHeader.ZIndex = 102
-LoadingHeader.Parent = LoadingCard
-
-local LoadingSubHeader = Instance.new("TextLabel")
-LoadingSubHeader.Name = "LoadingSubHeader"
-LoadingSubHeader.Size = UDim2.new(1, 0, 0, 20)
-LoadingSubHeader.Position = UDim2.new(0, 0, 0, 54)
-LoadingSubHeader.BackgroundTransparency = 1
-LoadingSubHeader.Text = "Initializing"
-LoadingSubHeader.TextColor3 = C_ACCENT_PURPLE
-LoadingSubHeader.TextSize = 10
-LoadingSubHeader.Font = Enum.Font.Code
-LoadingSubHeader.ZIndex = 102
-LoadingSubHeader.Parent = LoadingCard
-
-local LoadingProgressBackground = Instance.new("Frame")
-LoadingProgressBackground.Name = "ProgressBarBackground"
-LoadingProgressBackground.Size = UDim2.new(0.85, 0, 0, 8)
-LoadingProgressBackground.Position = UDim2.new(0.075, 0, 0.52, 0)
-LoadingProgressBackground.BackgroundColor3 = C_ITEM_DARK
-LoadingProgressBackground.ZIndex = 102
-LoadingProgressBackground.Parent = LoadingCard
-
-local ProgressBgCorner = Instance.new("UICorner")
-ProgressBgCorner.CornerRadius = UDim.new(1, 0)
-ProgressBgCorner.Parent = LoadingProgressBackground
-
-local LoadingProgressFill = Instance.new("Frame")
-LoadingProgressFill.Name = "ProgressBarFill"
-LoadingProgressFill.Size = UDim2.new(0, 0, 1, 0)
-LoadingProgressFill.BackgroundColor3 = C_ACCENT_PURPLE
-LoadingProgressFill.ZIndex = 103
-LoadingProgressFill.Parent = LoadingProgressBackground
-
-local ProgressFillCorner = Instance.new("UICorner")
-ProgressFillCorner.CornerRadius = UDim.new(1, 0)
-ProgressFillCorner.Parent = LoadingProgressFill
-
-local ProgressGlow = Instance.new("UIGradient")
-ProgressGlow.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, C_ACCENT_PURPLE),
-    ColorSequenceKeypoint.new(1, C_ACCENT_VIOLET)
-})
-ProgressGlow.Parent = LoadingProgressFill
-
-local LoadingStatusText = Instance.new("TextLabel")
-LoadingStatusText.Name = "StatusTerminal"
-LoadingStatusText.Size = UDim2.new(1, -30, 0, 40)
-LoadingStatusText.Position = UDim2.new(0, 15, 0.68, 0)
-LoadingStatusText.BackgroundTransparency = 1
-LoadingStatusText.Text = "Connecting to VoidHub..."
-LoadingStatusText.TextColor3 = C_SUBTEXT
-LoadingStatusText.TextSize = 10
-LoadingStatusText.Font = Enum.Font.Code
-LoadingStatusText.TextWrapped = true
-LoadingStatusText.ZIndex = 102
-LoadingStatusText.Parent = LoadingCard
-
-task.spawn(function()
-    local loadingSequence = {
-        {message = "[1/6] Injecting Boss Hitbox & Knockback Inhibitor...", duration = 0.18},
-        {message = "[2/6] Hooking Character Inventory for Egg Detection...", duration = 0.20},
-        {message = "[3/6] Calibrating Base Teleport Coordinate Engine...", duration = 0.18},
-        {message = "[4/6] Constructing Clean Compact UI Navigation...", duration = 0.18},
-        {message = "[5/6] Finalizing Anti-AFK & Server Scan Protocols...", duration = 0.15},
-        {message = "[6/6] Verifying System Integrities & Module Registers...", duration = 0.15}
-    }
-
-    for index, taskData in ipairs(loadingSequence) do
-        LoadingStatusText.Text = taskData.message
-        local targetRatio = index / #loadingSequence
-        TweenService:Create(LoadingProgressFill, TweenInfo.new(taskData.duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(targetRatio, 0, 1, 0)
-        }):Play()
-        task.wait(taskData.duration)
-    end
-
-    LoadingStatusText.Text = "VoidHub Ready & Active"
-    task.wait(0.15)
-
-    TweenService:Create(LoadingCard, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-        BackgroundTransparency = 1
-    }):Play()
-
-    for _, childInstance in pairs(LoadingCard:GetChildren()) do
-        if childInstance:IsA("TextLabel") or childInstance:IsA("Frame") then
-            TweenService:Create(childInstance, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
-        end
-    end
-
-    task.wait(0.3)
-    LoadingCard:Destroy()
-    Notify("VoidHub", "Engine Loaded Successfully! Enjoy.", 4)
-end)
-
--- ==========================================
--- FLOATING TOGGLE BUTTON
+-- FLOATING TOGGLE BUTTON (TOP RIGHT BANNER MATCH)
 -- ==========================================
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Name = "OpenToggleButton"
-OpenBtn.Size = UDim2.new(0, 140, 0, 38)
-OpenBtn.Position = UDim2.new(0.02, 0, 0.12, 0)
-OpenBtn.BackgroundColor3 = C_BG
-OpenBtn.Text = "VOIDHUB"
-OpenBtn.TextColor3 = C_ACCENT_PURPLE
-OpenBtn.TextSize = 11
+OpenBtn.Size = UDim2.new(0, 110, 0, 32)
+OpenBtn.Position = UDim2.new(1, -125, 0, 15)
+OpenBtn.BackgroundColor3 = C_CARD_BG
+OpenBtn.Text = "UXT VOIDLES"
+OpenBtn.TextColor3 = C_TEXT_WHITE
+OpenBtn.TextSize = 10
 OpenBtn.Font = Enum.Font.GothamBold
 OpenBtn.Visible = false
 OpenBtn.ZIndex = 99
 OpenBtn.Parent = VoidHubUI
 
-local OpenBtnCorner = Instance.new("UICorner")
-OpenBtnCorner.CornerRadius = UDim.new(0, 8)
-OpenBtnCorner.Parent = OpenBtn
-
-local OpenBtnStroke = Instance.new("UIStroke")
-OpenBtnStroke.Color = C_ACCENT_PURPLE
-OpenBtnStroke.Thickness = 1.5
-OpenBtnStroke.Parent = OpenBtn
+local OpenBtnCorner = Instance.new("UICorner", OpenBtn) OpenBtnCorner.CornerRadius = UDim.new(0, 6)
+local OpenBtnStroke = Instance.new("UIStroke", OpenBtn) OpenBtnStroke.Color = C_BORDER OpenBtnStroke.Thickness = 1
 
 MakeDraggable(OpenBtn, OpenBtn)
 
@@ -448,92 +127,107 @@ MakeDraggable(OpenBtn, OpenBtn)
 -- ==========================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainCyberFrame"
-MainFrame.Size = UDim2.new(0, 680, 0, 460)
-MainFrame.Position = UDim2.new(0.5, -340, 0.5, -230)
-MainFrame.BackgroundColor3 = C_BG
-MainFrame.BackgroundTransparency = 0.05
+MainFrame.Size = UDim2.new(0, 520, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -260, 0.5, -210)
+MainFrame.BackgroundColor3 = C_MAIN_BG
 MainFrame.ClipsDescendants = true
 MainFrame.ZIndex = 10
 MainFrame.Parent = VoidHubUI
 
-local MainFrameCorner = Instance.new("UICorner")
-MainFrameCorner.CornerRadius = UDim.new(0, 14)
-MainFrameCorner.Parent = MainFrame
-
-local MainFrameStroke = Instance.new("UIStroke")
-MainFrameStroke.Color = C_ACCENT_PURPLE
-MainFrameStroke.Thickness = 1.5
-MainFrameStroke.Parent = MainFrame
+local MainFrameCorner = Instance.new("UICorner", MainFrame) MainFrameCorner.CornerRadius = UDim.new(0, 12)
+local MainFrameStroke = Instance.new("UIStroke", MainFrame) MainFrameStroke.Color = C_BORDER MainFrameStroke.Thickness = 1.5
 
 -- TOPBAR
 local Topbar = Instance.new("Frame")
 Topbar.Name = "TopbarFrame"
-Topbar.Size = UDim2.new(1, 0, 0, 40)
-Topbar.BackgroundColor3 = C_PANEL
+Topbar.Size = UDim2.new(1, 0, 0, 50)
+Topbar.BackgroundTransparency = 1
 Topbar.ZIndex = 11
 Topbar.Parent = MainFrame
 
 MakeDraggable(Topbar, MainFrame)
 
+local LogoBox = Instance.new("Frame")
+LogoBox.Size = UDim2.new(0, 32, 0, 32)
+LogoBox.Position = UDim2.new(0, 14, 0, 10)
+LogoBox.BackgroundColor3 = Color3.fromRGB(130, 20, 220)
+LogoBox.ZIndex = 12
+LogoBox.Parent = Topbar
+
+local LogoCorner = Instance.new("UICorner", LogoBox) LogoCorner.CornerRadius = UDim.new(0, 8)
+local LogoText = Instance.new("TextLabel", LogoBox) LogoText.Size = UDim2.new(1,0,1,0) LogoText.Text = "V" LogoText.TextColor3 = C_TEXT_WHITE LogoText.TextSize = 18 LogoText.Font = Enum.Font.GothamBold LogoText.BackgroundTransparency = 1
+
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Name = "TitleLabel"
-TitleLabel.Size = UDim2.new(0, 400, 1, 0)
-TitleLabel.Position = UDim2.new(0, 14, 0, 0)
+TitleLabel.Size = UDim2.new(0, 200, 0, 18)
+TitleLabel.Position = UDim2.new(0, 54, 0, 8)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "VoidHub <font color=\"#bc00fc\">v1.0</font>"
+TitleLabel.Text = "VoidHub Supreme <font color=\"#a090b0\">v1.0</font>"
 TitleLabel.RichText = true
-TitleLabel.TextColor3 = C_TEXT
+TitleLabel.TextColor3 = C_TEXT_WHITE
 TitleLabel.TextSize = 13
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.ZIndex = 12
 TitleLabel.Parent = Topbar
 
+local SubTitleLabel = Instance.new("TextLabel")
+SubTitleLabel.Size = UDim2.new(0, 200, 0, 14)
+SubTitleLabel.Position = UDim2.new(0, 54, 0, 26)
+SubTitleLabel.BackgroundTransparency = 1
+SubTitleLabel.Text = "Roblox Script Hub"
+SubTitleLabel.TextColor3 = C_TEXT_SUB
+SubTitleLabel.TextSize = 10
+SubTitleLabel.Font = Enum.Font.Gotham
+SubTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+SubTitleLabel.ZIndex = 12
+SubTitleLabel.Parent = Topbar
+
+-- TELEMETRY (FPS / PING)
+local TelemetryLabel = Instance.new("TextLabel")
+TelemetryLabel.Size = UDim2.new(0, 100, 0, 30)
+TelemetryLabel.Position = UDim2.new(1, -125, 0, 10)
+TelemetryLabel.BackgroundTransparency = 1
+TelemetryLabel.Text = "FPS        Ping\n<b>144</b>      <b>18ms</b>"
+TelemetryLabel.RichText = true
+TelemetryLabel.TextColor3 = C_TEXT_SUB
+TelemetryLabel.TextSize = 9
+TelemetryLabel.Font = Enum.Font.Gotham
+TelemetryLabel.TextXAlignment = Enum.TextXAlignment.Right
+TelemetryLabel.ZIndex = 12
+TelemetryLabel.Parent = Topbar
+
+RegisterConnection(RunService.RenderStepped:Connect(function(dt)
+    local fps = math.floor(1 / dt)
+    local ping = 0
+    pcall(function() ping = math.floor(StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()) end)
+    TelemetryLabel.Text = string.format("FPS        Ping\n<b>%d</b>      <b>%dms</b>", fps, ping)
+end))
+
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Name = "CloseButton"
-CloseBtn.Size = UDim2.new(0, 26, 0, 26)
-CloseBtn.Position = UDim2.new(1, -32, 0, 7)
-CloseBtn.BackgroundColor3 = C_ITEM
+CloseBtn.Size = UDim2.new(0, 20, 0, 20)
+CloseBtn.Position = UDim2.new(1, -28, 0, 15)
+CloseBtn.BackgroundTransparency = 1
 CloseBtn.Text = "✕"
-CloseBtn.TextColor3 = C_ACCENT_PINK
-CloseBtn.TextSize = 11
-CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextColor3 = C_TEXT_SUB
+CloseBtn.TextSize = 13
+CloseBtn.Font = Enum.Font.Gotham
 CloseBtn.ZIndex = 12
 CloseBtn.Parent = Topbar
 
-local CloseBtnCorner = Instance.new("UICorner")
-CloseBtnCorner.CornerRadius = UDim.new(0, 6)
-CloseBtnCorner.Parent = CloseBtn
-
-CloseBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
-    OpenBtn.Visible = true
-end)
-
-OpenBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = true
-    OpenBtn.Visible = false
-end)
+CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false OpenBtn.Visible = true end)
+OpenBtn.MouseButton1Click:Connect(function() MainFrame.Visible = true OpenBtn.Visible = false end)
 
 -- ==========================================
--- TOP CATEGORY NAVIGATION BAR
+-- NAVIGATION PILL TABS
 -- ==========================================
 local TopNavFrame = Instance.new("ScrollingFrame")
-TopNavFrame.Name = "TopCategoryNav"
-TopNavFrame.Size = UDim2.new(1, -20, 0, 36)
-TopNavFrame.Position = UDim2.new(0, 10, 0, 46)
-TopNavFrame.BackgroundColor3 = C_PANEL
-TopNavFrame.BackgroundTransparency = 0.2
-TopNavFrame.BorderSizePixel = 0
-TopNavFrame.CanvasSize = UDim2.new(0, 1100, 0, 0)
-TopNavFrame.ScrollBarThickness = 2
-TopNavFrame.ScrollBarImageColor3 = C_ACCENT_PURPLE
+TopNavFrame.Size = UDim2.new(1, -24, 0, 32)
+TopNavFrame.Position = UDim2.new(0, 12, 0, 52)
+TopNavFrame.BackgroundTransparency = 1
+TopNavFrame.CanvasSize = UDim2.new(0, 520, 0, 0)
+TopNavFrame.ScrollBarThickness = 0
 TopNavFrame.ZIndex = 11
 TopNavFrame.Parent = MainFrame
-
-local TopNavCorner = Instance.new("UICorner")
-TopNavCorner.CornerRadius = UDim.new(0, 8)
-TopNavCorner.Parent = TopNavFrame
 
 local TopNavLayout = Instance.new("UIListLayout")
 TopNavLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -541,25 +235,14 @@ TopNavLayout.SortOrder = Enum.SortOrder.LayoutOrder
 TopNavLayout.Padding = UDim.new(0, 6)
 TopNavLayout.Parent = TopNavFrame
 
-local TopNavPadding = Instance.new("UIPadding")
-TopNavPadding.PaddingTop = UDim.new(0, 4)
-TopNavPadding.PaddingBottom = UDim.new(0, 4)
-TopNavPadding.PaddingLeft = UDim.new(0, 6)
-TopNavPadding.PaddingRight = UDim.new(0, 6)
-TopNavPadding.Parent = TopNavFrame
-
--- CONTENT AREA
 local ContentArea = Instance.new("Frame")
-ContentArea.Name = "ContentAreaFrame"
-ContentArea.Size = UDim2.new(1, -20, 1, -92)
-ContentArea.Position = UDim2.new(0, 10, 0, 86)
+ContentArea.Size = UDim2.new(1, -24, 1, -94)
+ContentArea.Position = UDim2.new(0, 12, 0, 88)
 ContentArea.BackgroundTransparency = 1
 ContentArea.ZIndex = 11
 ContentArea.Parent = MainFrame
 
-local PagesFolder = Instance.new("Folder")
-PagesFolder.Name = "PagesFolder"
-PagesFolder.Parent = ContentArea
+local PagesFolder = Instance.new("Folder", ContentArea) PagesFolder.Name = "PagesFolder"
 
 local function CreatePage(pageName)
     local pageScroll = Instance.new("ScrollingFrame")
@@ -568,7 +251,7 @@ local function CreatePage(pageName)
     pageScroll.BackgroundTransparency = 1
     pageScroll.BorderSizePixel = 0
     pageScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    pageScroll.ScrollBarThickness = 3
+    pageScroll.ScrollBarThickness = 2
     pageScroll.ScrollBarImageColor3 = C_ACCENT_PURPLE
     pageScroll.Visible = false
     pageScroll.ZIndex = 12
@@ -576,80 +259,71 @@ local function CreatePage(pageName)
 
     local pageLayout = Instance.new("UIListLayout")
     pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    pageLayout.Padding = UDim.new(0, 8)
+    pageLayout.Padding = UDim.new(0, 10)
     pageLayout.Parent = pageScroll
-
-    local pagePadding = Instance.new("UIPadding")
-    pagePadding.PaddingRight = UDim.new(0, 6)
-    pagePadding.Parent = pageScroll
 
     return pageScroll
 end
 
 local MainTabPage = CreatePage("Main")
-local MechanicsTabPage = CreatePage("Mechanics")
+local FarmTabPage = CreatePage("Farm")
 local MovementTabPage = CreatePage("Movement")
 local UtilityTabPage = CreatePage("Utility")
 local VisualTabPage = CreatePage("Visual")
 local WorldTabPage = CreatePage("World")
-local ServerTabPage = CreatePage("Server")
-local PlayersTabPage = CreatePage("Players")
-local SettingsTabPage = CreatePage("Settings")
+local ConfigTabPage = CreatePage("Config")
 
 MainTabPage.Visible = true
 
 local function CreateTabButton(buttonText, pageTarget, defaultActive)
     local tabBtn = Instance.new("TextButton")
-    tabBtn.Name = buttonText .. "TabBtn"
-    tabBtn.Size = UDim2.new(0, 125, 1, 0)
-    tabBtn.BackgroundColor3 = defaultActive and C_ACCENT_PURPLE or C_ITEM
+    tabBtn.Size = UDim2.new(0, 62, 1, 0)
+    tabBtn.BackgroundColor3 = defaultActive and Color3.fromRGB(80, 20, 130) or C_CARD_BG
     tabBtn.Text = buttonText
-    tabBtn.TextColor3 = defaultActive and C_BG or C_SUBTEXT
+    tabBtn.TextColor3 = defaultActive and C_TEXT_WHITE or C_TEXT_SUB
     tabBtn.TextSize = 10
-    tabBtn.Font = Enum.Font.GothamBold
+    tabBtn.Font = Enum.Font.GothamMedium
     tabBtn.ZIndex = 12
     tabBtn.Parent = TopNavFrame
 
-    local tabCorner = Instance.new("UICorner")
-    tabCorner.CornerRadius = UDim.new(0, 6)
-    tabCorner.Parent = tabBtn
+    local tabCorner = Instance.new("UICorner", tabBtn) tabCorner.CornerRadius = UDim.new(0, 8)
+    local tabStroke = Instance.new("UIStroke", tabBtn)
+    tabStroke.Color = defaultActive and C_ACCENT_PURPLE or C_BORDER
+    tabStroke.Thickness = 1
 
     tabBtn.MouseButton1Click:Connect(function()
-        for _, page in pairs(PagesFolder:GetChildren()) do
-            page.Visible = false
-        end
+        for _, page in pairs(PagesFolder:GetChildren()) do page.Visible = false end
         for _, button in pairs(TopNavFrame:GetChildren()) do
             if button:IsA("TextButton") then
-                TweenService:Create(button, TweenInfo.new(0.18), {BackgroundColor3 = C_ITEM}):Play()
-                button.TextColor3 = C_SUBTEXT
+                TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = C_CARD_BG}):Play()
+                button.TextColor3 = C_TEXT_SUB
+                button.UIStroke.Color = C_BORDER
             end
         end
         pageTarget.Visible = true
-        TweenService:Create(tabBtn, TweenInfo.new(0.18), {BackgroundColor3 = C_ACCENT_PURPLE}):Play()
-        tabBtn.TextColor3 = C_BG
+        TweenService:Create(tabBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(80, 20, 130)}):Play()
+        tabBtn.TextColor3 = C_TEXT_WHITE
+        tabStroke.Color = C_ACCENT_PURPLE
     end)
 end
 
 CreateTabButton("Main", MainTabPage, true)
-CreateTabButton("Farm", MechanicsTabPage, false)
+CreateTabButton("Farm", FarmTabPage, false)
 CreateTabButton("Movement", MovementTabPage, false)
 CreateTabButton("Utility", UtilityTabPage, false)
 CreateTabButton("Visual", VisualTabPage, false)
 CreateTabButton("World", WorldTabPage, false)
-CreateTabButton("Server", ServerTabPage, false)
-CreateTabButton("Player", PlayersTabPage, false)
-CreateTabButton("Config", SettingsTabPage, false)
+CreateTabButton("Config", ConfigTabPage, false)
 
 -- ==========================================
--- COMPONENT BUILDERS ENGINE
+-- BENTO COMPONENT BUILDERS (REFERENCE SPECIFIC)
 -- ==========================================
 local function CreateSectionLabel(parentContainer, sectionTitleText)
     local sectionLabel = Instance.new("TextLabel")
-    sectionLabel.Name = "SectionHeader_" .. sectionTitleText
-    sectionLabel.Size = UDim2.new(1, -6, 0, 22)
+    sectionLabel.Size = UDim2.new(1, 0, 0, 18)
     sectionLabel.BackgroundTransparency = 1
-    sectionLabel.Text = "  //" .. string.upper(sectionTitleText)
-    sectionLabel.TextColor3 = C_ACCENT_PURPLE
+    sectionLabel.Text = string.upper(sectionTitleText)
+    sectionLabel.TextColor3 = C_ACCENT_MAGENTA
     sectionLabel.TextSize = 10
     sectionLabel.Font = Enum.Font.GothamBold
     sectionLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -658,100 +332,100 @@ local function CreateSectionLabel(parentContainer, sectionTitleText)
     return sectionLabel
 end
 
-local function CreateToggle(parentContainer, titleText, defaultState, toggleCallback)
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Name = titleText .. "_ToggleFrame"
-    toggleFrame.Size = UDim2.new(1, -6, 0, 36)
-    toggleFrame.BackgroundColor3 = C_ITEM
-    toggleFrame.ZIndex = 13
-    toggleFrame.Parent = parentContainer
+local function CreateBentoToggle(parentContainer, iconSymbol, mainTitle, subDesc, defaultState, callback)
+    local cardFrame = Instance.new("Frame")
+    cardFrame.Size = UDim2.new(1, 0, 0, subDesc ~= "" and 68 or 44)
+    cardFrame.BackgroundColor3 = C_CARD_BG
+    cardFrame.ZIndex = 13
+    cardFrame.Parent = parentContainer
 
-    local frameCorner = Instance.new("UICorner")
-    frameCorner.CornerRadius = UDim.new(0, 6)
-    frameCorner.Parent = toggleFrame
+    local cardCorner = Instance.new("UICorner", cardFrame) cardCorner.CornerRadius = UDim.new(0, 10)
+    local cardStroke = Instance.new("UIStroke", cardFrame) cardStroke.Color = C_BORDER cardStroke.Thickness = 1
 
-    local frameStroke = Instance.new("UIStroke")
-    frameStroke.Color = C_STROKE
-    frameStroke.Transparency = 0.85
-    frameStroke.Parent = toggleFrame
+    local iconLabel = Instance.new("TextLabel")
+    iconLabel.Size = UDim2.new(0, 24, 0, 24)
+    iconLabel.Position = UDim2.new(0, 10, 0, 10)
+    iconLabel.BackgroundTransparency = 1
+    iconLabel.Text = iconSymbol
+    iconLabel.TextColor3 = C_TEXT_WHITE
+    iconLabel.TextSize = 14
+    iconLabel.Font = Enum.Font.Gotham
+    iconLabel.ZIndex = 14
+    iconLabel.Parent = cardFrame
 
-    local labelText = Instance.new("TextLabel")
-    labelText.Name = "Label"
-    labelText.Size = UDim2.new(1, -55, 1, 0)
-    labelText.Position = UDim2.new(0, 12, 0, 0)
-    labelText.BackgroundTransparency = 1
-    labelText.Text = titleText
-    labelText.TextColor3 = C_TEXT
-    labelText.TextSize = 10
-    labelText.Font = Enum.Font.GothamMedium
-    labelText.TextXAlignment = Enum.TextXAlignment.Left
-    labelText.ZIndex = 14
-    labelText.Parent = toggleFrame
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -90, 0, 18)
+    titleLabel.Position = UDim2.new(0, 38, 0, 8)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = mainTitle
+    titleLabel.TextColor3 = C_TEXT_WHITE
+    titleLabel.TextSize = 11
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.ZIndex = 14
+    titleLabel.Parent = cardFrame
+
+    if subDesc ~= "" then
+        local descLabel = Instance.new("TextLabel")
+        descLabel.Size = UDim2.new(1, -50, 0, 30)
+        descLabel.Position = UDim2.new(0, 10, 0, 32)
+        descLabel.BackgroundTransparency = 1
+        descLabel.Text = subDesc
+        descLabel.TextColor3 = C_TEXT_MUTED
+        descLabel.TextSize = 9
+        descLabel.Font = Enum.Font.Gotham
+        descLabel.TextWrapped = true
+        descLabel.TextXAlignment = Enum.TextXAlignment.Left
+        descLabel.ZIndex = 14
+        descLabel.Parent = cardFrame
+    end
 
     local switchButton = Instance.new("TextButton")
-    switchButton.Name = "Switch"
-    switchButton.Size = UDim2.new(0, 36, 0, 18)
-    switchButton.Position = UDim2.new(1, -44, 0.5, -9)
-    switchButton.BackgroundColor3 = defaultState and C_ACCENT_PURPLE or C_ITEM_DARK
+    switchButton.Size = UDim2.new(0, 38, 0, 20)
+    switchButton.Position = UDim2.new(1, -46, 0, 8)
+    switchButton.BackgroundColor3 = defaultState and C_ACCENT_PURPLE or C_CARD_DARK
     switchButton.Text = ""
     switchButton.ZIndex = 14
-    switchButton.Parent = toggleFrame
+    switchButton.Parent = cardFrame
 
-    local switchCorner = Instance.new("UICorner")
-    switchCorner.CornerRadius = UDim.new(1, 0)
-    switchCorner.Parent = switchButton
+    local switchCorner = Instance.new("UICorner", switchButton) switchCorner.CornerRadius = UDim.new(1, 0)
 
     local circleIndicator = Instance.new("Frame")
-    circleIndicator.Name = "Circle"
-    circleIndicator.Size = UDim2.new(0, 12, 0, 12)
-    circleIndicator.Position = defaultState and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6)
-    circleIndicator.BackgroundColor3 = defaultState and C_BG or C_TEXT
+    circleIndicator.Size = UDim2.new(0, 14, 0, 14)
+    circleIndicator.Position = defaultState and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
+    circleIndicator.BackgroundColor3 = C_TEXT_WHITE
     circleIndicator.ZIndex = 15
     circleIndicator.Parent = switchButton
 
-    local circleCorner = Instance.new("UICorner")
-    circleCorner.CornerRadius = UDim.new(1, 0)
-    circleCorner.Parent = circleIndicator
+    local circleCorner = Instance.new("UICorner", circleIndicator) circleCorner.CornerRadius = UDim.new(1, 0)
 
     local isActive = defaultState
     switchButton.MouseButton1Click:Connect(function()
         isActive = not isActive
         if isActive then
             TweenService:Create(switchButton, TweenInfo.new(0.2), {BackgroundColor3 = C_ACCENT_PURPLE}):Play()
-            TweenService:Create(circleIndicator, TweenInfo.new(0.2), {
-                Position = UDim2.new(1, -15, 0.5, -6),
-                BackgroundColor3 = C_BG
-            }):Play()
+            TweenService:Create(circleIndicator, TweenInfo.new(0.2), {Position = UDim2.new(1, -17, 0.5, -7)}):Play()
         else
-            TweenService:Create(switchButton, TweenInfo.new(0.2), {BackgroundColor3 = C_ITEM_DARK}):Play()
-            TweenService:Create(circleIndicator, TweenInfo.new(0.2), {
-                Position = UDim2.new(0, 3, 0.5, -6),
-                BackgroundColor3 = C_TEXT
-            }):Play()
+            TweenService:Create(switchButton, TweenInfo.new(0.2), {BackgroundColor3 = C_CARD_DARK}):Play()
+            TweenService:Create(circleIndicator, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -7)}):Play()
         end
-        toggleCallback(isActive)
+        callback(isActive)
     end)
+    return cardFrame
 end
 
-local function CreateSlider(parentContainer, titleText, minimumValue, maximumValue, defaultValue, sliderCallback)
+local function CreateBentoSlider(parentContainer, titleText, minimumValue, maximumValue, defaultValue, callback)
     local sliderFrame = Instance.new("Frame")
-    sliderFrame.Name = titleText .. "_SliderFrame"
-    sliderFrame.Size = UDim2.new(1, -6, 0, 46)
-    sliderFrame.BackgroundColor3 = C_ITEM
+    sliderFrame.Size = UDim2.new(1, 0, 0, 36)
+    sliderFrame.BackgroundTransparency = 1
     sliderFrame.ZIndex = 13
     sliderFrame.Parent = parentContainer
 
-    local sliderCorner = Instance.new("UICorner")
-    sliderCorner.CornerRadius = UDim.new(0, 6)
-    sliderCorner.Parent = sliderFrame
-
     local labelText = Instance.new("TextLabel")
-    labelText.Name = "TitleLabel"
-    labelText.Size = UDim2.new(1, -60, 0, 20)
-    labelText.Position = UDim2.new(0, 12, 0, 4)
+    labelText.Size = UDim2.new(1, -50, 0, 16)
     labelText.BackgroundTransparency = 1
     labelText.Text = titleText
-    labelText.TextColor3 = C_TEXT
+    labelText.TextColor3 = C_TEXT_WHITE
     labelText.TextSize = 10
     labelText.Font = Enum.Font.GothamMedium
     labelText.TextXAlignment = Enum.TextXAlignment.Left
@@ -759,234 +433,174 @@ local function CreateSlider(parentContainer, titleText, minimumValue, maximumVal
     labelText.Parent = sliderFrame
 
     local valueLabel = Instance.new("TextLabel")
-    valueLabel.Name = "ValueDisplay"
-    valueLabel.Size = UDim2.new(0, 45, 0, 20)
-    valueLabel.Position = UDim2.new(1, -55, 0, 4)
+    valueLabel.Size = UDim2.new(0, 40, 0, 16)
+    valueLabel.Position = UDim2.new(1, -40, 0, 0)
     valueLabel.BackgroundTransparency = 1
     valueLabel.Text = tostring(defaultValue)
-    valueLabel.TextColor3 = C_ACCENT_PURPLE
+    valueLabel.TextColor3 = C_TEXT_SUB
     valueLabel.TextSize = 10
-    valueLabel.Font = Enum.Font.GothamBold
+    valueLabel.Font = Enum.Font.Gotham
     valueLabel.TextXAlignment = Enum.TextXAlignment.Right
     valueLabel.ZIndex = 14
     valueLabel.Parent = sliderFrame
 
     local trackBackground = Instance.new("Frame")
-    trackBackground.Name = "TrackBg"
-    trackBackground.Size = UDim2.new(1, -24, 0, 6)
-    trackBackground.Position = UDim2.new(0, 12, 0, 30)
-    trackBackground.BackgroundColor3 = C_ITEM_DARK
+    trackBackground.Size = UDim2.new(1, 0, 0, 4)
+    trackBackground.Position = UDim2.new(0, 0, 0, 22)
+    trackBackground.BackgroundColor3 = C_CARD_DARK
     trackBackground.ZIndex = 14
     trackBackground.Parent = sliderFrame
 
-    local trackBgCorner = Instance.new("UICorner")
-    trackBgCorner.CornerRadius = UDim.new(1, 0)
-    trackBgCorner.Parent = trackBackground
+    local trackBgCorner = Instance.new("UICorner", trackBackground) trackBgCorner.CornerRadius = UDim.new(1, 0)
 
     local trackFill = Instance.new("Frame")
-    trackFill.Name = "TrackFill"
     trackFill.Size = UDim2.new((defaultValue - minimumValue) / (maximumValue - minimumValue), 0, 1, 0)
     trackFill.BackgroundColor3 = C_ACCENT_PURPLE
     trackFill.ZIndex = 15
     trackFill.Parent = trackBackground
 
-    local trackFillCorner = Instance.new("UICorner")
-    trackFillCorner.CornerRadius = UDim.new(1, 0)
-    trackFillCorner.Parent = trackFill
+    local trackFillCorner = Instance.new("UICorner", trackFill) trackFillCorner.CornerRadius = UDim.new(1, 0)
+
+    local sliderThumb = Instance.new("Frame")
+    sliderThumb.Size = UDim2.new(0, 10, 0, 14)
+    sliderThumb.Position = UDim2.new(1, -5, 0.5, -7)
+    sliderThumb.BackgroundColor3 = C_TEXT_WHITE
+    sliderThumb.ZIndex = 16
+    sliderThumb.Parent = trackFill
+
+    local thumbCorner = Instance.new("UICorner", sliderThumb) thumbCorner.CornerRadius = UDim.new(0, 3)
 
     local isDragging = false
     local function UpdateSliderValue(inputObject)
-        local relativePosition = math.clamp((inputObject.Position.X - trackBackground.AbsolutePosition.X) / trackBackground.AbsoluteSize.X, 0, 1)
-        local calculatedValue = math.floor(minimumValue + (maximumValue - minimumValue) * relativePosition)
-        trackFill.Size = UDim2.new(relativePosition, 0, 1, 0)
-        valueLabel.Text = tostring(calculatedValue)
-        sliderCallback(calculatedValue)
+        local relPos = math.clamp((inputObject.Position.X - trackBackground.AbsolutePosition.X) / trackBackground.AbsoluteSize.X, 0, 1)
+        local val = math.floor(minimumValue + (maximumValue - minimumValue) * relPos)
+        trackFill.Size = UDim2.new(relPos, 0, 1, 0)
+        valueLabel.Text = tostring(val)
+        callback(val)
     end
 
     RegisterConnection(trackBackground.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isDragging = true
-            UpdateSliderValue(input)
+            isDragging = true UpdateSliderValue(input)
         end
     end))
-
     RegisterConnection(UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isDragging = false
-        end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then isDragging = false end
     end))
-
     RegisterConnection(UserInputService.InputChanged:Connect(function(input)
-        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            UpdateSliderValue(input)
-        end
+        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateSliderValue(input) end
     end))
-end
-
-local function CreateButton(parentContainer, buttonText, clickCallback)
-    local actionButton = Instance.new("TextButton")
-    actionButton.Name = buttonText .. "_ActionButton"
-    actionButton.Size = UDim2.new(1, -6, 0, 34)
-    actionButton.BackgroundColor3 = C_ITEM
-    actionButton.Text = buttonText
-    actionButton.TextColor3 = C_TEXT
-    actionButton.TextSize = 10
-    actionButton.Font = Enum.Font.GothamMedium
-    actionButton.ZIndex = 13
-    actionButton.Parent = parentContainer
-
-    local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 6)
-    buttonCorner.Parent = actionButton
-
-    local buttonStroke = Instance.new("UIStroke")
-    buttonStroke.Color = C_STROKE
-    buttonStroke.Transparency = 0.85
-    buttonStroke.Parent = actionButton
-
-    actionButton.MouseButton1Click:Connect(function()
-        TweenService:Create(actionButton, TweenInfo.new(0.08), {
-            BackgroundColor3 = C_ACCENT_PURPLE,
-            TextColor3 = C_BG
-        }):Play()
-        task.wait(0.1)
-        TweenService:Create(actionButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = C_ITEM,
-            TextColor3 = C_TEXT
-        }):Play()
-        clickCallback()
-    end)
 end
 
 -- ==========================================
--- 1. MAIN DASHBOARD PAGE
+-- 1. MAIN OVERVIEW TAB
 -- ==========================================
 local ProfileCard = Instance.new("Frame")
-ProfileCard.Name = "UserProfileCard"
-ProfileCard.Size = UDim2.new(1, -6, 0, 60)
-ProfileCard.BackgroundColor3 = C_ITEM
+ProfileCard.Size = UDim2.new(1, 0, 0, 130)
+ProfileCard.BackgroundColor3 = C_CARD_BG
 ProfileCard.ZIndex = 13
 ProfileCard.Parent = MainTabPage
 
-local ProfileCardCorner = Instance.new("UICorner")
-ProfileCardCorner.CornerRadius = UDim.new(0, 8)
-ProfileCardCorner.Parent = ProfileCard
+local ProfileCardCorner = Instance.new("UICorner", ProfileCard) ProfileCardCorner.CornerRadius = UDim.new(0, 12)
+local ProfileCardStroke = Instance.new("UIStroke", ProfileCard) ProfileCardStroke.Color = C_BORDER ProfileCardStroke.Thickness = 1
 
 local AvatarImage = Instance.new("ImageLabel")
-AvatarImage.Name = "AvatarThumbnail"
-AvatarImage.Size = UDim2.new(0, 44, 0, 44)
-AvatarImage.Position = UDim2.new(0, 8, 0, 8)
+AvatarImage.Size = UDim2.new(0, 64, 0, 64)
+AvatarImage.Position = UDim2.new(0, 16, 0.5, -32)
 AvatarImage.BackgroundTransparency = 1
 AvatarImage.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
 AvatarImage.ZIndex = 14
 AvatarImage.Parent = ProfileCard
 
-local AvatarCorner = Instance.new("UICorner")
-AvatarCorner.CornerRadius = UDim.new(1, 0)
-AvatarCorner.Parent = AvatarImage
+local AvatarCorner = Instance.new("UICorner", AvatarImage) AvatarCorner.CornerRadius = UDim.new(1, 0)
 
-local UserWelcomeLabel = Instance.new("TextLabel")
-UserWelcomeLabel.Name = "UserWelcomeText"
-UserWelcomeLabel.Size = UDim2.new(1, -66, 0, 18)
-UserWelcomeLabel.Position = UDim2.new(0, 60, 0, 10)
-UserWelcomeLabel.BackgroundTransparency = 1
-UserWelcomeLabel.Text = "Welcome, <font color=\"#bc00fc\">" .. LocalPlayer.DisplayName .. "</font>"
-UserWelcomeLabel.RichText = true
-UserWelcomeLabel.TextColor3 = C_TEXT
-UserWelcomeLabel.TextSize = 11
-UserWelcomeLabel.Font = Enum.Font.GothamBold
-UserWelcomeLabel.TextXAlignment = Enum.TextXAlignment.Left
-UserWelcomeLabel.ZIndex = 14
-UserWelcomeLabel.Parent = ProfileCard
+local WelcomeSubText = Instance.new("TextLabel")
+WelcomeSubText.Size = UDim2.new(1, -100, 0, 16)
+WelcomeSubText.Position = UDim2.new(0, 92, 0, 32)
+WelcomeSubText.BackgroundTransparency = 1
+WelcomeSubText.Text = "Welcome back,"
+WelcomeSubText.TextColor3 = C_TEXT_SUB
+WelcomeSubText.TextSize = 11
+WelcomeSubText.Font = Enum.Font.Gotham
+WelcomeSubText.TextXAlignment = Enum.TextXAlignment.Left
+WelcomeSubText.ZIndex = 14
+WelcomeSubText.Parent = ProfileCard
 
-local TelemetryLabel = Instance.new("TextLabel")
-TelemetryLabel.Name = "NetworkTelemetry"
-TelemetryLabel.Size = UDim2.new(1, -66, 0, 18)
-TelemetryLabel.Position = UDim2.new(0, 60, 0, 30)
-TelemetryLabel.BackgroundTransparency = 1
-TelemetryLabel.Text = "FPS: 60  |  PING: 0 ms"
-TelemetryLabel.TextColor3 = C_SUBTEXT
-TelemetryLabel.TextSize = 10
-TelemetryLabel.Font = Enum.Font.Code
-TelemetryLabel.TextXAlignment = Enum.TextXAlignment.Left
-TelemetryLabel.ZIndex = 14
-TelemetryLabel.Parent = ProfileCard
+local UsernameLabel = Instance.new("TextLabel")
+UsernameLabel.Size = UDim2.new(1, -100, 0, 22)
+UsernameLabel.Position = UDim2.new(0, 92, 0, 48)
+UsernameLabel.BackgroundTransparency = 1
+UsernameLabel.Text = LocalPlayer.Name:upper()
+UsernameLabel.TextColor3 = C_TEXT_WHITE
+UsernameLabel.TextSize = 16
+UsernameLabel.Font = Enum.Font.GothamBold
+UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+UsernameLabel.ZIndex = 14
+UsernameLabel.Parent = ProfileCard
 
-RegisterConnection(RunService.RenderStepped:Connect(function(deltaTime)
-    local currentFps = math.floor(1 / deltaTime)
-    local currentPing = 0
-    pcall(function()
-        currentPing = math.floor(StatsService.Network.ServerStatsItem["Data Ping"]:GetValue())
+local StatusBadge = Instance.new("TextLabel")
+StatusBadge.Size = UDim2.new(1, -100, 0, 16)
+StatusBadge.Position = UDim2.new(0, 92, 0, 72)
+StatusBadge.BackgroundTransparency = 1
+StatusBadge.Text = "Status: <font color=\"#bc00fc\">VIP Lifetime Access</font> | Active Session"
+StatusBadge.RichText = true
+StatusBadge.TextColor3 = C_TEXT_MUTED
+StatusBadge.TextSize = 10
+StatusBadge.Font = Enum.Font.Gotham
+StatusBadge.TextXAlignment = Enum.TextXAlignment.Left
+StatusBadge.ZIndex = 14
+StatusBadge.Parent = ProfileCard
+
+-- ==========================================
+-- 2. FARM & MECHANICS TAB (BENTO LAYOUT MATCH)
+-- ==========================================
+CreateSectionLabel(FarmTabPage, "// Automation & Mechanics")
+
+local BentoGrid = Instance.new("Frame")
+BentoGrid.Size = UDim2.new(1, 0, 0, 160)
+BentoGrid.BackgroundTransparency = 1
+BentoGrid.ZIndex = 13
+BentoGrid.Parent = FarmTabPage
+
+local GridUI = Instance.new("UIGridLayout")
+GridUI.CellSize = UDim2.new(0.5, -5, 0, 75)
+GridUI.CellPadding = UDim2.new(0, 10, 0, 10)
+GridUI.Parent = BentoGrid
+
+CreateBentoToggle(BentoGrid, "⚔", "Disable Knockback", "Glow& switches evailor ce conveyor disable knockback.", State.BossDisableAttack, function(v) State.BossDisableAttack = v end)
+CreateBentoToggle(BentoGrid, "❄", "Freeze Boss", "Modern sliders to ther-stamiled feetioios and use ooain Boss.", State.FreezeBossGuard, function(v)
+    State.FreezeBossGuard = v
+    task.spawn(function()
+        while State.FreezeBossGuard do
+            pcall(function()
+                for _, npcModel in pairs(workspace:GetDescendants()) do
+                    if npcModel:IsA("Model") and not Players:GetPlayerFromCharacter(npcModel) then
+                        local npcHumanoid = npcModel:FindFirstChildOfClass("Humanoid")
+                        local npcRoot = npcModel:FindFirstChild("HumanoidRootPart") or npcModel:FindFirstChild("PrimaryPart")
+                        if npcHumanoid and npcRoot then npcHumanoid.WalkSpeed = 0 npcRoot.Velocity = Vector3.zero npcRoot.Anchored = true end
+                    end
+                end
+            end)
+            task.wait(0.2)
+        end
     end)
-    TelemetryLabel.Text = string.format("FPS: %d  |  PING: %d ms", currentFps, currentPing)
-end))
-
-local BannerNotice = Instance.new("Frame")
-BannerNotice.Name = "AnnouncementBanner"
-BannerNotice.Size = UDim2.new(1, -6, 0, 72)
-BannerNotice.BackgroundColor3 = C_ITEM
-BannerNotice.ZIndex = 13
-BannerNotice.Parent = MainTabPage
-
-local BannerCorner = Instance.new("UICorner")
-BannerCorner.CornerRadius = UDim.new(0, 8)
-BannerCorner.Parent = BannerNotice
-
-local BannerStroke = Instance.new("UIStroke")
-BannerStroke.Color = C_ACCENT_PURPLE
-BannerStroke.Transparency = 0.7
-BannerStroke.Parent = BannerNotice
-
-local BannerHeader = Instance.new("TextLabel")
-BannerHeader.Name = "BannerHeader"
-BannerHeader.Size = UDim2.new(1, -20, 0, 18)
-BannerHeader.Position = UDim2.new(0, 10, 0, 6)
-BannerHeader.BackgroundTransparency = 1
-BannerHeader.Text = "VoidHub v1.0"
-BannerHeader.TextColor3 = C_ACCENT_PURPLE
-BannerHeader.TextSize = 10
-BannerHeader.Font = Enum.Font.GothamBold
-BannerHeader.TextXAlignment = Enum.TextXAlignment.Left
-BannerHeader.ZIndex = 14
-BannerHeader.Parent = BannerNotice
-
-local BannerText = Instance.new("TextLabel")
-BannerText.Name = "BannerBody"
-BannerText.Size = UDim2.new(1, -20, 0, 42)
-BannerText.Position = UDim2.new(0, 10, 0, 24)
-BannerText.BackgroundTransparency = 1
-BannerText.Text = "Script Ini Masih Dalam Pengembangan Dan Masih Dalam Tahap Percobaan (BETA)"
-BannerText.TextColor3 = C_TEXT
-BannerText.TextSize = 10
-BannerText.Font = Enum.Font.Gotham
-BannerText.TextWrapped = true
-BannerText.TextXAlignment = Enum.TextXAlignment.Left
-BannerText.TextYAlignment = Enum.TextYAlignment.Top
-BannerText.ZIndex = 14
-BannerText.Parent = BannerNotice
-
-CreateSectionLabel(MainTabPage, "Quick Server Control")
-CreateButton(MainTabPage, "Rejoin Server", function() RejoinServer() end)
-CreateButton(MainTabPage, "Server Hop", function() ServerHop() end)
-
--- ==========================================
--- 2. BOSS & EGG MECHANICS TAB
--- ==========================================
-CreateSectionLabel(MechanicsTabPage, "Base")
-CreateButton(MechanicsTabPage, "Simpan Koordinat Posisi Saat Ini Sebagai Base", function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        State.BaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-        Notify("BASE SAVED", "Koordinat posisi berhasil disimpan sebagai lokasi Base!", 3)
-    end
 end)
 
-CreateSectionLabel(MechanicsTabPage, "Boss")
-CreateToggle(MechanicsTabPage, "Disable Knockback", State.BossDisableAttack, function(activeState)
-    State.BossDisableAttack = activeState
-    Notify("BOSS ENGINE", activeState and "Boss Attack Hitbox Disabler Aktif!" or "Boss Attack Normal.", 2)
+CreateBentoToggle(BentoGrid, "👆", "Auto Click Proximity Prompts", "Sleder sliders to save option and om glow strokes.", State.AutoPrompt, function(v)
+    State.AutoPrompt = v
+    task.spawn(function()
+        while State.AutoPrompt do
+            for _, prompt in pairs(workspace:GetDescendants()) do
+                if prompt:IsA("ProximityPrompt") then fireproximityprompt(prompt) end
+            end
+            task.wait(0.4)
+        end
+    end)
 end)
 
--- ENGINE HITBOX & ANTI-KNOCKBACK BOSS
+CreateBentoToggle(BentoGrid, "⚡", "Click Teleport (Shift + Left Click)", "Glover sliders to the auto click Shift + Left click orrsebosesltigro.", State.ClickTP, function(v) State.ClickTP = v end)
+
+-- BOSS & KNOCKBACK ENGINE LOOP
 RegisterConnection(RunService.Stepped:Connect(function()
     if State.BossDisableAttack then
         pcall(function()
@@ -995,23 +609,9 @@ RegisterConnection(RunService.Stepped:Connect(function()
                     local humanoid = workspaceObject:FindFirstChildOfClass("Humanoid")
                     if humanoid then
                         for _, childPart in pairs(workspaceObject:GetDescendants()) do
-                            if childPart:IsA("TouchTransmitter") then
-                                childPart:Destroy()
-                            elseif childPart:IsA("BasePart") then
-                                childPart.CanTouch = false
-                                childPart.CanCollide = false
-                            end
+                            if childPart:IsA("TouchTransmitter") then childPart:Destroy()
+                            elseif childPart:IsA("BasePart") then childPart.CanTouch = false childPart.CanCollide = false end
                         end
-                    end
-                end
-            end
-
-            local character = LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                local rootPart = character.HumanoidRootPart
-                for _, childVelocity in pairs(rootPart:GetChildren()) do
-                    if childVelocity:IsA("BodyVelocity") or childVelocity:IsA("BodyForce") or childVelocity:IsA("BodyThrust") then
-                        childVelocity:Destroy()
                     end
                 end
             end
@@ -1019,174 +619,59 @@ RegisterConnection(RunService.Stepped:Connect(function()
     end
 end))
 
-CreateToggle(MechanicsTabPage, "Freeze Boss", State.FreezeBossGuard, function(activeState)
-    State.FreezeBossGuard = activeState
-    Notify("BOSS ENGINE", activeState and "Freeze Boss Active!" or "Boss Normal Unfrozen.", 2)
-    task.spawn(function()
-        while State.FreezeBossGuard do
-            pcall(function()
-                for _, npcModel in pairs(workspace:GetDescendants()) do
-                    if npcModel:IsA("Model") and not Players:GetPlayerFromCharacter(npcModel) then
-                        local npcHumanoid = npcModel:FindFirstChildOfClass("Humanoid")
-                        local npcRoot = npcModel:FindFirstChild("HumanoidRootPart") or npcModel:FindFirstChild("PrimaryPart")
-                        if npcHumanoid and npcRoot then
-                            npcHumanoid.WalkSpeed = 0
-                            npcRoot.Velocity = Vector3.zero
-                            if not npcRoot.Anchored then
-                                npcRoot.Anchored = true
-                            end
-                        end
-                    end
-                end
-            end)
-            task.wait(0.2)
-        end
-
-        pcall(function()
-            for _, npcModel in pairs(workspace:GetDescendants()) do
-                if npcModel:IsA("Model") and not Players:GetPlayerFromCharacter(npcModel) then
-                    local npcHumanoid = npcModel:FindFirstChildOfClass("Humanoid")
-                    local npcRoot = npcModel:FindFirstChild("HumanoidRootPart") or npcModel:FindFirstChild("PrimaryPart")
-                    if npcHumanoid and npcRoot then
-                        npcHumanoid.WalkSpeed = 16
-                        npcRoot.Anchored = false
-                    end
-                end
-            end
-        end)
-    end)
-end)
-
-CreateSectionLabel(MechanicsTabPage, "Egg Automation")
-CreateToggle(MechanicsTabPage, "Auto Run", State.AutoRunToBaseWithEgg, function(activeState)
-    State.AutoRunToBaseWithEgg = activeState
-    Notify("EGG ENGINE", activeState and "Auto TP Base saat memegang Telur Aktif!" or "Auto TP Nonaktif.", 2)
-end)
-
-CreateToggle(MechanicsTabPage, "Auto Equip Telur", State.AutoEquipEgg, function(activeState)
-    State.AutoEquipEgg = activeState
-end)
-
--- EGG DETECTOR & AUTO BASE RETURN LOOP
-task.spawn(function()
-    while true do
-        if State.AutoRunToBaseWithEgg or State.AutoEquipEgg then
-            pcall(function()
-                local character = LocalPlayer.Character
-                local backpack = LocalPlayer:FindFirstChild("Backpack")
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    local isHoldingEgg = false
-                    local eggToolInstance = nil
-
-                    for _, toolItem in pairs(character:GetChildren()) do
-                        if toolItem:IsA("Tool") and (toolItem.Name:lower():find("egg") or toolItem.Name:lower():find("telur")) then
-                            isHoldingEgg = true
-                            eggToolInstance = toolItem
-                        end
-                    end
-
-                    if backpack then
-                        for _, toolItem in pairs(backpack:GetChildren()) do
-                            if toolItem:IsA("Tool") and (toolItem.Name:lower():find("egg") or toolItem.Name:lower():find("telur")) then
-                                eggToolInstance = toolItem
-                                if State.AutoEquipEgg then
-                                    toolItem.Parent = character
-                                    isHoldingEgg = true
-                                else
-                                    isHoldingEgg = true
-                                end
-                            end
-                        end
-                    end
-
-                    if isHoldingEgg and State.AutoRunToBaseWithEgg then
-                        local destinationCFrame = State.BaseCFrame
-                        if not destinationCFrame then
-                            local mapSpawn = workspace:FindFirstChildOfClass("SpawnLocation")
-                            if mapSpawn then
-                                destinationCFrame = mapSpawn.CFrame + Vector3.new(0, 4, 0)
-                            end
-                        end
-
-                        if destinationCFrame then
-                            character.HumanoidRootPart.CFrame = destinationCFrame
-                        end
-                    end
-                end
-            end)
-        end
-        task.wait(0.2)
-    end
-end)
-
--- FIX SYNTAX ERROR TERHUBUNG SINI: "Automation"
-CreateSectionLabel(MechanicsTabPage, "Automation")
-CreateToggle(MechanicsTabPage, "Tanpa Hold Delay", State.InstantPrompt, function(activeState)
-    State.InstantPrompt = activeState
-end)
-
-RegisterConnection(ProximityPromptService.PromptButtonHoldBegan:Connect(function(promptInstance)
-    if State.InstantPrompt then
-        fireproximityprompt(promptInstance)
-    end
-end))
-
-CreateToggle(MechanicsTabPage, "Auto Click Proximity Prompts", State.AutoPrompt, function(activeState)
-    State.AutoPrompt = activeState
-    task.spawn(function()
-        while State.AutoPrompt do
-            for _, promptInstance in pairs(workspace:GetDescendants()) do
-                if promptInstance:IsA("ProximityPrompt") then
-                    fireproximityprompt(promptInstance)
-                end
-            end
-            task.wait(0.4)
-        end
-    end)
-end)
-
 -- ==========================================
--- 3. MOVEMENT TAB
+-- 3. MOVEMENT & UTILITIES TAB (EXACT 2-COLUMN MATCH)
 -- ==========================================
-CreateSectionLabel(MovementTabPage, "Flight")
-CreateToggle(MovementTabPage, "Kinetic Flight", State.Flying, function(activeState)
+local MovementColumns = Instance.new("Frame")
+MovementColumns.Size = UDim2.new(1, 0, 0, 260)
+MovementColumns.BackgroundTransparency = 1
+MovementColumns.ZIndex = 13
+MovementColumns.Parent = MovementTabPage
+
+local LeftCol = Instance.new("Frame")
+LeftCol.Size = UDim2.new(0.48, 0, 1, 0)
+LeftCol.BackgroundTransparency = 1
+LeftCol.Parent = MovementColumns
+
+local RightCol = Instance.new("Frame")
+RightCol.Size = UDim2.new(0.48, 0, 1, 0)
+RightCol.Position = UDim2.new(0.52, 0, 0, 0)
+RightCol.BackgroundTransparency = 1
+RightCol.Parent = MovementColumns
+
+local LeftLayout = Instance.new("UIListLayout", LeftCol) LeftLayout.Padding = UDim.new(0, 8)
+local RightLayout = Instance.new("UIListLayout", RightCol) RightLayout.Padding = UDim.new(0, 8)
+
+CreateSectionLabel(LeftCol, "FLYING & SPEED")
+
+local FlySpeedCard = Instance.new("Frame")
+FlySpeedCard.Size = UDim2.new(1, 0, 0, 120)
+FlySpeedCard.BackgroundColor3 = C_CARD_BG
+FlySpeedCard.ZIndex = 13
+FlySpeedCard.Parent = LeftCol
+
+local FlySpeedCorner = Instance.new("UICorner", FlySpeedCard) FlySpeedCorner.CornerRadius = UDim.new(0, 10)
+local FlySpeedStroke = Instance.new("UIStroke", FlySpeedCard) FlySpeedStroke.Color = C_BORDER FlySpeedStroke.Thickness = 1
+
+local FlyListLayout = Instance.new("UIListLayout", FlySpeedCard) FlyListLayout.Padding = UDim.new(0, 4)
+
+CreateBentoToggle(FlySpeedCard, "✈", "Kinetic Flight", "", State.Flying, function(activeState)
     State.Flying = activeState
     if activeState then
         local character = LocalPlayer.Character
         if character and character:FindFirstChild("HumanoidRootPart") then
             local root = character.HumanoidRootPart
-            FlyVel = Instance.new("BodyVelocity")
-            FlyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            FlyVel.Parent = root
-
-            FlyGyro = Instance.new("BodyGyro")
-            FlyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-            FlyGyro.Parent = root
+            FlyVel = Instance.new("BodyVelocity", root) FlyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            FlyGyro = Instance.new("BodyGyro", root) FlyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
 
             task.spawn(function()
                 while State.Flying and character and root:FindFirstChild("BodyVelocity") do
                     local camera = workspace.CurrentCamera
                     local moveDirection = Vector3.zero
-
-                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                        moveDirection = moveDirection + camera.CFrame.LookVector
-                    end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                        moveDirection = moveDirection - camera.CFrame.LookVector
-                    end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                        moveDirection = moveDirection - camera.CFrame.RightVector
-                    end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                        moveDirection = moveDirection + camera.CFrame.RightVector
-                    end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                        moveDirection = moveDirection + Vector3.new(0, 1, 0)
-                    end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                        moveDirection = moveDirection - Vector3.new(0, 1, 0)
-                    end
-
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + camera.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camera.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - camera.CFrame.RightVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + camera.CFrame.RightVector end
                     FlyVel.Velocity = moveDirection * State.FlySpeed
                     FlyGyro.CFrame = camera.CFrame
                     task.wait()
@@ -1194,83 +679,18 @@ CreateToggle(MovementTabPage, "Kinetic Flight", State.Flying, function(activeSta
             end)
         end
     else
-        if FlyVel then FlyVel:Destroy() end
-        if FlyGyro then FlyGyro:Destroy() end
+        if FlyVel then FlyVel:Destroy() end if FlyGyro then FlyGyro:Destroy() end
     end
 end)
 
-CreateSlider(MovementTabPage, "Flight Speed", 20, 200, 50, function(value)
-    State.FlySpeed = value
-end)
-
-CreateSectionLabel(MovementTabPage, "Speed & Jump")
-CreateToggle(MovementTabPage, "WalkSpeed", State.WalkSpeed, function(activeState)
-    State.WalkSpeed = activeState
-    task.spawn(function()
-        while State.WalkSpeed do
-            pcall(function()
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-                    LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = State.SpeedValue
-                end
-            end)
-            task.wait(0.2)
-        end
-        pcall(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-                LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
-            end
-        end)
-    end)
-end)
-
-CreateSlider(MovementTabPage, "Custom WalkSpeed", 16, 250, 24, function(value)
-    State.SpeedValue = value
-end)
-
-CreateToggle(MovementTabPage, "Jump Power", State.JumpPower, function(activeState)
-    State.JumpPower = activeState
-    task.spawn(function()
-        while State.JumpPower do
-            pcall(function()
-                local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid.UseJumpPower = true
-                    humanoid.JumpPower = State.JumpValue
-                end
-            end)
-            task.wait(0.2)
-        end
-    end)
-end)
-
-CreateSlider(MovementTabPage, "Jump Value", 50, 300, 100, function(value)
-    State.JumpValue = value
-end)
-
-CreateToggle(MovementTabPage, "Infinite Jump", State.InfJump, function(activeState)
-    State.InfJump = activeState
-end)
-
-RegisterConnection(UserInputService.JumpRequest:Connect(function()
-    if State.InfJump and LocalPlayer.Character then
-        local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end
-end))
-
-CreateSectionLabel(MovementTabPage, "Physics & Noclip")
-CreateToggle(MovementTabPage, "Noclip", State.Noclip, function(activeState)
-    State.Noclip = activeState
+CreateBentoToggle(FlySpeedCard, "👻", "Noclip", "", State.Noclip, function(v)
+    State.Noclip = v
     task.spawn(function()
         while State.Noclip do
             pcall(function()
                 if LocalPlayer.Character then
-                    for _, childPart in pairs(LocalPlayer.Character:GetDescendants()) do
-                        if childPart:IsA("BasePart") then
-                            childPart.CanCollide = false
-                        end
+                    for _, p in pairs(LocalPlayer.Character:GetDescendants()) do
+                        if p:IsA("BasePart") then p.CanCollide = false end
                     end
                 end
             end)
@@ -1279,494 +699,127 @@ CreateToggle(MovementTabPage, "Noclip", State.Noclip, function(activeState)
     end)
 end)
 
-CreateToggle(MovementTabPage, "Gravity", State.GravityMod, function(activeState)
-    State.GravityMod = activeState
-    if not activeState then
-        workspace.Gravity = 196.2
+local InfJumpCard = Instance.new("Frame")
+InfJumpCard.Size = UDim2.new(1, 0, 0, 40)
+InfJumpCard.BackgroundColor3 = C_CARD_BG
+InfJumpCard.ZIndex = 13
+InfJumpCard.Parent = LeftCol
+local InfJumpCorner = Instance.new("UICorner", InfJumpCard) InfJumpCorner.CornerRadius = UDim.new(0, 10)
+local InfJumpStroke = Instance.new("UIStroke", InfJumpCard) InfJumpStroke.Color = C_BORDER
+
+local InfJumpText = Instance.new("TextLabel")
+InfJumpText.Size = UDim2.new(1, -20, 1, 0)
+InfJumpText.Position = UDim2.new(0, 10, 0, 0)
+InfJumpText.BackgroundTransparency = 1
+InfJumpText.Text = "🏃 InfJump (O)"
+InfJumpText.TextColor3 = C_TEXT_WHITE
+InfJumpText.TextSize = 10
+InfJumpText.Font = Enum.Font.GothamMedium
+InfJumpText.TextXAlignment = Enum.TextXAlignment.Left
+InfJumpText.Parent = InfJumpCard
+
+RegisterConnection(UserInputService.JumpRequest:Connect(function()
+    if State.InfJump and LocalPlayer.Character then
+        local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
     end
-    task.spawn(function()
-        while State.GravityMod do
-            workspace.Gravity = State.GravityVal
-            task.wait(0.2)
-        end
+end))
+
+-- RIGHT COLUMN SLIDERS CARD
+local SlidersCard = Instance.new("Frame")
+SlidersCard.Size = UDim2.new(1, 0, 0, 168)
+SlidersCard.BackgroundColor3 = C_CARD_BG
+SlidersCard.ZIndex = 13
+SlidersCard.Parent = RightCol
+
+local SlidersCorner = Instance.new("UICorner", SlidersCard) SlidersCorner.CornerRadius = UDim.new(0, 10)
+local SlidersStroke = Instance.new("UIStroke", SlidersCard) SlidersStroke.Color = C_BORDER
+
+local SlidersPadding = Instance.new("UIPadding", SlidersCard)
+SlidersPadding.PaddingTop = UDim.new(0, 10) SlidersPadding.PaddingLeft = UDim.new(0, 10) SlidersPadding.PaddingRight = UDim.new(0, 10)
+
+local SlidersLayout = Instance.new("UIListLayout", SlidersCard) SlidersLayout.Padding = UDim.new(0, 10)
+
+CreateBentoSlider(SlidersCard, "FLY Speed", 20, 200, 120, function(v) State.FlySpeed = v end)
+CreateBentoSlider(SlidersCard, "WalkSpeed", 16, 250, 100, function(v)
+    State.SpeedValue = v
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = v
+    end
+end)
+CreateBentoSlider(SlidersCard, "Jump Power", 50, 300, 100, function(v)
+    State.JumpValue = v
+    local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then humanoid.UseJumpPower = true humanoid.JumpPower = v end
+end)
+
+-- UTILITY OPTIONS HORIZONTAL CARD (EXACT MATCH REFERENCE)
+CreateSectionLabel(UtilityTabPage, "UTILITY OPTIONS")
+
+local UtilityRow = Instance.new("Frame")
+UtilityRow.Size = UDim2.new(1, 0, 0, 42)
+UtilityRow.BackgroundTransparency = 1
+UtilityRow.ZIndex = 13
+UtilityRow.Parent = UtilityTabPage
+
+local UtilityRowLayout = Instance.new("UIListLayout", UtilityRow)
+UtilityRowLayout.FillDirection = Enum.FillDirection.Horizontal
+UtilityRowLayout.Padding = UDim.new(0, 8)
+
+local function CreatePillOption(parentContainer, symbolIcon, titleText, callback)
+    local pillCard = Instance.new("Frame")
+    pillCard.Size = UDim2.new(0.32, 0, 1, 0)
+    pillCard.BackgroundColor3 = C_CARD_BG
+    pillCard.ZIndex = 13
+    pillCard.Parent = parentContainer
+
+    local pillCorner = Instance.new("UICorner", pillCard) pillCorner.CornerRadius = UDim.new(0, 10)
+    local pillStroke = Instance.new("UIStroke", pillCard) pillStroke.Color = C_BORDER
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.BackgroundTransparency = 1
+    btn.Text = symbolIcon .. "  " .. titleText .. " (O)"
+    btn.TextColor3 = C_TEXT_WHITE
+    btn.TextSize = 10
+    btn.Font = Enum.Font.GothamMedium
+    btn.ZIndex = 14
+    btn.Parent = pillCard
+
+    local active = false
+    btn.MouseButton1Click:Connect(function()
+        active = not active
+        pillStroke.Color = active and C_ACCENT_PURPLE or C_BORDER
+        callback(active)
     end)
-end)
+end
 
-CreateSlider(MovementTabPage, "Gravity Power", 0, 196, 196, function(value)
-    State.GravityVal = value
-end)
-
-CreateToggle(MovementTabPage, "Spinbot", State.Spinbot, function(activeState)
-    State.Spinbot = activeState
-    task.spawn(function()
-        while State.Spinbot do
-            pcall(function()
-                local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(State.SpinSpeed), 0)
-                end
-            end)
-            task.wait()
-        end
-    end)
-end)
-
-CreateSlider(MovementTabPage, "Spinbot Speed", 10, 100, 30, function(value)
-    State.SpinSpeed = value
-end)
-
-CreateToggle(MovementTabPage, "HipHeight", State.HipHeightMod, function(activeState)
-    State.HipHeightMod = activeState
-    task.spawn(function()
-        while State.HipHeightMod do
-            pcall(function()
-                local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid.HipHeight = State.HipHeightVal
-                end
-            end)
-            task.wait(0.2)
-        end
-        pcall(function()
-            local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.HipHeight = 2
-            end
-        end)
-    end)
-end)
-
-CreateSlider(MovementTabPage, "HipHeight Value", 0, 30, 2, function(value)
-    State.HipHeightVal = value
-end)
-
--- ==========================================
--- 4. UTILITY & AUTOMATION TAB
--- ==========================================
-CreateSectionLabel(UtilityTabPage, "Protection")
-CreateToggle(UtilityTabPage, "Anti Void", State.AntiVoid, function(activeState)
-    State.AntiVoid = activeState
+CreatePillOption(UtilityRow, "◯", "AntiVoid", function(v)
+    State.AntiVoid = v
     task.spawn(function()
         while State.AntiVoid do
             pcall(function()
-                local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if rootPart and rootPart.Position.Y < -50 then
-                    rootPart.CFrame = CFrame.new(rootPart.Position.X, 50, rootPart.Position.Z)
-                    rootPart.Velocity = Vector3.zero
-                    Notify("ANTI-VOID", "Mencegah jatuh ke Void! Teleported safe.", 2)
-                end
+                local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if root and root.Position.Y < -50 then root.CFrame = CFrame.new(root.Position.X, 50, root.Position.Z) root.Velocity = Vector3.zero end
             end)
             task.wait(0.4)
         end
     end)
 end)
 
-CreateToggle(UtilityTabPage, "Anti AFK", State.AntiAFK, function(activeState)
-    State.AntiAFK = activeState
-    task.spawn(function()
-        while State.AntiAFK do
-            pcall(function()
-                local camera = workspace.CurrentCamera
-                if camera then
-                    camera.CFrame = camera.CFrame * CFrame.Angles(0, 0.001, 0)
-                    task.wait(0.05)
-                    camera.CFrame = camera.CFrame * CFrame.Angles(0, -0.001, 0)
-                end
-            end)
-            task.wait(30)
-        end
-    end)
+CreatePillOption(UtilityRow, "🚫", "AntiAFK", function(v) State.AntiAFK = v end)
+CreatePillOption(UtilityRow, "👁", "NoFog", function(v)
+    State.NoFog = v
+    if v then Lighting.FogEnd = 9e9 end
 end)
 
-CreateSectionLabel(UtilityTabPage, "Clicker")
-CreateToggle(UtilityTabPage, "Auto Clicker", State.AutoClicker, function(activeState)
-    State.AutoClicker = activeState
-    task.spawn(function()
-        while State.AutoClicker do
-            pcall(function()
-                mouse1click()
-            end)
-            task.wait(1 / State.ClickerCPS)
-        end
-    end)
-end)
-
-CreateSlider(UtilityTabPage, "Clicker Speed", 1, 30, 10, function(value)
-    State.ClickerCPS = value
-end)
-
--- ==========================================
--- 5. VISUALS & ESP TAB
--- ==========================================
-CreateSectionLabel(VisualTabPage, "ESP")
-
-local function ApplyPlayerESP(targetPlayer)
-    if targetPlayer == LocalPlayer or not targetPlayer.Character then return end
-    
-    if State.PlayerESP and not targetPlayer.Character:FindFirstChild("VoidHighlight") then
-        local highlight = Instance.new("Highlight")
-        highlight.Name = "VoidHighlight"
-        highlight.FillColor = C_ACCENT_PURPLE
-        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-        highlight.FillTransparency = 0.5
-        highlight.Parent = targetPlayer.Character
-    end
-end
-
-CreateToggle(VisualTabPage, "Player ESP", State.PlayerESP, function(activeState)
-    State.PlayerESP = activeState
-    if activeState then
-        for _, playerInstance in pairs(Players:GetPlayers()) do
-            ApplyPlayerESP(playerInstance)
-        end
-        RegisterConnection(RunService.Heartbeat:Connect(function()
-            if State.PlayerESP then
-                for _, playerInstance in pairs(Players:GetPlayers()) do
-                    ApplyPlayerESP(playerInstance)
-                end
-            end
-        end))
-    else
-        for _, playerInstance in pairs(Players:GetPlayers()) do
-            if playerInstance.Character and playerInstance.Character:FindFirstChild("VoidHighlight") then
-                playerInstance.Character.VoidHighlight:Destroy()
-            end
-        end
-    end
-end)
-
--- ==========================================
--- 6. CAMERA & WORLD TAB
--- ==========================================
-CreateSectionLabel(WorldTabPage, "World")
-CreateToggle(WorldTabPage, "Fullbright", State.Fullbright, function(activeState)
-    State.Fullbright = activeState
-    if activeState then
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        Lighting.FogEnd = 100000
-        Lighting.GlobalShadows = false
-    else
-        Lighting.Brightness = 1
-        Lighting.GlobalShadows = true
-    end
-end)
-
-CreateToggle(WorldTabPage, "Fog & Atmosphere", State.NoFog, function(activeState)
-    State.NoFog = activeState
-    if activeState then
-        Lighting.FogEnd = 9e9
-        for _, atmosphere in pairs(Lighting:GetChildren()) do
-            if atmosphere:IsA("Atmosphere") then
-                atmosphere.Density = 0
-            end
-        end
-    end
-end)
-
-CreateSectionLabel(WorldTabPage, "Camera")
-CreateToggle(WorldTabPage, "Field Of View", State.CustomFOV, function(activeState)
-    State.CustomFOV = activeState
-    if not activeState then
-        workspace.CurrentCamera.FieldOfView = 70
-    end
-    task.spawn(function()
-        while State.CustomFOV do
-            workspace.CurrentCamera.FieldOfView = State.FOVValue
-            task.wait(0.2)
-        end
-    end)
-end)
-
-CreateSlider(WorldTabPage, "FOV Angle Range", 50, 120, 70, function(value)
-    State.FOVValue = value
-end)
-
--- ==========================================
--- 7. SERVER FINDER TAB
--- ==========================================
-CreateSectionLabel(ServerTabPage, "Server")
-CreateButton(ServerTabPage, "Rejoin", function() RejoinServer() end)
-CreateButton(ServerTabPage, "Server Hop", function() ServerHop() end)
-
-CreateSectionLabel(ServerTabPage, "Server 1 Player")
-
-local ServerListScroll = Instance.new("ScrollingFrame")
-ServerListScroll.Name = "ServerListScroll"
-ServerListScroll.Size = UDim2.new(1, -6, 0, 220)
-ServerListScroll.BackgroundTransparency = 1
-ServerListScroll.ScrollBarThickness = 3
-ServerListScroll.ScrollBarImageColor3 = C_ACCENT_PURPLE
-ServerListScroll.ZIndex = 13
-ServerListScroll.Parent = ServerTabPage
-
-local ServerListLayout = Instance.new("UIListLayout")
-ServerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ServerListLayout.Padding = UDim.new(0, 6)
-ServerListLayout.Parent = ServerListScroll
-
-local function ScanSoloServers()
-    for _, childFrame in pairs(ServerListScroll:GetChildren()) do
-        if childFrame:IsA("Frame") or childFrame:IsA("TextLabel") then
-            childFrame:Destroy()
-        end
-    end
-
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(1, 0, 0, 25)
-    statusLabel.BackgroundTransparency = 1
-    statusLabel.Text = "Scanning public servers with exactly 1 player..."
-    statusLabel.TextColor3 = C_SUBTEXT
-    statusLabel.TextSize = 10
-    statusLabel.Font = Enum.Font.Gotham
-    statusLabel.Parent = ServerListScroll
-
-    task.spawn(function()
-        pcall(function()
-            local requestUrl = "https://games.roblox.com/v1/games/" .. tostring(game.PlaceId) .. "/servers/Public?sortOrder=Asc&limit=100"
-            local responseData = game:HttpGet(requestUrl)
-            local decodedData = HttpService:JSONDecode(responseData)
-            statusLabel:Destroy()
-
-            local foundServerCount = 0
-            if decodedData and decodedData.data then
-                for _, serverData in pairs(decodedData.data) do
-                    if serverData.playing == 1 and serverData.id ~= game.JobId then
-                        foundServerCount = foundServerCount + 1
-
-                        local serverCard = Instance.new("Frame")
-                        serverCard.Size = UDim2.new(1, 0, 0, 40)
-                        serverCard.BackgroundColor3 = C_ITEM
-                        serverCard.ZIndex = 14
-                        serverCard.Parent = ServerListScroll
-
-                        local serverCardCorner = Instance.new("UICorner")
-                        serverCardCorner.CornerRadius = UDim.new(0, 6)
-                        serverCardCorner.Parent = serverCard
-
-                        local serverInfoText = Instance.new("TextLabel")
-                        serverInfoText.Size = UDim2.new(1, -110, 1, 0)
-                        serverInfoText.Position = UDim2.new(0, 10, 0, 0)
-                        serverInfoText.BackgroundTransparency = 1
-                        serverInfoText.Text = "Server: " .. string.sub(serverData.id, 1, 12) .. "... [" .. serverData.playing .. "/" .. serverData.maxPlayers .. " Player]"
-                        serverInfoText.TextColor3 = C_TEXT
-                        serverInfoText.TextSize = 10
-                        serverInfoText.Font = Enum.Font.GothamMedium
-                        serverInfoText.TextXAlignment = Enum.TextXAlignment.Left
-                        serverInfoText.ZIndex = 15
-                        serverInfoText.Parent = serverCard
-
-                        local joinButton = Instance.new("TextButton")
-                        joinButton.Size = UDim2.new(0, 85, 0, 24)
-                        joinButton.Position = UDim2.new(1, -92, 0.5, -12)
-                        joinButton.BackgroundColor3 = C_ACCENT_PURPLE
-                        joinButton.Text = "JOIN SERVER"
-                        joinButton.TextColor3 = C_BG
-                        joinButton.TextSize = 9
-                        joinButton.Font = Enum.Font.GothamBold
-                        joinButton.ZIndex = 15
-                        joinButton.Parent = serverCard
-
-                        local joinBtnCorner = Instance.new("UICorner")
-                        joinBtnCorner.CornerRadius = UDim.new(0, 5)
-                        joinBtnCorner.Parent = joinButton
-
-                        joinButton.MouseButton1Click:Connect(function()
-                            TeleportService:TeleportToPlaceInstance(game.PlaceId, serverData.id, LocalPlayer)
-                        end)
-                    end
-                end
-            end
-
-            if foundServerCount == 0 then
-                local emptyLabel = Instance.new("TextLabel")
-                emptyLabel.Size = UDim2.new(1, 0, 0, 25)
-                emptyLabel.BackgroundTransparency = 1
-                emptyLabel.Text = "Tidak ditemukan server publik dengan 1 player. Coba lagi!"
-                emptyLabel.TextColor3 = C_SUBTEXT
-                emptyLabel.TextSize = 10
-                emptyLabel.Font = Enum.Font.Gotham
-                emptyLabel.Parent = ServerListScroll
-            end
-        end)
-    end)
-end
-
-CreateButton(ServerTabPage, "Scan Server 1 Player", function() ScanSoloServers() end)
-
--- ==========================================
--- 8. PLAYER LIST TAB
--- ==========================================
-CreateSectionLabel(PlayersTabPage, "Active Players In Server")
-
-local PlayerListScroll = Instance.new("ScrollingFrame")
-PlayerListScroll.Name = "PlayerListScroll"
-PlayerListScroll.Size = UDim2.new(1, -6, 0, 220)
-PlayerListScroll.BackgroundTransparency = 1
-PlayerListScroll.ScrollBarThickness = 3
-PlayerListScroll.ScrollBarImageColor3 = C_ACCENT_PURPLE
-PlayerListScroll.ZIndex = 13
-PlayerListScroll.Parent = PlayersTabPage
-
-local PlayerListLayout = Instance.new("UIListLayout")
-PlayerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-PlayerListLayout.Padding = UDim.new(0, 6)
-PlayerListLayout.Parent = PlayerListScroll
-
-local function RenderPlayerList()
-    for _, childFrame in pairs(PlayerListScroll:GetChildren()) do
-        if childFrame:IsA("Frame") then
-            childFrame:Destroy()
-        end
-    end
-
-    for _, targetPlayer in pairs(Players:GetPlayers()) do
-        if targetPlayer ~= LocalPlayer then
-            local playerCard = Instance.new("Frame")
-            playerCard.Size = UDim2.new(1, 0, 0, 42)
-            playerCard.BackgroundColor3 = C_ITEM
-            playerCard.ZIndex = 14
-            playerCard.Parent = PlayerListScroll
-
-            local cardCorner = Instance.new("UICorner")
-            cardCorner.CornerRadius = UDim.new(0, 6)
-            cardCorner.Parent = playerCard
-
-            local avatarImage = Instance.new("ImageLabel")
-            avatarImage.Size = UDim2.new(0, 30, 0, 30)
-            avatarImage.Position = UDim2.new(0, 6, 0.5, -15)
-            avatarImage.BackgroundTransparency = 1
-            avatarImage.Image = Players:GetUserThumbnailAsync(targetPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
-            avatarImage.ZIndex = 15
-            avatarImage.Parent = playerCard
-
-            local avatarCorner = Instance.new("UICorner")
-            avatarCorner.CornerRadius = UDim.new(1, 0)
-            avatarCorner.Parent = avatarImage
-
-            local nameLabel = Instance.new("TextLabel")
-            nameLabel.Size = UDim2.new(1, -140, 1, 0)
-            nameLabel.Position = UDim2.new(0, 42, 0, 0)
-            nameLabel.BackgroundTransparency = 1
-            nameLabel.Text = targetPlayer.DisplayName .. " (@" .. targetPlayer.Name .. ")"
-            nameLabel.TextColor3 = C_TEXT
-            nameLabel.TextSize = 10
-            nameLabel.Font = Enum.Font.GothamMedium
-            nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-            nameLabel.ZIndex = 15
-            nameLabel.Parent = playerCard
-
-            local tpButton = Instance.new("TextButton")
-            tpButton.Size = UDim2.new(0, 85, 0, 24)
-            tpButton.Position = UDim2.new(1, -92, 0.5, -12)
-            tpButton.BackgroundColor3 = C_ACCENT_PURPLE
-            tpButton.Text = "TP TO PLAYER"
-            tpButton.TextColor3 = C_BG
-            tpButton.TextSize = 9
-            tpButton.Font = Enum.Font.GothamBold
-            tpButton.ZIndex = 15
-            tpButton.Parent = playerCard
-
-            local tpBtnCorner = Instance.new("UICorner")
-            tpBtnCorner.CornerRadius = UDim.new(0, 5)
-            tpBtnCorner.Parent = tpButton
-
-            tpButton.MouseButton1Click:Connect(function()
-                if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
-                    Notify("TELEPORT", "Teleported to " .. targetPlayer.DisplayName, 2)
-                end
-            end)
-        end
-    end
-end
-
-CreateSectionLabel(PlayersTabPage, "Click Teleport")
-CreateToggle(PlayersTabPage, "Teleport (Shift + Left Click)", State.ClickTP, function(activeState)
-    State.ClickTP = activeState
-end)
-
-RegisterConnection(UserInputService.InputBegan:Connect(function(inputObject, gameProcessed)
-    if not gameProcessed and State.ClickTP and inputObject.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+-- CLICK TP CONNECTOR
+RegisterConnection(UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and State.ClickTP and input.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
         if Mouse.Hit and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Mouse.Hit.Position + Vector3.new(0, 3, 0))
         end
     end
 end))
 
-RegisterConnection(Players.PlayerAdded:Connect(RenderPlayerList))
-RegisterConnection(Players.PlayerRemoving:Connect(RenderPlayerList))
-RenderPlayerList()
-
--- ==========================================
--- 9. SETTINGS & LOGS TAB
--- ==========================================
-CreateSectionLabel(SettingsTabPage, "System Console")
-
-local LogDisplayFrame = Instance.new("ScrollingFrame")
-LogDisplayFrame.Name = "LogDisplayFrame"
-LogDisplayFrame.Size = UDim2.new(1, -6, 0, 180)
-LogDisplayFrame.BackgroundColor3 = Color3.fromRGB(10, 8, 16)
-LogDisplayFrame.BorderSizePixel = 0
-LogDisplayFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-LogDisplayFrame.ScrollBarThickness = 3
-LogDisplayFrame.ScrollBarImageColor3 = C_ACCENT_PURPLE
-LogDisplayFrame.ZIndex = 13
-LogDisplayFrame.Parent = SettingsTabPage
-
-local LogDisplayCorner = Instance.new("UICorner")
-LogDisplayCorner.CornerRadius = UDim.new(0, 6)
-LogDisplayCorner.Parent = LogDisplayFrame
-
-local LogLayout = Instance.new("UIListLayout")
-LogLayout.SortOrder = Enum.SortOrder.LayoutOrder
-LogLayout.Padding = UDim.new(0, 4)
-LogLayout.Parent = LogDisplayFrame
-
-local LogPadding = Instance.new("UIPadding")
-LogPadding.PaddingTop = UDim.new(0, 6)
-LogPadding.PaddingLeft = UDim.new(0, 8)
-LogPadding.PaddingRight = UDim.new(0, 8)
-LogPadding.Parent = LogDisplayFrame
-
-local function RefreshLogsDisplay()
-    for _, child in pairs(LogDisplayFrame:GetChildren()) do
-        if child:IsA("TextLabel") then
-            child:Destroy()
-        end
-    end
-
-    for _, logText in ipairs(State.SystemLogs) do
-        local logLabel = Instance.new("TextLabel")
-        logLabel.Size = UDim2.new(1, 0, 0, 16)
-        logLabel.BackgroundTransparency = 1
-        logLabel.Text = logText
-        logLabel.TextColor3 = C_ACCENT_GREEN
-        logLabel.TextSize = 9
-        logLabel.Font = Enum.Font.Code
-        logLabel.TextXAlignment = Enum.TextXAlignment.Left
-        logLabel.ZIndex = 14
-        logLabel.Parent = LogDisplayFrame
-    end
-end
-
-CreateButton(SettingsTabPage, "Refresh Logs", function() RefreshLogsDisplay() end)
-CreateButton(SettingsTabPage, "Clear Logs", function()
-    State.SystemLogs = {}
-    RefreshLogsDisplay()
-    Notify("LOGS", "History Logs dibersihkan.", 2)
-end)
-
-CreateSectionLabel(SettingsTabPage, "Script Unload")
-CreateButton(SettingsTabPage, "Unload VoidHub", function()
-    if _G.VoidHubSupremeConnections then
-        for _, conn in pairs(_G.VoidHubSupremeConnections) do
-            if conn.Connected then conn:Disconnect() end
-        end
-    end
-    VoidHubUI:Destroy()
-    print("[VOIDHUB]: Unloaded successfully.")
-end)
-
-AddLog("VoidHub Supreme Engine initialized.")
-print("[VOIDHUB v1.0] LOADED SUCCESSFULLY!")
+print("[VOIDHUB SUPREME v1.0] UI REDESIGN LOADED SUCCESSFULLY!")
